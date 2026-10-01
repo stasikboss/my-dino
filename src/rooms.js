@@ -124,7 +124,7 @@ function setRoom(r, quiet){
   if (room === 'bed' && r !== 'bed' && sleeping) wakeUp(true);
   if (r !== 'bath'){ bath.stage = 0; FX.clear('foam'); stopWashCount(); stallEl.hidden = true; }
   const prev = room;
-  if (prev !== r) stopSpeech();
+  if (prev !== r){ stopSpeech(); stopMic(); }
   room = r;
   if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
@@ -546,7 +546,9 @@ $('wardrobe-close').addEventListener('click', closeWardrobe);
 
 /* Say it back: the child talks, the pet repeats it in a funny high voice. Recording is held in memory only for the
    few seconds it takes to play it back; nothing is saved or sent anywhere. */
-Object.assign(mic, { denied: false, stream: null, stop: null });
+Object.assign(mic, { denied: false, abort: null });
+// Stops listening (or the playback) right away: when the room changes, the app is hidden, or bedtime starts.
+function stopMic(){ if (mic.abort){ const f = mic.abort; mic.abort = null; try { f(); } catch (e) {} } }
 async function talkBack(btn){
   if (mic.busy || speechBusy()) return;
   mic.busy = true;
@@ -575,6 +577,7 @@ async function talkBack(btn){
     const chunks = [];
     let floor = 0.01, frames = 0, startIdx = -1, lastLoud = 0, t0 = performance.now();
     const result = await new Promise(resolve => {
+      mic.abort = () => resolve('abort');
       setTimeout(() => resolve(startIdx >= 0 ? 'ok' : 'quiet'), 9000);
       proc.onaudioprocess = ev => {
         const data = new Float32Array(ev.inputBuffer.getChannelData(0));
@@ -593,7 +596,9 @@ async function talkBack(btn){
     });
     proc.onaudioprocess = null;
     cleanup();
-    if (result !== 'ok'){ await sayP('noHear', null, 9); mic.busy = false; return; }
+    mic.abort = null;
+    if (result === 'abort'){ chunks.length = 0; mic.busy = false; return; }
+    if (result !== 'ok'){ chunks.length = 0; await sayP('noHear', null, 9); mic.busy = false; return; }
     // the part with the voice, played back higher and faster
     const take = chunks.slice(startIdx);
     const len = take.reduce((n, c) => n + c.length, 0);
@@ -608,6 +613,7 @@ async function talkBack(btn){
     s.connect(g); g.connect(an); an.connect(AC.destination);
     const lv = new Uint8Array(an.fftSize);
     let playing = true;
+    mic.abort = () => { try { s.stop(); } catch (e) {} };
     const mouthLoop = () => {
       if (!playing) return;
       an.getByteTimeDomainData(lv);
@@ -616,7 +622,7 @@ async function talkBack(btn){
       requestAnimationFrame(mouthLoop);
     };
     s.onended = () => {
-      playing = false; Pet.mouthOpen(false); Pet.expr('happy', 1400); Pet.flash('hop', 600); sfx.giggle();
+      playing = false; mic.abort = null; Pet.mouthOpen(false); Pet.expr('happy', 1400); Pet.flash('hop', 600); sfx.giggle();
       const h = Pet.headTop(); FX.emit('note', h.x, h.y + 30, 4, { size: 16 });
       addNeed('fun', 8);
       mic.busy = false;
@@ -624,7 +630,7 @@ async function talkBack(btn){
     s.start(); mouthLoop();
   } catch (err){
     cleanup();
-    mic.busy = false;
+    mic.busy = false; mic.abort = null;
     if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError' || err.name === 'NotFoundError')){ mic.denied = true; ROOM_SETUP.home(); }
   }
 }

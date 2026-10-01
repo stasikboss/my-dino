@@ -27,25 +27,52 @@ const AGE = {
   5: { count: [2, 4], rounds: 5, session: 15 },
   6: { count: [2, 5], rounds: 6, session: 20 }
 };
-const DEFAULT_PROFILE = { he: 'יונתן', ru: 'Йонатан', en: 'Yonatan', g: 'm', age: 4 };
-let profile = Object.assign({}, DEFAULT_PROFILE, store.get('ymd-profile', null) || store.get('yfs-profile', null) || {});
-if (!AGE[profile.age]) profile.age = 4;
-if (profile.g !== 'f') profile.g = 'm';
+/* Saved data is checked as it is read: anything of the wrong type or with an unknown value falls back to a safe
+   default, so a damaged or edited storage can never break the game or put unexpected text on screen. */
+const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+const cleanStr = (v, max) => typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, max) : '';
+const cleanNum = (v, min, max, d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : d; };
+const cleanBool = (v, d) => typeof v === 'boolean' ? v : d;
+// No name until a parent sets one (the fruit game's name is used when it was set on this device).
+const DEFAULT_PROFILE = { he: '', ru: '', en: '', g: 'm', age: 4 };
+const savedProfile = store.get('ymd-profile', null) || store.get('yfs-profile', null);
+const profileWasSet = isObj(savedProfile);
+let profile = (() => {
+  const r = isObj(savedProfile) ? savedProfile : {};
+  return { he: cleanStr(r.he, 20), ru: cleanStr(r.ru, 20), en: cleanStr(r.en, 20), g: r.g === 'f' ? 'f' : 'm', age: AGE[r.age] ? Number(r.age) : 4 };
+})();
 const ageCfg = () => AGE[profile.age] || AGE[4];
 const nameIn = lang => String(profile[lang] || '').trim();
 function saveProfile(){ store.set('ymd-profile', profile); }
-let opts = Object.assign({ mic: true, count: true, needs: true }, store.get('ymd-opts', {}));
+let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true) }; })();
 
 /* ---------- the pets, the album, the hats ---------- */
 let current = store.get('ymd-current', null);
-if (current && !SPECIES[current]) current = null;
-let pets = store.get('ymd-pets', {});
-if (!pets || typeof pets !== 'object') pets = {};
-let facts = store.get('ymd-facts', {});
-if (!facts || typeof facts !== 'object') facts = {};
-let owned = store.get('ymd-owned', ['party', 'cap']);
-if (!Array.isArray(owned)) owned = ['party', 'cap'];
-let stats = Object.assign({ games: 0, feeds: 0, baths: 0, sleeps: 0, digs: 0 }, store.get('ymd-stats', {}));
+if (typeof current !== 'string' || !SPECIES_ORDER.includes(current)) current = null;
+const DAY_KEY = /^\d{4}-\d{1,2}-\d{1,2}$/;
+let pets = (() => {
+  const r = store.get('ymd-pets', {}), out = {};
+  if (!isObj(r)) return out;
+  for (const sp of SPECIES_ORDER){
+    const d = r[sp]; if (!isObj(d)) continue;
+    const outfit = (typeof d.outfit === 'string' && OUTFIT_ORDER.includes(d.outfit)) ? d.outfit : null;
+    const days = Array.isArray(d.days) ? d.days.filter(k => typeof k === 'string' && (DAY_KEY.test(k) || k.length <= 12)).slice(-60) : [];
+    out[sp] = { born: d.born === true, days, outfit };
+  }
+  return out;
+})();
+let facts = (() => {
+  const r = store.get('ymd-facts', {}), out = {};
+  if (!isObj(r)) return out;
+  for (const sp of SPECIES_ORDER){
+    if (!isObj(r[sp])) continue;
+    out[sp] = {};
+    for (const k of FACT_KINDS) if (r[sp][k]) out[sp][k] = cleanNum(r[sp][k], 0, 9e15, 1);
+  }
+  return out;
+})();
+let owned = (() => { const r = store.get('ymd-owned', ['party', 'cap']); return Array.isArray(r) ? OUTFIT_ORDER.filter(o => r.includes(o)) : ['party', 'cap']; })();
+let stats = (() => { const r = store.get('ymd-stats', {}), o = isObj(r) ? r : {}, out = {}; for (const k of ['games', 'feeds', 'baths', 'sleeps', 'digs']) out[k] = Math.floor(cleanNum(o[k], 0, 1e7, 0)); return out; })();
 const savePets = () => store.set('ymd-pets', pets);
 const saveFacts = () => store.set('ymd-facts', facts);
 const saveStats = () => store.set('ymd-stats', stats);
@@ -56,8 +83,7 @@ const factCount = sp => FACT_KINDS.filter(k => facts[sp] && facts[sp][k]).length
 /* ---------- time: one sitting, the day, and the limits a parent can set ---------- */
 const keyOf = d => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
 const dayKey = () => keyOf(new Date());
-let days = store.get('ymd-days', {});
-if (!days || typeof days !== 'object') days = {};
+let days = (() => { const r = store.get('ymd-days', {}), out = {}; if (!isObj(r)) return out; for (const k of Object.keys(r)) if (DAY_KEY.test(k)) out[k] = cleanNum(r[k], 0, 86400, 0); return out; })();
 const todaySec = () => days[dayKey()] || 0;
 let daysSavedAt = 0;
 function saveDays(force){
@@ -71,7 +97,7 @@ function saveDays(force){
 const SESSIONS = [10, 15, 20];
 let sessionMin = Number(store.get('ymd-session-min', ageCfg().session));
 if (!SESSIONS.includes(sessionMin)) sessionMin = 15;
-let limits = Object.assign({ daily: 0, bedOn: false, bed: '19:30' }, store.get('ymd-limits', {}));
+let limits = (() => { const r = store.get('ymd-limits', {}), o = isObj(r) ? r : {}; return { daily: [0, 20, 30, 45].includes(Number(o.daily)) ? Number(o.daily) : 0, bedOn: o.bedOn === true, bed: typeof o.bed === 'string' && /^\d{2}:\d{2}$/.test(o.bed) ? o.bed : '19:30' }; })();
 function inQuietHours(){
   const parts = String(limits.bed || '19:30').split(':').map(Number);
   const bedMin = (parts[0] || 0) * 60 + (parts[1] || 0);
@@ -90,7 +116,7 @@ function lockReason(){
 let AC = null, master = null, noiseBuf = null, silentEl = null, lastUnlock = 0;
 const mic = { busy: false };
 let sleeping = false;
-let muted = !!store.get('ymd-muted', false);
+let muted = store.get('ymd-muted', false) === true;
 const VOL = 0.7, VOL_DUCK = 0.3;
 const SILENT_WAV = 'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
 function initAudio(){
@@ -205,8 +231,8 @@ function buzz(ms){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch (
    with no voice behind it. Those cases fall back to the speech bubble, and the parents' corner says how to fix it. */
 const synth = (window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function') ? window.speechSynthesis : null;
 let voices = [];
-let langsOn = Object.assign({ he: true, ru: true, en: true }, store.get('ymd-langs', store.get('yfs-langs', {})));
-let voicePick = Object.assign({}, store.get('ymd-voice-pick', store.get('yfs-voice-pick', {})));
+let langsOn = (() => { const r = store.get('ymd-langs', store.get('yfs-langs', {})), o = isObj(r) ? r : {}; return { he: cleanBool(o.he, true), ru: cleanBool(o.ru, true), en: cleanBool(o.en, true) }; })();
+let voicePick = (() => { const r = store.get('ymd-voice-pick', store.get('yfs-voice-pick', {})), out = {}; if (isObj(r)) for (const l of LANGS) if (typeof r[l] === 'string') out[l] = r[l].slice(0, 300); return out; })();
 let langTurn = 0, talkUntil = 0, speechActive = false;
 const health = { started: 0, silent: 0, off: !synth, why: synth ? '' : 'none', lastError: '', fail: { he: 0, ru: 0, en: 0 }, bad: { he: false, ru: false, en: false }, badEarly: [] };
 const tagOf = v => String(v.lang || '').toLowerCase().replace(/_/g, '-');

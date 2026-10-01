@@ -2,6 +2,8 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Jr+xnIv5oZdArglehU1Z+sjNVJ/ffoAqIaZZphbHsYE=' 'sha256-sb9deyMt1ekQ8UVcbAi99I+An+T/77h6lRzTGeo8IEg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>הדינו שלי</title>
 <meta name="description" content="משחק לגידול דינוזאורים וחיות לילדים בגילאי 3 עד 6: מאכילים, רוחצים, משכיבים לישון ולומדים. בעברית, ברוסית ובאנגלית, בלי פרסומות.">
@@ -657,11 +659,10 @@ body{color:var(--text)}
   radial-gradient(ellipse 80% 22% at 92% 103%,#7cc24f 97%,transparent 100%),
   radial-gradient(ellipse 120% 30% at 50% 110%,#a8dd7e 97%,transparent 100%),
   radial-gradient(circle at 50% 18%,rgba(255,248,214,.95) 0,rgba(255,248,214,0) 34%),
+  radial-gradient(circle at 50% 18%,transparent 0,rgba(143,208,251,0) 30%,rgba(143,208,251,.9) 75%),
+  repeating-conic-gradient(from 0deg at 50% 18%,rgba(255,255,255,.2) 0deg 7deg,rgba(255,255,255,0) 7deg 22deg),
   linear-gradient(#8fd0fb 0%,#c6e9ff 46%,#ecf8ff 74%)}
-.screen.sky::before{content:"";position:fixed;left:50%;top:18%;width:240vmax;height:240vmax;margin:-120vmax 0 0 -120vmax;pointer-events:none;z-index:-1;
-  background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.22) 0deg 7deg,rgba(255,255,255,0) 7deg 22deg);animation:spin 90s linear infinite;
-  -webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)}
-.screen{isolation:isolate;animation:screen-in .38s cubic-bezier(.2,.9,.3,1) both}
+.screen{isolation:isolate;animation:screen-in .38s cubic-bezier(.2,.9,.3,1) backwards}
 @keyframes screen-in{0%{opacity:0;transform:scale(1.03)}100%{opacity:1;transform:none}}
 .screen.sky .eyebrow{color:#2f6fa0;text-shadow:0 1px 0 rgba(255,255,255,.8)}
 #start .title{color:#ff7a2f;font-size:clamp(52px,15vw,112px);letter-spacing:-.01em;
@@ -735,11 +736,12 @@ body{color:var(--text)}
 
 @media (prefers-reduced-motion: reduce){
   .screen,.room.swap{animation:none}
-  .screen.sky::before{animation:none}
 }
 
 body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
 #choose .screen-inner{padding-top:4px}
+
+.first-run{margin:0;max-width:24rem;padding:8px 16px;border-radius:16px;background:rgba(255,255,255,.7);font:500 15px/1.45 var(--font-body);color:#38536b;text-wrap:balance}
 
 </style>
 </head>
@@ -1019,8 +1021,8 @@ body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
 <!-- start -->
 <div class="screen sky" id="start">
   <div class="screen-inner">
-    <p class="eyebrow" id="start-eyebrow">Yonatan's Dino</p>
-    <h1 class="title" dir="rtl" id="start-title">הדינו של יונתן</h1>
+    <p class="eyebrow" id="start-eyebrow">My Dino</p>
+    <h1 class="title" dir="rtl" id="start-title">הדינו שלי</h1>
     <div class="start-pet" id="start-pet" role="button" tabindex="0" aria-label="מתחילים לשחק"></div>
     <p class="sleep-msg" id="sleep-msg" dir="rtl" hidden></p>
     <button class="big-btn" type="button" id="play-btn" dir="rtl">
@@ -1031,7 +1033,8 @@ body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
       <svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="28" rx="15" ry="18" fill="#fff5e2" stroke="#1b2430" stroke-width="3.5"/><g fill="#7cc85a"><circle cx="18" cy="22" r="4"/><circle cx="30" cy="30" r="5"/><circle cx="22" cy="38" r="3"/></g></svg>
       <span>חבר אחר</span>
     </button>
-    <p class="note" id="no-voice" dir="rtl" lang="he" hidden><span id="no-voice-text"></span> <a id="no-voice-link" target="_blank" rel="noopener" hidden>לפתוח ב-Chrome</a></p>
+    <p class="first-run" id="first-run" dir="rtl" lang="he" hidden>להורים: את שם הילד או הילדה, הגיל והשפות מגדירים בכפתור ״להורים״ כאן למטה.</p>
+    <p class="note" id="no-voice" dir="rtl" lang="he" hidden><span id="no-voice-text"></span> <a id="no-voice-link" target="_blank" rel="noopener noreferrer" hidden>לפתוח ב-Chrome</a></p>
     <button class="parent-link" type="button" data-open-parents dir="rtl" lang="he">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
       <span>להורים</span>
@@ -1153,7 +1156,7 @@ body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
         <span class="mini">בדיקת קול: לוחצים כדי לשמוע כל שפה</span>
         <ul class="vc-list" id="vc-list"></ul>
         <p class="small" id="vc-sum"></p>
-        <a class="btn vc-chrome" id="vc-chrome" target="_blank" rel="noopener" hidden>פתיחת המשחק ב-Chrome</a>
+        <a class="btn vc-chrome" id="vc-chrome" target="_blank" rel="noopener noreferrer" hidden>פתיחת המשחק ב-Chrome</a>
       </div>
     </div>
 
@@ -1577,7 +1580,7 @@ function petSvg(sp, opts = {}){
   const headK = stage === 0 ? 1.14 : stage === 1 ? 1.06 : 1;
   const [px, py] = s.headPivot;
   let hat = '';
-  if (opts.outfit && opts.outfit !== 'glasses' && OUTFITS[opts.outfit]){
+  if (opts.outfit && opts.outfit !== 'glasses' && Object.prototype.hasOwnProperty.call(OUTFITS, opts.outfit)){
     const [hx, hy, hs] = s.hat;
     hat = `<g class="outfit" transform="translate(${hx} ${hy + 5 * hs}) scale(${hs})">${OUTFITS[opts.outfit]}</g>`;
   } else if (opts.outfit === 'glasses') hat = glassesSvg(sp);
@@ -2038,25 +2041,52 @@ const AGE = {
   5: { count: [2, 4], rounds: 5, session: 15 },
   6: { count: [2, 5], rounds: 6, session: 20 }
 };
-const DEFAULT_PROFILE = { he: 'יונתן', ru: 'Йонатан', en: 'Yonatan', g: 'm', age: 4 };
-let profile = Object.assign({}, DEFAULT_PROFILE, store.get('ymd-profile', null) || store.get('yfs-profile', null) || {});
-if (!AGE[profile.age]) profile.age = 4;
-if (profile.g !== 'f') profile.g = 'm';
+/* Saved data is checked as it is read: anything of the wrong type or with an unknown value falls back to a safe
+   default, so a damaged or edited storage can never break the game or put unexpected text on screen. */
+const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+const cleanStr = (v, max) => typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, max) : '';
+const cleanNum = (v, min, max, d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : d; };
+const cleanBool = (v, d) => typeof v === 'boolean' ? v : d;
+// No name until a parent sets one (the fruit game's name is used when it was set on this device).
+const DEFAULT_PROFILE = { he: '', ru: '', en: '', g: 'm', age: 4 };
+const savedProfile = store.get('ymd-profile', null) || store.get('yfs-profile', null);
+const profileWasSet = isObj(savedProfile);
+let profile = (() => {
+  const r = isObj(savedProfile) ? savedProfile : {};
+  return { he: cleanStr(r.he, 20), ru: cleanStr(r.ru, 20), en: cleanStr(r.en, 20), g: r.g === 'f' ? 'f' : 'm', age: AGE[r.age] ? Number(r.age) : 4 };
+})();
 const ageCfg = () => AGE[profile.age] || AGE[4];
 const nameIn = lang => String(profile[lang] || '').trim();
 function saveProfile(){ store.set('ymd-profile', profile); }
-let opts = Object.assign({ mic: true, count: true, needs: true }, store.get('ymd-opts', {}));
+let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true) }; })();
 
 /* ---------- the pets, the album, the hats ---------- */
 let current = store.get('ymd-current', null);
-if (current && !SPECIES[current]) current = null;
-let pets = store.get('ymd-pets', {});
-if (!pets || typeof pets !== 'object') pets = {};
-let facts = store.get('ymd-facts', {});
-if (!facts || typeof facts !== 'object') facts = {};
-let owned = store.get('ymd-owned', ['party', 'cap']);
-if (!Array.isArray(owned)) owned = ['party', 'cap'];
-let stats = Object.assign({ games: 0, feeds: 0, baths: 0, sleeps: 0, digs: 0 }, store.get('ymd-stats', {}));
+if (typeof current !== 'string' || !SPECIES_ORDER.includes(current)) current = null;
+const DAY_KEY = /^\d{4}-\d{1,2}-\d{1,2}$/;
+let pets = (() => {
+  const r = store.get('ymd-pets', {}), out = {};
+  if (!isObj(r)) return out;
+  for (const sp of SPECIES_ORDER){
+    const d = r[sp]; if (!isObj(d)) continue;
+    const outfit = (typeof d.outfit === 'string' && OUTFIT_ORDER.includes(d.outfit)) ? d.outfit : null;
+    const days = Array.isArray(d.days) ? d.days.filter(k => typeof k === 'string' && (DAY_KEY.test(k) || k.length <= 12)).slice(-60) : [];
+    out[sp] = { born: d.born === true, days, outfit };
+  }
+  return out;
+})();
+let facts = (() => {
+  const r = store.get('ymd-facts', {}), out = {};
+  if (!isObj(r)) return out;
+  for (const sp of SPECIES_ORDER){
+    if (!isObj(r[sp])) continue;
+    out[sp] = {};
+    for (const k of FACT_KINDS) if (r[sp][k]) out[sp][k] = cleanNum(r[sp][k], 0, 9e15, 1);
+  }
+  return out;
+})();
+let owned = (() => { const r = store.get('ymd-owned', ['party', 'cap']); return Array.isArray(r) ? OUTFIT_ORDER.filter(o => r.includes(o)) : ['party', 'cap']; })();
+let stats = (() => { const r = store.get('ymd-stats', {}), o = isObj(r) ? r : {}, out = {}; for (const k of ['games', 'feeds', 'baths', 'sleeps', 'digs']) out[k] = Math.floor(cleanNum(o[k], 0, 1e7, 0)); return out; })();
 const savePets = () => store.set('ymd-pets', pets);
 const saveFacts = () => store.set('ymd-facts', facts);
 const saveStats = () => store.set('ymd-stats', stats);
@@ -2067,8 +2097,7 @@ const factCount = sp => FACT_KINDS.filter(k => facts[sp] && facts[sp][k]).length
 /* ---------- time: one sitting, the day, and the limits a parent can set ---------- */
 const keyOf = d => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
 const dayKey = () => keyOf(new Date());
-let days = store.get('ymd-days', {});
-if (!days || typeof days !== 'object') days = {};
+let days = (() => { const r = store.get('ymd-days', {}), out = {}; if (!isObj(r)) return out; for (const k of Object.keys(r)) if (DAY_KEY.test(k)) out[k] = cleanNum(r[k], 0, 86400, 0); return out; })();
 const todaySec = () => days[dayKey()] || 0;
 let daysSavedAt = 0;
 function saveDays(force){
@@ -2082,7 +2111,7 @@ function saveDays(force){
 const SESSIONS = [10, 15, 20];
 let sessionMin = Number(store.get('ymd-session-min', ageCfg().session));
 if (!SESSIONS.includes(sessionMin)) sessionMin = 15;
-let limits = Object.assign({ daily: 0, bedOn: false, bed: '19:30' }, store.get('ymd-limits', {}));
+let limits = (() => { const r = store.get('ymd-limits', {}), o = isObj(r) ? r : {}; return { daily: [0, 20, 30, 45].includes(Number(o.daily)) ? Number(o.daily) : 0, bedOn: o.bedOn === true, bed: typeof o.bed === 'string' && /^\d{2}:\d{2}$/.test(o.bed) ? o.bed : '19:30' }; })();
 function inQuietHours(){
   const parts = String(limits.bed || '19:30').split(':').map(Number);
   const bedMin = (parts[0] || 0) * 60 + (parts[1] || 0);
@@ -2101,7 +2130,7 @@ function lockReason(){
 let AC = null, master = null, noiseBuf = null, silentEl = null, lastUnlock = 0;
 const mic = { busy: false };
 let sleeping = false;
-let muted = !!store.get('ymd-muted', false);
+let muted = store.get('ymd-muted', false) === true;
 const VOL = 0.7, VOL_DUCK = 0.3;
 const SILENT_WAV = 'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
 function initAudio(){
@@ -2216,8 +2245,8 @@ function buzz(ms){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch (
    with no voice behind it. Those cases fall back to the speech bubble, and the parents' corner says how to fix it. */
 const synth = (window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function') ? window.speechSynthesis : null;
 let voices = [];
-let langsOn = Object.assign({ he: true, ru: true, en: true }, store.get('ymd-langs', store.get('yfs-langs', {})));
-let voicePick = Object.assign({}, store.get('ymd-voice-pick', store.get('yfs-voice-pick', {})));
+let langsOn = (() => { const r = store.get('ymd-langs', store.get('yfs-langs', {})), o = isObj(r) ? r : {}; return { he: cleanBool(o.he, true), ru: cleanBool(o.ru, true), en: cleanBool(o.en, true) }; })();
+let voicePick = (() => { const r = store.get('ymd-voice-pick', store.get('yfs-voice-pick', {})), out = {}; if (isObj(r)) for (const l of LANGS) if (typeof r[l] === 'string') out[l] = r[l].slice(0, 300); return out; })();
 let langTurn = 0, talkUntil = 0, speechActive = false;
 const health = { started: 0, silent: 0, off: !synth, why: synth ? '' : 'none', lastError: '', fail: { he: 0, ru: 0, en: 0 }, bad: { he: false, ru: false, en: false }, badEarly: [] };
 const tagOf = v => String(v.lang || '').toLowerCase().replace(/_/g, '-');
@@ -2862,7 +2891,7 @@ function setRoom(r, quiet){
   if (room === 'bed' && r !== 'bed' && sleeping) wakeUp(true);
   if (r !== 'bath'){ bath.stage = 0; FX.clear('foam'); stopWashCount(); stallEl.hidden = true; }
   const prev = room;
-  if (prev !== r) stopSpeech();
+  if (prev !== r){ stopSpeech(); stopMic(); }
   room = r;
   if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
@@ -3284,7 +3313,9 @@ $('wardrobe-close').addEventListener('click', closeWardrobe);
 
 /* Say it back: the child talks, the pet repeats it in a funny high voice. Recording is held in memory only for the
    few seconds it takes to play it back; nothing is saved or sent anywhere. */
-Object.assign(mic, { denied: false, stream: null, stop: null });
+Object.assign(mic, { denied: false, abort: null });
+// Stops listening (or the playback) right away: when the room changes, the app is hidden, or bedtime starts.
+function stopMic(){ if (mic.abort){ const f = mic.abort; mic.abort = null; try { f(); } catch (e) {} } }
 async function talkBack(btn){
   if (mic.busy || speechBusy()) return;
   mic.busy = true;
@@ -3313,6 +3344,7 @@ async function talkBack(btn){
     const chunks = [];
     let floor = 0.01, frames = 0, startIdx = -1, lastLoud = 0, t0 = performance.now();
     const result = await new Promise(resolve => {
+      mic.abort = () => resolve('abort');
       setTimeout(() => resolve(startIdx >= 0 ? 'ok' : 'quiet'), 9000);
       proc.onaudioprocess = ev => {
         const data = new Float32Array(ev.inputBuffer.getChannelData(0));
@@ -3331,7 +3363,9 @@ async function talkBack(btn){
     });
     proc.onaudioprocess = null;
     cleanup();
-    if (result !== 'ok'){ await sayP('noHear', null, 9); mic.busy = false; return; }
+    mic.abort = null;
+    if (result === 'abort'){ chunks.length = 0; mic.busy = false; return; }
+    if (result !== 'ok'){ chunks.length = 0; await sayP('noHear', null, 9); mic.busy = false; return; }
     // the part with the voice, played back higher and faster
     const take = chunks.slice(startIdx);
     const len = take.reduce((n, c) => n + c.length, 0);
@@ -3346,6 +3380,7 @@ async function talkBack(btn){
     s.connect(g); g.connect(an); an.connect(AC.destination);
     const lv = new Uint8Array(an.fftSize);
     let playing = true;
+    mic.abort = () => { try { s.stop(); } catch (e) {} };
     const mouthLoop = () => {
       if (!playing) return;
       an.getByteTimeDomainData(lv);
@@ -3354,7 +3389,7 @@ async function talkBack(btn){
       requestAnimationFrame(mouthLoop);
     };
     s.onended = () => {
-      playing = false; Pet.mouthOpen(false); Pet.expr('happy', 1400); Pet.flash('hop', 600); sfx.giggle();
+      playing = false; mic.abort = null; Pet.mouthOpen(false); Pet.expr('happy', 1400); Pet.flash('hop', 600); sfx.giggle();
       const h = Pet.headTop(); FX.emit('note', h.x, h.y + 30, 4, { size: 16 });
       addNeed('fun', 8);
       mic.busy = false;
@@ -3362,7 +3397,7 @@ async function talkBack(btn){
     s.start(); mouthLoop();
   } catch (err){
     cleanup();
-    mic.busy = false;
+    mic.busy = false; mic.abort = null;
     if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError' || err.name === 'NotFoundError')){ mic.denied = true; ROOM_SETUP.home(); }
   }
 }
@@ -3394,7 +3429,7 @@ const GAMES = [
   { id: 'egg', label: 'ביצה או נולד?' },
   { id: 'size', label: 'מי יותר גדול?', wide: true }
 ];
-let gamesPlayed = store.get('ymd-games', {});
+let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
 function renderGames(){
   const g = $('games-grid');
   g.textContent = '';
@@ -3427,7 +3462,7 @@ function tapOnce(btns){
   });
 }
 function startGame(id){
-  stopSpeech();
+  stopSpeech(); stopMic();
   gameOn = id; gameToken++;
   inPlay = false;
   gameEl.hidden = false;
@@ -3801,12 +3836,13 @@ function renderStart(){
   }
   playBtn.hidden = !!lock;
   friendsBtn.hidden = !!lock || !sp;
+  $('first-run').hidden = !!lock || profileWasSet || !!nameIn('he');
 }
 
 /* Choosing a friend */
 const friendsEl = $('friends');
 function openChoose(fromStart){
-  stopSpeech();
+  stopSpeech(); stopMic();
   closeWardrobe();
   friendsEl.textContent = '';
   for (const sp of SPECIES_ORDER){
@@ -3959,7 +3995,7 @@ function startBedtime(){
   if (gameOn){ pendingBed = true; return; }
   pendingBed = false;
   bedtime = true;
-  stopSpeech(); closeWardrobe();
+  stopSpeech(); stopMic(); closeWardrobe();
   if (sleeping){ say('goodnight', null, 9, null, () => setTimeout(showNight, 3000)); return; }
   setRoom('bed', true);
   sfx.yawn();
@@ -4298,7 +4334,7 @@ document.addEventListener('visibilitychange', () => {
     if (inPlay) keepAwake();
     if (!startEl.hidden) renderStart();
   } else {
-    stopSpeech(); stopLullaby();
+    stopSpeech(); stopLullaby(); stopMic();
     saveDays(true);
   }
 });

@@ -25,7 +25,7 @@ const GAMES = [
   { id: 'egg', label: 'ביצה או נולד?' },
   { id: 'size', label: 'מי יותר גדול?', wide: true }
 ];
-let gamesPlayed = store.get('ymd-games', {});
+let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
 function renderGames(){
   const g = $('games-grid');
   g.textContent = '';
@@ -58,7 +58,7 @@ function tapOnce(btns){
   });
 }
 function startGame(id){
-  stopSpeech();
+  stopSpeech(); stopMic();
   gameOn = id; gameToken++;
   inPlay = false;
   gameEl.hidden = false;

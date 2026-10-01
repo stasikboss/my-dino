@@ -26,12 +26,13 @@ function renderStart(){
   }
   playBtn.hidden = !!lock;
   friendsBtn.hidden = !!lock || !sp;
+  $('first-run').hidden = !!lock || profileWasSet || !!nameIn('he');
 }
 
 /* Choosing a friend */
 const friendsEl = $('friends');
 function openChoose(fromStart){
-  stopSpeech();
+  stopSpeech(); stopMic();
   closeWardrobe();
   friendsEl.textContent = '';
   for (const sp of SPECIES_ORDER){
@@ -184,7 +185,7 @@ function startBedtime(){
   if (gameOn){ pendingBed = true; return; }
   pendingBed = false;
   bedtime = true;
-  stopSpeech(); closeWardrobe();
+  stopSpeech(); stopMic(); closeWardrobe();
   if (sleeping){ say('goodnight', null, 9, null, () => setTimeout(showNight, 3000)); return; }
   setRoom('bed', true);
   sfx.yawn();
@@ -523,7 +524,7 @@ document.addEventListener('visibilitychange', () => {
     if (inPlay) keepAwake();
     if (!startEl.hidden) renderStart();
   } else {
-    stopSpeech(); stopLullaby();
+    stopSpeech(); stopLullaby(); stopMic();
     saveDays(true);
   }
 });

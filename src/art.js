@@ -366,7 +366,7 @@ function petSvg(sp, opts = {}){
   const headK = stage === 0 ? 1.14 : stage === 1 ? 1.06 : 1;
   const [px, py] = s.headPivot;
   let hat = '';
-  if (opts.outfit && opts.outfit !== 'glasses' && OUTFITS[opts.outfit]){
+  if (opts.outfit && opts.outfit !== 'glasses' && Object.prototype.hasOwnProperty.call(OUTFITS, opts.outfit)){
     const [hx, hy, hs] = s.hat;
     hat = `<g class="outfit" transform="translate(${hx} ${hy + 5 * hs}) scale(${hs})">${OUTFITS[opts.outfit]}</g>`;
   } else if (opts.outfit === 'glasses') hat = glassesSvg(sp);

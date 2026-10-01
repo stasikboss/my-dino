@@ -52,6 +52,8 @@ html = f"""<!doctype html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="__CSP__">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>הדינו שלי</title>
 <meta name="description" content="משחק לגידול דינוזאורים וחיות לילדים בגילאי 3 עד 6: מאכילים, רוחצים, משכיבים לישון ולומדים. בעברית, ברוסית ובאנגלית, בלי פרסומות.">
@@ -82,7 +84,25 @@ if ('serviceWorker' in navigator) addEventListener('load', () => {{ navigator.se
 </body>
 </html>
 """
+# Content Security Policy: only this site's own files, plus the exact inline scripts below (by hash). No outside
+# scripts, connections, frames or plugins; forms go nowhere; <base> can't be changed.
+import base64, hashlib as _h
+def csp_for(page):
+    hashes = []
+    for m in re.finditer(r'<script>(.*?)</script>', page, re.S):
+        hashes.append("'sha256-" + base64.b64encode(_h.sha256(m.group(1).encode('utf-8')).digest()).decode() + "'")
+    return ("default-src 'self'; script-src 'self' " + ' '.join(hashes) + "; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
+            "worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'")
+html = html.replace('__CSP__', csp_for(html))
 (root / 'play.html').write_text(html)
+# the download page is written by hand; its policy is refreshed here so it always matches its scripts
+idx = (root / 'index.html').read_text()
+if 'Content-Security-Policy' not in idx:
+    idx = idx.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="__CSP__">\n<meta name="referrer" content="no-referrer">', 1)
+idx = re.sub(r'(<meta http-equiv="Content-Security-Policy" content=")[^"]*(">)', lambda m: m.group(1) + '__CSP__' + m.group(2), idx)
+idx = idx.replace('__CSP__', csp_for(idx))
+(root / 'index.html').write_text(idx)
 print('play.html', len(html.encode()), 'bytes')
 
 # offline list for the service worker, with a version that changes whenever a file changes
