@@ -401,7 +401,7 @@ function fillLine(t, lang, vars){
     const val = (v && typeof v === 'object') ? v[lang] : v;
     s = s.split('{' + k + '}').join(val == null ? '' : String(val));
   }
-  s = s.replace(/\s+/g, ' ').trim();
+  s = s.replace(/[ \t\n]+/g, ' ').trim();
   if (lang !== 'he' && s){
     s = s.charAt(0).toUpperCase() + s.slice(1);
     // a name that starts a new sentence gets a capital ("Right! The elephant...", "Правильно! Слон...")

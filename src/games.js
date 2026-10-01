@@ -32,7 +32,7 @@ function renderGames(){
   for (const gm of GAMES){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'game-tile' + (gm.wide ? ' wide' : ''); b.dir = 'rtl';
-    b.innerHTML = GAME_ICON[gm.id] + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '');
+    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '');
     b.addEventListener('click', () => { initAudio(); sfx.tap(); startGame(gm.id); });
     g.append(b);
   }
@@ -62,6 +62,7 @@ function startGame(id){
   gameOn = id; gameToken++;
   inPlay = false;
   gameEl.hidden = false;
+  document.body.classList.add('in-game');
   gameEl.className = 'game g-' + id;
   bubbleAnchor = () => ({ x: innerWidth / 2, y: 0 });
   gameBody.textContent = '';
@@ -72,6 +73,7 @@ function startGame(id){
 function closeGame(){
   gameOn = null; gameToken++;
   gameEl.hidden = true;
+  document.body.classList.remove('in-game');
   gameBody.textContent = '';
   stopSpeech();
   inPlay = true;
@@ -380,6 +382,7 @@ function renderAlbum(){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'album-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(sp === albumSp));
     b.setAttribute('aria-label', PET_NAMES[sp].he);
+    b.style.setProperty('--c', mix(SPECIES[sp].c.body, 'w', 0.62));
     b.innerHTML = petSvg(sp, { stage: 2 }) + `<span class="count">${factCount(sp)}/6</span>`;
     b.addEventListener('click', () => { initAudio(); sfx.tap(); albumSp = sp; renderAlbum(); sayFrom(LINES.pickFriend, { sp }, 5); });
     tabs.append(b);

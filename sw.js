@@ -1,5 +1,5 @@
 /* Offline support for "הדינו שלי": after the first visit, everything the game needs is kept on the device. */
-const VERSION = 'dino-7398b91522';
+const VERSION = 'dino-c162dde7b8';
 const ASSETS = [
   "./",
   "./index.html",

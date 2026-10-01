@@ -14,7 +14,36 @@ while len(stars) < 16:
     if (x - 165) ** 2 + (y - 78) ** 2 < 46 ** 2: continue
     stars.append(f'<circle class="tw" cx="{x:.0f}" cy="{y:.0f}" r="{random.uniform(1.4, 2.8):.1f}" style="animation-delay:-{random.uniform(0, 3):.1f}s"/>')
 quilt = ''.join(f'<circle cx="{x}" cy="{y}" r="7"/>' for x in range(60, 620, 120) for y in (120, 170)) + ''.join(f'<path d="M{x} {y - 8} l2.5 5 5.5 .8 -4 3.9 1 5.5 -5 -2.6 -5 2.6 1 -5.5 -4 -3.9 5.5 -.8 Z"/>' for x in range(120, 620, 120) for y in (146,))
-room = (src / 'room.html').read_text().replace('${SUN_RAYS}', rays).replace('${RUG_FRINGE}', fringe).replace('${STARS}', ''.join(stars))
+def persp_floor(kind):
+    """A floor seen from the front: seams that run toward a point far behind the room, and (for tiles)
+    cross seams that get closer together with distance. Drawn on a 1000x300 box stretched to the floor."""
+    W, H, vx, vy = 1000, 300, 500, -900
+    out = []
+    n = 13 if kind == 'wood' else 11
+    for k in range(-n, n + 1):
+        bx = vx + k * (W / (n * 0.9))
+        t = (0 - vy) / (H - vy)
+        tx = vx + (bx - vx) * t
+        out.append(f'<path d="M{tx:.1f} 0 L{bx:.1f} {H}"/>')
+    if kind == 'tile':
+        z = 1.0
+        while True:
+            y = H - (H) * (1 - 1 / z) * 1.25
+            if y < 2: break
+            out.append(f'<path d="M0 {y:.1f} H{W}"/>')
+            z += 0.55
+    if kind == 'wood':
+        random.seed(3)
+        for k in range(-n, n):
+            for j in range(3):
+                y = random.uniform(30, H - 10)
+                t = (y - vy) / (H - vy)
+                x1 = vx + (vx + k * (W / (n * 0.9)) - vx) * t
+                x2 = vx + (vx + (k + 1) * (W / (n * 0.9)) - vx) * t
+                out.append(f'<path d="M{x1:.1f} {y:.1f} L{x2:.1f} {y + 1:.1f}"/>')
+    return f'<svg class="floor-lines fl-{kind}" viewBox="0 0 {W} {H}" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke-width="2.2" vector-effect="non-scaling-stroke">{"".join(out)}</g></svg>'
+floors = persp_floor('wood') + persp_floor('tile')
+room = (src / 'room.html').read_text().replace('${SUN_RAYS}', rays).replace('${RUG_FRINGE}', fringe).replace('${STARS}', ''.join(stars)).replace('${FLOORS}', floors)
 body = (src / 'body.html').read_text().replace('${ROOM}', room).replace('${TUB_FOAM}', foam).replace('${TUB_SHINE}', shine).replace('${QUILT_DOTS}', quilt)
 assert '${' not in body, body[body.index('${'):body.index('${') + 40]
 js = '\n'.join((src / f).read_text() for f in ['art.js', 'content.js', 'core.js', 'pet.js', 'rooms.js', 'games.js', 'main.js'])

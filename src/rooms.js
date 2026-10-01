@@ -126,6 +126,7 @@ function setRoom(r, quiet){
   const prev = room;
   if (prev !== r) stopSpeech();
   room = r;
+  if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
   roomEl.dataset.room = r;
   stageEl.classList.toggle('in-tub', r === 'bath');

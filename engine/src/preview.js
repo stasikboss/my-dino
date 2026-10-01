@@ -1,0 +1,35 @@
+import * as THREE from 'three';
+import { makeRenderer, envFor, rig } from './lights.js';
+import { buildFriend, SPECIES_ORDER, dress } from './characters.js';
+import { radialTex } from './util.js';
+window.renderGrid = (opts = {}) => {
+  const W = opts.w || 1800, H = opts.h || 760;
+  const canvas = document.getElementById('c'); canvas.width = W; canvas.height = H;
+  const renderer = makeRenderer(canvas, { preserve: true });
+  renderer.setSize(W, H, false);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#ffe7cc');
+  scene.environment = envFor(renderer); scene.environmentIntensity = 0.55;
+  const L = rig(scene, { shadowSize: 2048 });
+  L.key.shadow.camera.left = -8; L.key.shadow.camera.right = 8;
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), new THREE.MeshStandardMaterial({ color: '#f6d4ae', roughness: 0.9 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  const list = opts.list || SPECIES_ORDER;
+  const gap = opts.gap || 2.3;
+  list.forEach((sp, i) => {
+    const r = buildFriend(sp, opts.stage ?? 2);
+    r.root.position.x = (i - (list.length - 1) / 2) * gap;
+    if (opts.happy) for (const e of r.eyes) e.set(1, 1, 0);
+    if (opts.sleep) for (const e of r.eyes) e.set(0, 0, 0);
+    if (opts.talk) r.mouth.set(1);
+    if (opts.outfits) dress(r, opts.outfits[i % opts.outfits.length]);
+    scene.add(r.root);
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.0), new THREE.MeshBasicMaterial({ map: radialTex('#5a3420', 128), transparent: true, opacity: 0.35, depthWrite: false }));
+    sh.rotation.x = -Math.PI / 2; sh.position.set(r.root.position.x, 0.005, 0); scene.add(sh);
+  });
+  const cam = new THREE.PerspectiveCamera(opts.fov || 26, W / H, 0.1, 100);
+  cam.position.set(0, opts.camY ?? 1.6, opts.camZ ?? 18);
+  cam.lookAt(0, opts.lookY ?? 1.0, 0);
+  renderer.render(scene, cam);
+  return 'ok';
+};

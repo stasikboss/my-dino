@@ -34,11 +34,12 @@ function eyeSvg(x, y, r){
       <ellipse rx="${r}" ry="${f(ry)}" fill="url(#${U}-ew)" stroke="${INK}" stroke-width="3.5"/>
       <g class="pupil">
         <circle r="${f(r * 0.68)}" fill="url(#${U}-iris)"/>
-        <circle r="${f(r * 0.4)}" fill="${INK}"/>
+        <circle r="${f(r * 0.4)}" fill="#120d20"/>
         <ellipse cx="${f(-r * 0.26)}" cy="${f(-r * 0.3)}" rx="${f(r * 0.27)}" ry="${f(r * 0.24)}" fill="#fff"/>
         <circle cx="${f(r * 0.24)}" cy="${f(r * 0.26)}" r="${f(r * 0.12)}" fill="#fff" opacity=".9"/>
       </g>
       <path d="M${f(-r * 0.92)} ${f(-ry * 0.3)} Q0 ${f(-ry * 1.15)} ${f(r * 0.92)} ${f(-ry * 0.3)} Q0 ${f(-ry * 0.78)} ${f(-r * 0.92)} ${f(-ry * 0.3)} Z" fill="${INK}" opacity=".13"/>
+      <path class="lid" d="M${f(-r * 1.02)} ${f(-ry * 0.12)} Q${f(-r * 0.7)} ${f(-ry * 1.12)} 0 ${f(-ry * 1.08)} Q${f(r * 0.7)} ${f(-ry * 1.12)} ${f(r * 1.02)} ${f(-ry * 0.12)}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>
     </g>
     <path class="eye-shut" d="M${-r} -1 Q0 ${f(r * 0.8)} ${r} -1" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
     <path class="eye-happy" d="M${-r} ${f(r * 0.35)} Q0 ${f(-r * 0.95)} ${r} ${f(r * 0.35)}" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>
@@ -68,7 +69,7 @@ const toes = (x1, x2, y, n = 3, color = '#fff5e2') => {
   return s + '</g>';
 };
 const thick = (d, w, fill) =>
-  `<path d="${d}" fill="none" stroke="${INK}" stroke-width="${w + SW * 2}" stroke-linecap="round" stroke-linejoin="round"/>` +
+  `<path d="${d}" fill="none" stroke="${INK}" stroke-width="${(w + SW * 2 * 0.8).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>` +
   `<path d="${d}" fill="none" stroke="${fill}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
 const plate = (x, base, w, h, fill, rot = 0) =>
   `<path transform="rotate(${rot} ${x} ${base})" d="M${x - w / 2} ${base} L${(x - w * 0.56).toFixed(1)} ${(base - h * 0.45).toFixed(1)} Q${x} ${base - h * 1.08} ${(x + w * 0.56).toFixed(1)} ${(base - h * 0.45).toFixed(1)} L${x + w / 2} ${base} Z" fill="${fill}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>`;
@@ -77,6 +78,7 @@ const plate = (x, base, w, h, fill, rot = 0) =>
    mouth (where food goes), head (pivot for tilting), hat (top of the head and its width), eyes (for glasses). */
 const SPECIES = {
   trex: {
+    line: '#2c6a1e',
     iris: '#c9862f', gloss: [[88, 38, 20, 9], [96, 130, 12, 7]], ao: [120, 124, 50, 11],
     c: { body: '#6cc24a', dark: '#4f9c34', belly: '#eaf6b5' },
     mouth: [120, 100], headPivot: [120, 122], hat: [120, 26, 1.55], eyes: [[97, 68], [143, 68], 13],
@@ -112,6 +114,7 @@ const SPECIES = {
   },
 
   trike: {
+    line: '#8a4410',
     iris: '#7a4a1e', gloss: [[100, 78, 16, 7], [96, 30, 16, 6], [120, 152, 16, 6]], ao: [126, 150, 54, 11],
     c: { body: '#f2a33a', dark: '#cf7f22', frill: '#ffd35c', spot: '#f2a33a', horn: '#fff5e2', beak: '#c98a4b' },
     mouth: [120, 136], headPivot: [120, 150], hat: [120, 68, 1.15], eyes: [[100, 98], [140, 98], 12],
@@ -125,12 +128,23 @@ const SPECIES = {
         ${toes(70, 98, 224)}${toes(108, 136, 224)}`;
     },
     head(c){
-      return `<path d="${scallop(120, 82, 74, 60, 9, 0.11, 180, 360)}" fill="${c.frill}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
-        <g fill="${c.spot}"><circle cx="66" cy="66" r="7"/><circle cx="174" cy="66" r="7"/><circle cx="96" cy="36" r="6"/><circle cx="144" cy="36" r="6"/><circle cx="120" cy="30" r="4.5"/></g>
+      const fan = [];
+      const N = 11, a0 = 196, a1 = 344;
+      for (let k = 0; k <= N * 2; k++){
+        const ang = (a0 + (a1 - a0) * k / (N * 2)) * Math.PI / 180, out = k % 2 ? 1.11 : 1;
+        fan.push([120 + Math.cos(ang) * 80 * out, 92 + Math.sin(ang) * 66 * out]);
+      }
+      let fd = `M96 136 C70 134 44 120 ${fan[0][0].toFixed(1)} ${fan[0][1].toFixed(1)}`;
+      for (let k = 1; k < fan.length; k += 2) fd += ` Q${fan[k][0].toFixed(1)} ${fan[k][1].toFixed(1)} ${fan[k + 1][0].toFixed(1)} ${fan[k + 1][1].toFixed(1)}`;
+      fd += ` C196 120 170 134 144 136 Z`;
+      return `<path d="${fd}" fill="${c.frill}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="${fd}" fill="none" stroke="${c.raw.spot}" stroke-width="7" opacity=".35" transform="translate(120 96) scale(.84) translate(-120 -96)"/>
+        <g fill="${c.spot}"><circle cx="60" cy="74" r="7"/><circle cx="180" cy="74" r="7"/><circle cx="82" cy="44" r="6"/><circle cx="158" cy="44" r="6"/><circle cx="120" cy="32" r="6.5"/><circle cx="100" cy="36" r="4"/><circle cx="140" cy="36" r="4"/></g>
         <ellipse cx="120" cy="108" rx="52" ry="44" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
-        <path d="M88 76 Q66 46 70 16 Q86 42 104 70 Z" fill="${c.horn}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
-        <path d="M152 76 Q174 46 170 16 Q154 42 136 70 Z" fill="${c.horn}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
-        <path d="M111 124 Q118 104 121 98 Q124 106 129 124 Z" fill="${c.horn}" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M92 80 C82 62 80 44 86 26 C94 42 102 58 106 74 Z" fill="${c.horn}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M148 80 C158 62 160 44 154 26 C146 42 138 58 134 74 Z" fill="${c.horn}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M86 26 C84 34 85 40 88 46 L92 40 Z M154 26 C156 34 155 40 152 46 L148 40 Z" fill="#d8c3a0" opacity=".9"/>
+        <path d="M111 124 Q117 106 121 98 Q125 106 129 124 Z" fill="${c.horn}" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>
         ${eyeSvg(100, 98, 12)}${eyeSvg(140, 98, 12)}
         ${cheeks(82, 158, 120, 9, 6)}
         <g class="mouth">
@@ -144,6 +158,7 @@ const SPECIES = {
   },
 
   stego: {
+    line: '#1d5e57',
     iris: '#4f7a2a', gloss: [[56, 120, 14, 6], [116, 134, 14, 6]], ao: [96, 178, 26, 9],
     c: { body: '#4fb3a9', dark: '#3a8f87', far: '#3a8f87', belly: '#d9f2c4', plate: '#ff8a5c', plate2: '#ffb38a', spike: '#fff5e2' },
     mouth: [72, 164], headPivot: [88, 176], hat: [73, 114, 1.3], eyes: [[56, 140], [90, 140], 11],
@@ -158,8 +173,8 @@ const SPECIES = {
         <path d="${legPath(112, 134, 192)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         <path d="${legPath(148, 170, 192)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         ${front}
-        <path d="M62 198 C60 150 98 124 138 124 C182 124 210 156 202 200 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
-        <path d="M74 198 C80 182 104 176 138 176 C170 176 192 184 196 198 Z" fill="${c.belly}" opacity=".85"/>
+        <path d="M64 186 C58 146 98 122 138 122 C184 122 214 152 206 190 C200 212 168 214 136 212 C104 212 70 210 64 186 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M78 196 C88 182 112 178 138 178 C166 178 190 184 198 196 C188 208 164 210 136 210 C108 210 86 208 78 196 Z" fill="${c.belly}" opacity=".9"/>
         <g fill="${c.dark}" opacity=".6"><ellipse cx="150" cy="148" rx="7" ry="5"/><ellipse cx="172" cy="160" rx="5" ry="4"/><ellipse cx="128" cy="144" rx="5" ry="3.5"/></g>
         <path d="${legPath(80, 106, 186)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         <path d="${legPath(166, 192, 186)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
@@ -176,24 +191,25 @@ const SPECIES = {
   },
 
   brachio: {
-    iris: '#6a4fc9', gloss: [[72, 36, 13, 6], [128, 146, 12, 6]], ao: [112, 150, 22, 9],
+    line: '#4636a6',
+    iris: '#6a4fc9', gloss: [[72, 36, 13, 6], [150, 148, 12, 6]], ao: null,
     c: { body: '#9a8cf0', dark: '#7867d8', far: '#7f70dc', belly: '#e6e0ff', spot: '#b9afff' },
-    mouth: [86, 70], headPivot: [92, 84], hat: [88, 30, 1.3], eyes: [[72, 50], [104, 50], 11],
+    mouth: [86, 70], headPivot: [90, 78], hat: [88, 30, 1.3], eyes: [[72, 50], [104, 50], 11],
     body(c){
       return `<g class="p-tail" style="transform-origin:194px 196px"><path d="M188 184 C214 184 232 196 236 214 C218 214 198 210 184 204 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/></g>
         <path d="${legPath(124, 146, 168)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         <path d="${legPath(154, 174, 186)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
-        <path d="M86 186 C82 150 108 132 146 136 C184 140 206 164 200 200 L98 202 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
-        <path d="M104 196 C110 180 132 174 156 176 C178 178 194 188 196 200 L106 202 Z" fill="${c.belly}" opacity=".85"/>
+        <path d="M98 170 C96 132 84 102 72 66 L108 60 C114 96 128 124 146 146 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <g fill="${c.spot}"><ellipse cx="104" cy="122" rx="6" ry="4" transform="rotate(-60 104 122)"/><ellipse cx="94" cy="96" rx="5" ry="3.5" transform="rotate(-65 94 96)"/><ellipse cx="114" cy="146" rx="5" ry="3.5"/></g>
+        <path d="M88 176 C84 146 112 128 148 134 C186 140 210 164 202 192 C196 212 160 214 140 212 C114 212 92 202 88 176 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M106 198 C116 186 136 182 158 184 C180 186 194 192 198 198 C186 208 162 210 142 210 C126 210 112 206 106 198 Z" fill="${c.belly}" opacity=".9"/>
         <g fill="${c.spot}"><ellipse cx="150" cy="150" rx="8" ry="5"/><ellipse cx="174" cy="160" rx="6" ry="4"/><ellipse cx="130" cy="146" rx="5" ry="3.5"/></g>
         <path d="${legPath(94, 120, 162)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         <path d="${legPath(172, 196, 188)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         ${toes(94, 120, 224)}${toes(172, 196, 224)}`;
     },
     head(c){
-      return `${thick('M118 156 C110 122 96 98 90 70', 30, c.body)}
-        <g fill="${c.spot}"><ellipse cx="108" cy="128" rx="6" ry="4"/><ellipse cx="98" cy="104" rx="5" ry="3.5"/></g>
-        <path d="M84 30 Q90 14 104 22 Q110 30 104 34 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+      return `<path d="M84 30 Q90 14 104 22 Q110 30 104 34 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
         <ellipse cx="88" cy="56" rx="42" ry="31" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
         <g fill="${c.dark}" opacity=".55"><ellipse cx="96" cy="32" rx="5" ry="3"/></g>
         ${eyeSvg(72, 50, 11)}${eyeSvg(104, 50, 11)}
@@ -203,6 +219,7 @@ const SPECIES = {
   },
 
   elephant: {
+    line: '#46527a',
     iris: '#5a6f96', gloss: [[100, 54, 17, 8], [96, 150, 12, 6]], ao: [120, 138, 46, 11],
     c: { body: '#a6b5d0', dark: '#8596b8', ear: '#f7b5c4', tusk: '#fffaf0' },
     mouth: [134, 124], headPivot: [120, 134], hat: [120, 44, 1.45], eyes: [[98, 82], [142, 82], 12],
@@ -231,6 +248,7 @@ const SPECIES = {
   },
 
   lion: {
+    line: '#7a3612',
     iris: '#b5761e', gloss: [[102, 66, 13, 6], [78, 40, 14, 6], [104, 162, 10, 5]], ao: [120, 150, 46, 9],
     c: { body: '#f4b942', dark: '#d9962a', mane: '#d06a2b', mane2: '#e8843a', muzzle: '#fff0c9', nose: '#7a3b2e', ear: '#ffb3a7' },
     mouth: [120, 132], headPivot: [120, 150], hat: [120, 32, 1.4], eyes: [[100, 88], [140, 88], 11],
@@ -262,6 +280,7 @@ const SPECIES = {
   },
 
   penguin: {
+    line: '#121a2e',
     iris: '#3a4a6a', gloss: [[96, 44, 15, 7], [96, 140, 10, 16]], ao: null,
     c: { body: '#2f3e5c', belly: '#fffaf2', beak: '#ffa53b', feet: '#ffa53b', patch: '#ffd35c' },
     mouth: [120, 112], headPivot: [120, 140], hat: [120, 36, 1.2], eyes: [[102, 90], [138, 90], 11],
@@ -320,7 +339,10 @@ function glassesSvg(sp){
 const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
 const mix = (h, to, t) => { const a = hexRgb(h), b = to === 'w' ? [255, 255, 255] : to === 'k' ? [20, 18, 40] : hexRgb(to); return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
 const lit = (id, base, hi = 0.3, lo = 0.16) =>
-  `<radialGradient id="${id}" cx=".36" cy=".28" r=".9" fx=".32" fy=".22"><stop offset="0" stop-color="${mix(base, 'w', hi)}"/><stop offset=".5" stop-color="${base}"/><stop offset="1" stop-color="${mix(base, 'k', lo)}"/></radialGradient>`;
+  `<radialGradient id="${id}" cx=".38" cy=".3" r=".86" fx=".3" fy=".2">` +
+  `<stop offset="0" stop-color="${mix(base, 'w', hi + 0.08)}"/><stop offset=".22" stop-color="${mix(base, 'w', hi * 0.45)}"/>` +
+  `<stop offset=".55" stop-color="${base}"/><stop offset=".82" stop-color="${mix(base, 'k', lo * 0.85)}"/>` +
+  `<stop offset=".95" stop-color="${mix(base, 'k', lo * 1.45)}"/><stop offset="1" stop-color="${mix(base, 'k', lo * 1.1)}"/></radialGradient>`;
 let petCounter = 0;
 
 /* The whole character. stage: 0 baby, 1 child, 2 grown. The baby has a bigger head, as real babies do. */
@@ -352,13 +374,20 @@ function petSvg(sp, opts = {}){
   const headGloss = gloss(s.gloss.slice(0, 1)), bodyGloss = gloss(s.gloss.slice(1));
   const ao = s.ao ? `<ellipse cx="${s.ao[0]}" cy="${s.ao[1]}" rx="${s.ao[2]}" ry="${s.ao[3]}" fill="url(#${U}-ao)"/>` : '';
   const id = opts.id ? ` id="${opts.id}"` : '';
+  const recolor = (m, col) => m
+    .replace(/stroke="#1b2430" stroke-width="([\d.]+)"/g, (x, n) => `stroke="${col}" stroke-width="${+n < 7 ? (+n * 0.82).toFixed(2) : n}"`)
+    .replace(/stroke="#1b2430"/g, `stroke="${col}"`)
+    .replace(/fill="#1b2430"/g, `fill="${col}"`);
+  const line = s.line || INK, hatLine = '#4a2c2a';
+  const bodyM = recolor(s.body(c) + bodyGloss + ao, line);
+  const headM = recolor(s.head(c) + headGloss, line) + recolor(hat, opts.outfit === 'glasses' ? line : hatLine);
   const out = `<svg${id} class="pet sp-${sp}" viewBox="-10 -40 260 280" aria-hidden="true" focusable="false">
     <defs>${defs.join('')}</defs>
     <ellipse class="p-shadow" cx="122" cy="228" rx="${Math.round(96 * sc)}" ry="${Math.round(13 * sc)}" fill="url(#${U}-sh)"/>
     <g class="p-scale" transform="translate(120 226) scale(${sc}) translate(-120 -226)">
       <g class="p-jump">
-        <g class="p-body" style="transform-origin:120px 226px">${s.body(c)}${bodyGloss}${ao}</g>
-        <g class="p-head" style="transform-origin:${px}px ${py}px"><g transform="translate(${px} ${py}) scale(${headK}) translate(${-px} ${-py})">${s.head(c)}${headGloss}${hat}</g></g>
+        <g class="p-body" style="transform-origin:120px 226px">${bodyM}</g>
+        <g class="p-head" style="transform-origin:${px}px ${py}px"><g transform="translate(${px} ${py}) scale(${headK}) translate(${-px} ${-py})">${headM}</g></g>
       </g>
     </g>
   </svg>`;

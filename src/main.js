@@ -38,7 +38,8 @@ function openChoose(fromStart){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'friend' + (sp === current ? ' current' : ''); b.dir = 'rtl';
     const d = pets[sp];
-    b.innerHTML = petSvg(sp, { stage: d && d.born ? stageOf(sp) : 2, outfit: d && d.outfit }) + `<span>${PET_NAMES[sp].he}</span>` + (IS_DINO[sp] ? '<span class="tag">דינוזאור</span>' : '<span class="tag">חיה של היום</span>');
+    b.style.setProperty('--c', mix(SPECIES[sp].c.body, 'w', 0.55)); b.style.setProperty('--c2', mix(SPECIES[sp].c.body, 'w', 0.25));
+    b.innerHTML = `<span class="fb">${petSvg(sp, { stage: d && d.born ? stageOf(sp) : 2, outfit: d && d.outfit })}</span>` + `<span>${PET_NAMES[sp].he}</span>` + (IS_DINO[sp] ? '<span class="tag">דינוזאור</span>' : '<span class="tag">חיה של היום</span>');
     b.addEventListener('click', () => pickFriend(sp, fromStart, b));
     friendsEl.append(b);
   }
@@ -341,7 +342,7 @@ $('reset-pet').addEventListener('click', () => {
   if (!confirm(`לגדל את ה${PET_NAMES[current].he} מחדש, מביצה? האלבום והכובעים נשמרים.`)) return;
   pets[current] = { born: false, days: [], outfit: null }; savePets();
   closeParents();
-  if (gameOn){ gameOn = null; gameToken++; gameEl.hidden = true; }
+  if (gameOn){ gameOn = null; gameToken++; gameEl.hidden = true; document.body.classList.remove('in-game'); }
   inPlay = false; bedtime = false;
   hudEl.hidden = true; trayEl.hidden = true; navEl.hidden = true; clockEl.hidden = true; gamesEl.hidden = true; albumEl.hidden = true;
   runIntro(current);
