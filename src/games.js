@@ -309,7 +309,7 @@ async function gameDig(tok){
     await new Promise(res => requestAnimationFrame(res));
     const cv = area.querySelector('canvas'), sweep = area.querySelector('.sweep');
     const rect = area.getBoundingClientRect();
-    const dpr = Math.min(2, devicePixelRatio || 1);
+    const dpr = Math.min(3, devicePixelRatio || 1);
     cv.width = Math.round(rect.width * dpr); cv.height = Math.round(rect.height * dpr);
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);

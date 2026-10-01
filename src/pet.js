@@ -123,7 +123,7 @@ const fctx = fx.getContext('2d');
 let FW = 0, FH = 0, DPR = 1;
 const parts = [];
 function sizeFx(){
-  DPR = Math.min(2, window.devicePixelRatio || 1);
+  DPR = Math.min(3, window.devicePixelRatio || 1);
   FW = innerWidth; FH = innerHeight;
   fx.width = Math.round(FW * DPR); fx.height = Math.round(FH * DPR);
   fctx.setTransform(DPR, 0, 0, DPR, 0, 0);
