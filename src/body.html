@@ -1,0 +1,261 @@
+${ROOM}
+
+<div class="bed-back d-only-bed" id="bed-back" hidden><svg viewBox="0 0 640 300">
+  <path d="M40 300 V80 Q40 30 90 30 H550 Q600 30 600 80 V300" fill="url(#g-headboard)" stroke="#1b2430" stroke-width="6"/>
+  <path d="M74 290 V94 Q74 64 104 64 H536 Q566 64 566 94 V290" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="7"/>
+  <g fill="url(#g-gold)" stroke="#1b2430" stroke-width="3" stroke-linejoin="round"><path d="M160 74 l5 10 11 1 -8 8 2 11 -10 -6 -10 6 2 -11 -8 -8 11 -1 Z"/><path d="M320 58 l6 12 13 2 -10 9 3 13 -12 -7 -12 7 3 -13 -10 -9 13 -2 Z"/><path d="M480 74 l5 10 11 1 -8 8 2 11 -10 -6 -10 6 2 -11 -8 -8 11 -1 Z"/></g>
+  <path d="M60 50 Q60 40 72 40 H200" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".35"/>
+  <rect x="20" y="186" width="600" height="114" rx="28" fill="url(#g-mattress)" stroke="#1b2430" stroke-width="6"/>
+  <path d="M40 206 H600" stroke="#fff" stroke-width="5" opacity=".7"/>
+  <rect x="104" y="140" width="200" height="74" rx="34" fill="url(#g-porcelain)" stroke="#1b2430" stroke-width="5"/>
+  <path d="M126 160 Q204 150 282 160" fill="none" stroke="#c7d6e6" stroke-width="4" stroke-linecap="round"/>
+</svg></div>
+
+<div class="stage" id="stage"></div>
+
+<div class="front tub" id="tub" hidden><svg viewBox="0 0 600 240">
+  <ellipse cx="300" cy="64" rx="276" ry="20" fill="url(#g-water)" stroke="#1b2430" stroke-width="4"/>
+  <g fill="url(#g-bubble)" stroke="#1b2430" stroke-width="3.5">${TUB_FOAM}</g>
+  <g fill="#fff" opacity=".85">${TUB_SHINE}</g>
+  <path d="M20 66 H580 Q574 196 470 212 H130 Q26 196 20 66 Z" fill="url(#g-porcelain)" stroke="#1b2430" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="8" y="52" width="584" height="28" rx="14" fill="url(#g-porcelain)" stroke="#1b2430" stroke-width="6"/>
+  <path d="M60 112 Q300 146 540 112" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".9"/>
+  <path d="M70 92 Q78 160 140 186" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".7"/>
+  <path d="M140 210 L124 234 H172 L178 210 Z M460 210 L476 234 H428 L422 210 Z" fill="url(#g-gold)" stroke="#1b2430" stroke-width="5" stroke-linejoin="round"/>
+  <g transform="translate(474 22)"><path d="M0 30 Q-4 4 18 2 Q34 2 34 18 Q48 18 52 28 Q46 46 22 46 Q2 46 0 30 Z" fill="url(#g-duck)" stroke="#1b2430" stroke-width="4" stroke-linejoin="round"/><path d="M34 14 L46 12 L36 22 Z" fill="#ff8a3d" stroke="#1b2430" stroke-width="3" stroke-linejoin="round"/><circle cx="24" cy="12" r="3" fill="#1b2430"/><path d="M10 30 Q16 36 26 34" fill="none" stroke="#e8a20f" stroke-width="3" stroke-linecap="round"/></g>
+</svg></div>
+<div class="front blanket off" id="blanket" hidden><svg viewBox="0 0 640 214">
+  <path d="M10 204 V62 Q10 32 50 36 Q320 12 590 36 Q630 32 630 62 V204 Z" fill="url(#g-blanket)" stroke="#1b2430" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M10 74 Q320 48 630 74" fill="none" stroke="#fff5e2" stroke-width="16"/>
+  <path d="M10 74 Q320 48 630 74" fill="none" stroke="#e8c27a" stroke-width="3" stroke-dasharray="10 8"/>
+  <g fill="none" stroke="#c94f5c" stroke-width="3" stroke-dasharray="9 8" opacity=".55"><path d="M120 92 V204"/><path d="M240 86 V204"/><path d="M360 84 V204"/><path d="M480 88 V204"/></g>
+  <g fill="#fff5e2">${QUILT_DOTS}</g>
+  <path d="M60 120 Q90 160 70 200 M560 120 Q540 160 566 200" fill="none" stroke="#c94f5c" stroke-width="5" stroke-linecap="round" opacity=".35"/>
+</svg></div>
+<div class="stall" id="stall" hidden><svg viewBox="0 0 480 520">
+  <rect x="20" y="10" width="440" height="500" rx="20" fill="#7cc3e6" stroke="#1b2430" stroke-width="8"/>
+  <g class="door"><rect x="40" y="30" width="400" height="470" rx="16" fill="url(#g-door)" stroke="#1b2430" stroke-width="7"/>
+    <rect x="80" y="70" width="320" height="170" rx="14" fill="#ffc68a" stroke="#1b2430" stroke-width="5"/><rect x="80" y="280" width="320" height="180" rx="14" fill="#ffc68a" stroke="#1b2430" stroke-width="5"/>
+    <circle cx="400" cy="262" r="14" fill="#c98a4b" stroke="#1b2430" stroke-width="5"/>
+    <g transform="translate(240 155)"><circle r="54" fill="#fff" stroke="#1b2430" stroke-width="5"/><path d="M-28 -6 H28 Q28 24 0 26 Q-28 24 -28 -6 Z" fill="#9fdcff" stroke="#1b2430" stroke-width="4" stroke-linejoin="round"/><ellipse cy="-6" rx="28" ry="8" fill="#ffd1dc" stroke="#1b2430" stroke-width="4"/></g></g>
+</svg></div>
+
+<canvas class="fx" id="fx"></canvas>
+
+<div class="hud" id="hud" hidden>
+  <div class="tools">
+    <button class="icon-btn" type="button" data-open-parents aria-label="להורים">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
+    </button>
+    <button class="icon-btn" id="mute" type="button" aria-label="צלילים" aria-pressed="false">
+      <svg id="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+      <svg id="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+    </button>
+  </div>
+  <div class="needs" id="needs" role="group" aria-label="מה החבר צריך"></div>
+</div>
+<div class="clock" id="clock" hidden aria-hidden="true"><span id="clock-fill"></span></div>
+
+<div class="games" id="games" hidden>
+  <div class="games-grid" id="games-grid"></div>
+</div>
+<div class="album" id="album" hidden>
+  <div class="album-tabs" id="album-tabs" role="tablist" aria-label="חברים"></div>
+  <div class="cards" id="cards"></div>
+</div>
+
+<div class="tray" id="tray" hidden></div>
+<nav class="nav" id="nav" hidden aria-label="חדרים"></nav>
+
+<div class="bubble" id="bubble" role="status" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<!-- start -->
+<div class="screen" id="start">
+  <div class="screen-inner">
+    <p class="eyebrow" id="start-eyebrow">Yonatan's Dino</p>
+    <h1 class="title" dir="rtl" id="start-title">הדינו של יונתן</h1>
+    <div class="start-pet" id="start-pet" role="button" tabindex="0" aria-label="מתחילים לשחק"></div>
+    <p class="sleep-msg" id="sleep-msg" dir="rtl" hidden></p>
+    <button class="big-btn" type="button" id="play-btn" dir="rtl">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#fff"/><path d="M15 11 L30 20 L15 29 Z" fill="#ff4b5c"/></svg>
+      <span>יאללה!</span>
+    </button>
+    <button class="soft-btn" type="button" id="friends-btn" dir="rtl">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="28" rx="15" ry="18" fill="#fff5e2" stroke="#1b2430" stroke-width="3.5"/><g fill="#7cc85a"><circle cx="18" cy="22" r="4"/><circle cx="30" cy="30" r="5"/><circle cx="22" cy="38" r="3"/></g></svg>
+      <span>חבר אחר</span>
+    </button>
+    <p class="note" id="no-voice" dir="rtl" lang="he" hidden><span id="no-voice-text"></span> <a id="no-voice-link" target="_blank" rel="noopener" hidden>לפתוח ב-Chrome</a></p>
+    <button class="parent-link" type="button" data-open-parents dir="rtl" lang="he">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
+      <span>להורים</span>
+    </button>
+  </div>
+</div>
+
+<div class="screen" id="choose" hidden>
+  <div class="screen-inner">
+    <h2 class="title" dir="rtl" style="font-size:clamp(30px,8vw,52px)">את מי מגדלים?</h2>
+    <p class="sub" dir="rtl">דינוזאורים וחיות. לוחצים על חבר כדי לבחור.</p>
+    <div class="friends" id="friends"></div>
+  </div>
+</div>
+
+<div class="screen intro" id="intro" hidden>
+  <div class="screen-inner">
+    <div class="egg-wrap" id="egg-wrap" role="button" tabindex="0" aria-label="דופקים על הביצה"></div>
+    <svg class="tap-hint" id="tap-hint" viewBox="0 0 64 64" aria-hidden="true"><path d="M26 30 V12 a5 5 0 0 1 10 0 V28 l10 2 a6 6 0 0 1 5 7 L48 54 H28 L16 40 a4 4 0 0 1 6 -6 Z" fill="#fff5e2" stroke="#1b2430" stroke-width="3.5" stroke-linejoin="round"/></svg>
+  </div>
+</div>
+
+<div class="game" id="game" hidden>
+  <div class="game-top">
+    <button class="soft-btn" type="button" id="game-exit" aria-label="חזרה למשחקים"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M30 10 L16 24 L30 38" fill="none" stroke="#1b2430" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="dots" id="game-dots"></div>
+    <span style="width:52px"></span>
+  </div>
+  <div class="game-body" id="game-body"></div>
+</div>
+
+<div class="sheet" id="wardrobe" hidden dir="rtl">
+  <div class="sheet-row"><strong style="font:700 22px/1 var(--font-display)">הארון</strong>
+    <button class="soft-btn" type="button" id="wardrobe-close" aria-label="סגירה"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 14 L34 34 M34 14 L14 34" stroke="#1b2430" stroke-width="6" stroke-linecap="round"/></svg></button></div>
+  <div class="outfits" id="outfits"></div>
+</div>
+
+<div class="screen night" id="night" hidden>
+  <div class="screen-inner" dir="rtl" lang="he">
+    <div class="night-pet" id="night-pet"></div>
+    <h2 class="title" id="night-title">לילה טוב</h2>
+    <p class="sub" id="night-sub"></p>
+    <div class="panel" id="learned-box"><span class="panel-label">מה גילינו היום</span><ul id="learned"></ul></div>
+    <div class="panel"><span class="panel-label">להורים: שאלות לשאול יחד</span><ul id="ask-list"></ul></div>
+    <div class="panel"><span class="panel-label">ועכשיו, בלי מסך</span><ul><li id="offline-idea"></li></ul></div>
+    <button class="parent-link" type="button" data-open-parents>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>
+      <span>להורים: עוד זמן משחק והגדרות</span>
+    </button>
+  </div>
+</div>
+
+<div class="modal" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" hidden>
+  <form class="card" id="gate-form" dir="rtl" lang="he" novalidate>
+    <h2 id="gate-title">רק להורים</h2>
+    <div class="section">
+      <label for="gate-answer" id="gate-q" class="field-label">כמה זה?</label>
+      <input id="gate-answer" type="text" inputmode="numeric" autocomplete="off" pattern="[0-9]*">
+      <p class="error" id="gate-error" hidden>לא נכון. הנה שאלה חדשה.</p>
+    </div>
+    <div class="row">
+      <button class="btn primary" type="submit">המשך</button>
+      <button class="btn" type="button" id="gate-cancel">ביטול</button>
+    </div>
+  </form>
+</div>
+
+<div class="modal" id="parents" role="dialog" aria-modal="true" aria-labelledby="parents-title" hidden>
+  <div class="card" dir="rtl" lang="he">
+    <h2 id="parents-title">הגדרות להורים</h2>
+
+    <div class="section">
+      <span class="field-label">הילד או הילדה</span>
+      <div class="name-grid">
+        <label class="mini" for="name-he">שם בעברית<input id="name-he" type="text" maxlength="20" autocomplete="off" dir="rtl"></label>
+        <label class="mini" for="name-ru">שם ברוסית, לא חובה<input id="name-ru" type="text" maxlength="20" autocomplete="off" dir="ltr" lang="ru"></label>
+        <label class="mini" for="name-en">שם באנגלית, לא חובה<input id="name-en" type="text" maxlength="20" autocomplete="off" dir="ltr" lang="en"></label>
+      </div>
+      <div class="chips" role="group" aria-label="בן או בת, לדקדוק נכון בעברית וברוסית">
+        <button class="chip" type="button" data-g="m" aria-pressed="true">בן</button>
+        <button class="chip" type="button" data-g="f" aria-pressed="false">בת</button>
+      </div>
+      <span class="field-label" id="age-label">גיל</span>
+      <div class="chips" role="group" aria-labelledby="age-label">
+        <button class="chip" type="button" data-age="3" aria-pressed="false">3</button>
+        <button class="chip" type="button" data-age="4" aria-pressed="true">4</button>
+        <button class="chip" type="button" data-age="5" aria-pressed="false">5</button>
+        <button class="chip" type="button" data-age="6" aria-pressed="false">6</button>
+      </div>
+      <p class="small">הגיל קובע עד כמה סופרים, כמה שאלות יש בכל משחק, ואת אורך המשחק המומלץ.</p>
+    </div>
+
+    <div class="section">
+      <span class="field-label" id="len-label">כמה זמן משחקים בכל פעם</span>
+      <div class="chips" role="group" aria-labelledby="len-label">
+        <button class="chip" type="button" data-len="10" aria-pressed="false">10 דקות</button>
+        <button class="chip" type="button" data-len="15" aria-pressed="true">15 דקות</button>
+        <button class="chip" type="button" data-len="20" aria-pressed="false">20 דקות</button>
+      </div>
+      <p class="small">כשהזמן נגמר, החבר מתעייף ומבקש ללכת לישון: מצחצחים שיניים, מכבים את האור, ואומרים לילה טוב. בלי ספירה לאחור ובלי עונש.</p>
+    </div>
+
+    <div class="section">
+      <span class="field-label">אפשרויות</span>
+      <label class="check" for="opt-mic"><input type="checkbox" id="opt-mic" checked><span>״חזור אחריי״ במיקרופון<small>החבר חוזר על מה שהילד אומר בקול מצחיק. ההקלטה נשארת רק בזיכרון של המכשיר לכמה שניות ונמחקת. שום דבר לא נשמר ולא נשלח.</small></span></label>
+      <label class="check" for="opt-count"><input type="checkbox" id="opt-count" checked><span>אתגרי ספירה במטבח<small>״תאכיל אותי 3 פעמים!״ והחבר סופר יחד</small></span></label>
+      <label class="check" for="opt-needs"><input type="checkbox" id="opt-needs" checked><span>הצרכים יורדים לאט<small>רעב, ניקיון, אנרגיה וכיף. יורדים רק בזמן המשחק, אף פעם לא כשהמשחק סגור</small></span></label>
+    </div>
+
+    <div class="section">
+      <span class="field-label" id="langs-label">שפות הדיבור</span>
+      <div class="chips" role="group" aria-labelledby="langs-label">
+        <button class="chip lang-chip" type="button" data-lang="he" aria-pressed="true">עברית</button>
+        <button class="chip lang-chip" type="button" data-lang="ru" lang="ru" aria-pressed="true">Русский</button>
+        <button class="chip lang-chip" type="button" data-lang="en" lang="en" aria-pressed="true">English</button>
+      </div>
+      <p class="voice-note" id="voice-note" hidden></p>
+      <div class="voice-check">
+        <span class="mini">בדיקת קול: לוחצים כדי לשמוע כל שפה</span>
+        <ul class="vc-list" id="vc-list"></ul>
+        <p class="small" id="vc-sum"></p>
+        <a class="btn vc-chrome" id="vc-chrome" target="_blank" rel="noopener" hidden>פתיחת המשחק ב-Chrome</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="field-label" id="daily-label">גבולות, לפי בחירתכם</span>
+      <div class="chips" role="group" aria-labelledby="daily-label">
+        <button class="chip" type="button" data-daily="0" aria-pressed="true">בלי מקסימום יומי</button>
+        <button class="chip" type="button" data-daily="20" aria-pressed="false">20 דקות ביום</button>
+        <button class="chip" type="button" data-daily="30" aria-pressed="false">30 דקות ביום</button>
+        <button class="chip" type="button" data-daily="45" aria-pressed="false">45 דקות ביום</button>
+      </div>
+      <label class="check" for="bed-on"><input type="checkbox" id="bed-on"><span>לנעול לפני השינה</span></label>
+      <div class="bed-row" id="bed-row" hidden>
+        <label for="bed-time">שעת שינה</label>
+        <input id="bed-time" type="time" value="19:30">
+      </div>
+      <p class="small">כשמגיעים למקסימום, או משעתיים לפני השינה ועד 6 בבוקר, החבר ישן והמשחק לא נפתח בלי הורה.</p>
+    </div>
+
+    <div class="section">
+      <span class="field-label">זמן משחק בשבוע האחרון</span>
+      <p class="today"><strong id="today-min">0</strong> דקות היום במשחק הזה</p>
+      <div class="chart" id="chart" role="img" aria-label="דקות משחק בכל אחד משבעת הימים האחרונים"></div>
+      <ul class="stat-list" id="stats"></ul>
+      <p class="small">משרד הבריאות ממליץ לילדים בגילאי שנתיים עד חמש עד שעה ביום לכל המסכים יחד, ובלי מסכים שעתיים לפני השינה.</p>
+    </div>
+
+    <details class="tips">
+      <summary>איך לשחק נכון</summary>
+      <ul>
+        <li>לשבת ליד הילד מדי פעם ולשאול: ״מה הוא אוכל?״, ״איך קוראים לחלק הזה בגוף?״</li>
+        <li>אחרי המשחק, לשאול את השאלות שבמסך ״לילה טוב״, ולספר את העובדות בעצמכם.</li>
+        <li>לחבר לעולם האמיתי: לחפש ציפורים בחוץ, לחפור ״מאובנים״ בארגז חול, לבקר במוזיאון טבע.</li>
+        <li>לא להשתמש במשחק כפרס או כעונש. החבר לא נעלב ולא בוכה כשלא משחקים.</li>
+        <li>מרחק של יותר מ-30 ס״מ מהמסך, ועדיף לשבת ליד שולחן.</li>
+      </ul>
+    </details>
+
+    <div class="section">
+      <span class="field-label">התחלה מחדש</span>
+      <div class="row"><button class="btn" type="button" id="reset-pet">לגדל את החבר הנוכחי מביצה</button></div>
+      <p class="small">האלבום והכובעים נשמרים.</p>
+    </div>
+
+    <div class="row">
+      <button class="btn primary" type="button" id="new-session">עוד זמן משחק</button>
+      <button class="btn" type="button" id="end-session">ללכת לישון עכשיו</button>
+      <button class="btn" type="button" id="close-parents">סגירה</button>
+    </div>
+  </div>
+</div>

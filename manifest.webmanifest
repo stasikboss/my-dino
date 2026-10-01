@@ -1,0 +1,27 @@
+{
+  "id": "./play.html",
+  "name": "הדינו שלי – לגדל דינוזאורים וחיות",
+  "short_name": "הדינו שלי",
+  "description": "משחק לגידול דינוזאורים וחיות לילדים בגילאי 3 עד 6: מאכילים, רוחצים, משכיבים לישון, משחקים ולומדים. מדבר בעברית, ברוסית ובאנגלית. בלי פרסומות, ועובד גם בלי אינטרנט.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./play.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#ffd6ae",
+  "theme_color": "#ffd6ae",
+  "categories": ["games", "kids", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screens/home.jpg", "sizes": "1170x2532", "type": "image/jpeg", "form_factor": "narrow", "label": "בבית: מלטפים, מלבישים ומדברים עם החבר" },
+    { "src": "screens/kitchen.jpg", "sizes": "1170x2532", "type": "image/jpeg", "form_factor": "narrow", "label": "במטבח: מגלים מה כל חיה אוכלת" },
+    { "src": "screens/game.jpg", "sizes": "1170x2532", "type": "image/jpeg", "form_factor": "narrow", "label": "חופרים מאובן ולומדים על דינוזאורים" }
+  ]
+}
