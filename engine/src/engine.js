@@ -158,11 +158,13 @@ function applyStage(r, stage){
 }
 
 /* ---------- life: actions, walking, eating, playing ---------- */
+const TOUCH_REACTIONS = new Set(['purr', 'giggle', 'sneeze', 'lookback', 'stomp', 'dizzy', 'shakehead']);
 // stops whatever the friend was doing (a new room, a new friend)
 E.calm = () => { E.actions = []; Life.clearEffects(E); Life.clearFoam(E); const W = E.walk; if (W.resolve){ const f = W.resolve; W.resolve = null; f(); } E.walk = Life.newWalk(); };
 E.act = (name, o = {}) => {
   const r = E.friend; if (!r || !Life.ACTION_NAMES.includes(name)) return;
   if (name !== 'eat') E.actions = E.actions.filter(a => a.name !== name);
+  if (TOUCH_REACTIONS.has(name) && E.walk.target && !E.walk.locked) E.walk.pause = Math.max(E.walk.pause || 0, 1.8);
   const a = { name, t: 0, side: o.side || 1, dur: o.dur || 0 };
   if (name === 'lookback' && r.tail && !o.side){ const tp = new THREE.Vector3(), hp = new THREE.Vector3(); r.tail.getWorldPosition(tp); r.head.getWorldPosition(hp); a.side = tp.x >= hp.x ? 1 : -1; }
   E.actions.push(a);
@@ -240,9 +242,10 @@ E.enter = side => {
 E.wander = async () => {
   if (!E.friend || !E.walkable() || E.walk.target) return;
   const range = E.walkRange();
-  if (range < 0.15) { E.act('lookaround'); return; }
+  // too little room to stroll sideways: a stroll would mostly walk away from the child, so just look around
+  if (range < 0.4) { E.act('lookaround'); return; }
   const side = Math.random() < 0.5 ? -1 : 1;
-  await E.walkTo(side * range * (0.6 + Math.random() * 0.4), -0.25 - Math.random() * 0.2, 0.8);
+  await E.walkTo(side * range * (0.6 + Math.random() * 0.4), -0.1 - Math.random() * 0.12, 0.8);
   if (!E.walkable()) return;
   E.act('lookaround');
   await new Promise(r => setTimeout(r, 2600));
@@ -272,9 +275,9 @@ E.frame = () => {
   const avail = Math.max(120, H - top - bottom);
   const game = E.layout === 'game';
   const small = E.layout === 'small' || game;
-  const share = game ? 0.26 : small ? 0.3 : 0.74;
-  // pixels per world unit at the friend
-  let k = Math.min(avail * share / PRESENCE, W * (small ? 0.4 : 0.92) / (PRESENCE * 1.15));
+  const share = game ? 0.3 : small ? 0.3 : 0.74;
+  // pixels per world unit at the friend (in the action games a little bigger, so the food, rocks and bubbles are easy to see)
+  let k = Math.min(avail * share / PRESENCE, W * (game ? 0.52 : small ? 0.4 : 0.92) / (PRESENCE * 1.15));
   if (E.roomName === 'bath' && !small) k = Math.min(k, W * 0.98 / 2.6);
   if (E.roomName === 'bed' && !small) k = Math.min(k, W * 0.98 / 2.35);
   const fit = E.fit;

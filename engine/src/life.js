@@ -119,7 +119,7 @@ function loveEyes(r){
 }
 
 /* ---------- the walk ---------- */
-export function newWalk(){ return { x: 0, y: 0, z: 0, yaw: 0, target: null, amt: 0, phase: 0, resolve: null, speed: 1, locked: false, run: false }; }
+export function newWalk(){ return { x: 0, y: 0, z: 0, yaw: 0, target: null, amt: 0, phase: 0, resolve: null, speed: 1, locked: false, run: false, pause: 0 }; }
 
 /* ---------- the animator ---------- */
 export function animate(E, dt){
@@ -261,7 +261,9 @@ function walkStep(E, r, dt, W){
   if (W.locked) return;          // a game moves the friend itself
   const rest = r.turn || 0;
   let wantYaw = 0;
-  if (W.target){
+  // touched on the way: stop, turn to the child for a moment, then walk on
+  if (W.pause > 0) W.pause -= dt;
+  else if (W.target){
     const dx = W.target.x - W.x, dz = W.target.z - W.z, dist = Math.hypot(dx, dz);
     if (dist < 0.015){
       W.x = W.target.x; W.z = W.target.z; W.target = null;
