@@ -7,10 +7,12 @@
    by name with E.act(name). Each frame, the state gives a base pose, every running action adds its own offsets on
    top, and the walk adds steps. */
 import * as THREE from 'three';
-import { V, glossy, basic, roundedShape, v2 } from './util.js';
+import { V, glossy, basic, roundedShape, v2, release } from './util.js';
 import { buildItem } from './items.js';
 
 export const ease = (a, b, k) => a + (b - a) * k;
+// takes a food, ball or butterfly out of the scene and frees the shapes only it used
+export function discard(E, obj){ if (!obj) return; if (obj.parent) obj.parent.remove(obj); try { release(obj); } catch (e) {} }
 const clamp01 = u => Math.max(0, Math.min(1, u));
 const sm = u => { u = clamp01(u); return u * u * (3 - 2 * u); };
 const bell = u => Math.sin(Math.PI * clamp01(u));
@@ -343,7 +345,7 @@ export function stars(E, sec){
     g.children.forEach((s, i) => { const a = this.age * 5 + i / n * Math.PI * 2; s.position.set(Math.cos(a) * 0.32, Math.sin(a * 2) * 0.03, Math.sin(a) * 0.32); s.rotation.y = a * 2; s.scale.setScalar(0.06 * k + 0.0001); });
     if (this.age >= sec){ g.parent && g.parent.remove(g); return false; }
     return true;
-  } });
+  }, cancel(){ g.parent && g.parent.remove(g); } });
 }
 
 // where on the friend: the mouth, the nose (same), the top of the head, the middle
@@ -417,7 +419,7 @@ export function feed(E, food, ok, from){
         if (t < 0.95) c.mouth = near ? 0.08 : 0.85;
         else if (t < 1.4){ c.mouth = 0.08 + 0.28 * Math.abs(Math.sin((t - 0.95) * 16)); c.happy = true; c.pitch = Math.sin((t - 0.95) * 16) * 0.03; }
         else if (t < 2.0){ c.mouth = 0.35 * bell(seg(t, 1.4, 2.0)); c.happy = true; c.love = ok === 'love' ? bell(seg(t, 1.4, 2.0)) : 0; if (!this.yum){ this.yum = true; E.cue('yum'); burst(E, 'spark', anchorPos(E, 'head'), 5); } }
-        else { c.done = true; E.scene.remove(holder); res(); return false; }
+        else { c.done = true; discard(E, holder); res(); return false; }
         return true;
       }
       // not this food: the head turns away, the food falls and fades
@@ -426,12 +428,12 @@ export function feed(E, food, ok, from){
       fallV.y -= 6 * dt; holder.position.addScaledVector(fallV, dt); holder.rotation.z += dt * 5;
       if (holder.position.y < 0.12){ holder.position.y = 0.12; fallV.y = Math.abs(fallV.y) * 0.35; fallV.x *= 0.7; fallV.z *= 0.7; }
       if (t > 1.2){
-        if (!this.faded){ this.faded = true; holder.traverse(o => { if (o.material){ o.material = o.material.clone(); o.material.transparent = true; } }); }
+        if (!this.faded){ this.faded = true; holder.traverse(o => { if (o.material){ o.material = o.material.clone(); o.material.userData.shared = false; o.material.transparent = true; } }); }
         holder.traverse(o => { if (o.material) o.material.opacity = Math.max(0, 1 - (t - 1.2) * 2); });
       }
-      if (t > 1.7){ c.done = true; E.scene.remove(holder); res(); return false; }
+      if (t > 1.7){ c.done = true; discard(E, holder); res(); return false; }
       return true;
-    } });
+    }, cancel(){ discard(E, holder); res(); } });
   });
 }
 
@@ -466,9 +468,9 @@ export function ball(E, from){
     }
     const gone = this.age > 4.2;
     if (this.age > 3.6) holder.scale.setScalar(R * Math.max(0.001, 1 - (this.age - 3.6) / 0.6));
-    if (gone){ E.scene.remove(holder); return false; }
+    if (gone){ discard(E, holder); return false; }
     return true;
-  } });
+  }, cancel(){ discard(E, holder); } });
 }
 
 /* A butterfly flutters in, circles around the friend's head (the friend follows it with its eyes), lands on its nose
@@ -515,9 +517,9 @@ export function butterfly(E){
       bf.wings[0].rotation.y = flap; bf.wings[2].rotation.y = flap * 0.8; bf.wings[1].rotation.y = -flap; bf.wings[3].rotation.y = -flap * 0.8;
       root.rotation.y = Math.sin(t * 2) * 0.6;
       E.lookOverride = t < 6.3 ? p : null;
-      if (t >= dur){ E.scene.remove(root); E.lookOverride = null; res(); return false; }
+      if (t >= dur){ discard(E, root); E.lookOverride = null; res(); return false; }
       return true;
-    } });
+    }, cancel(){ discard(E, root); res(); } });
   });
 }
 
@@ -527,12 +529,14 @@ export function updateEffects(E, dt){
   updateParticles(E, dt);
 }
 export function clearEffects(E){
+  const fxs = E.effects.slice();
   E.effects.length = 0;
+  for (const fx of fxs) if (fx.cancel) try { fx.cancel(); } catch (e) {}
   for (const p of E.parts){ E.scene.remove(p.m); p.m.material.dispose(); }
   E.parts.length = 0;
   E.lookOverride = null;
   // remove any food, ball or butterfly still in the scene
-  for (const o of E.scene.children.slice()) if (o.userData.fx) E.scene.remove(o);
+  for (const o of E.scene.children.slice()) if (o.userData.fx) discard(E, o);
 }
 
 /* Foam that stays on the friend where the sponge went, and pops off under the shower. Each puff is a few soft

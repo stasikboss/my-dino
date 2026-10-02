@@ -326,7 +326,7 @@ const Music = {
     this.name = name;
     if (!name || !AC || !musicBus) return;
     this.song = SONGS[name];
-    this.out = AC.createGain(); this.out.gain.value = 0.0001; this.out.connect(musicBus);
+    this.out = AC.createGain(); this.out.gain.setValueAtTime(0.0001, AC.currentTime); this.out.connect(musicBus);
     this.out.gain.exponentialRampToValueAtTime(0.075 * (this.song.vol || 1), AC.currentTime + 1.2);
     this.step = 0; this.loop = 0; this.nextT = AC.currentTime + 0.15;
     this.timer = setInterval(() => this.tick(), 90);

@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { V, glossy, skin, blob, canvasTex } from './util.js';
 import { buildItem } from './items.js';
-import { burst } from './life.js';
+import { burst, discard } from './life.js';
 
 const sm = u => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
 
@@ -35,17 +35,22 @@ function catchGame(E, o){
   const foods = o.foods, eats = new Set(o.diet);
   const items = [];
   const W = E.walk;
-  let score = 0, spawnIn = 1.2, targetX = 0, ended = false, mouthOpen = 0;
+  let score = 0, spawnIn = 1.2, targetX = null, ended = false, mouthOpen = 0, restOff = null, settle = 0;
   W.locked = true; W.x = 0; W.z = 0.2; W.y = 0; W.yaw = 0;
+  const half = friendBox(E).w * 0.45;
   const g = {
     mouth: 0,
     items,
-    pointer(type, x){ const p = E.screenToWorld(x, innerHeight * 0.6, W.z); if (p){ const v = view(E); targetX = Math.max(v.left + 0.35, Math.min(v.right - 0.35, p.x)); } },
+    pointer(type, x){ const p = E.screenToWorld(x, innerHeight * 0.6, W.z); if (p) targetX = p.x; },
     update(dt){
       const v = view(E);
       const rest = E.friend.turn || 0;
+      // where the mouth is, side to side, when the friend stands facing the child: the finger moves the MOUTH under
+      // the food (a long friend like the Ankylosaurus has its head well to one side of its middle)
+      if (restOff == null && ++settle > 2) restOff = mouthPos(E).x - W.x;
+      const goal = targetX == null ? W.x : Math.max(v.left + half, Math.min(v.right - half, targetX - (restOff || 0)));
       // walk toward the finger
-      const dx = targetX - W.x;
+      const dx = goal - W.x;
       if (Math.abs(dx) > 0.03){
         const step = Math.sign(dx) * Math.min(Math.abs(dx), 2.6 * dt);
         W.x += step;
@@ -100,13 +105,13 @@ function catchGame(E, o){
           if (it.age > 1.2) it.m.scale.multiplyScalar(0.85);
           if (it.age > 1.6) it.dead = true;
         }
-        if (it.dead) E.scene.remove(it.m);
+        if (it.dead) discard(E, it.m);
       }
       for (let i = items.length - 1; i >= 0; i--) if (items[i].dead) items.splice(i, 1);
       mouthOpen += (wantOpen - mouthOpen) * Math.min(1, dt * 10);
       g.mouth = mouthOpen * 0.9;
     },
-    stop(){ for (const it of items) E.scene.remove(it.m); items.length = 0; }
+    stop(){ for (const it of items) discard(E, it.m); items.length = 0; }
   };
   return g;
 }
@@ -188,16 +193,17 @@ function jumpGame(E, o){
             if (o.onScore) o.onScore(score);
             if (score >= o.goal && !ended){ ended = true; W.run = false; setTimeout(() => o.onDone && o.onDone(), 900); }
           }
-        } else if (!t.hit && Math.abs(t.m.position.x - fx) < fb.w * 0.3 && W.y < 0.3){
+        } else if (!t.hit && Math.abs(t.m.position.x - fx) < Math.min(fb.w * 0.3, 0.3) && W.y < 0.3){
+          // (a narrow window: a long friend like the Ankylosaurus can still clear a rock with a well-timed jump)
           t.hit = true; stumble = 0.5; E.act('shakehead'); E.cue('bump');
         }
         if (t.m.position.x < v.left - 0.6) t.dead = true;
-        if (t.dead) E.scene.remove(t.m);
+        if (t.dead) discard(E, t.m);
       }
       for (let i = things.length - 1; i >= 0; i--) if (things[i].dead) things.splice(i, 1);
       g.mouth = W.y > 0.05 ? 0.5 : 0;
     },
-    stop(){ for (const t of things) E.scene.remove(t.m); things.length = 0; W.run = false; }
+    stop(){ for (const t of things) discard(E, t.m); things.length = 0; W.run = false; }
   };
   return g;
 }
@@ -250,7 +256,7 @@ function bubblesGame(E, o){
         if (d < rad && d < bd){ bd = d; best = b; }
       }
       if (!best) return;
-      best.dead = true; E.scene.remove(best.m);
+      best.dead = true; discard(E, best.m);
       burst(E, 'bubble', best.m.position.clone(), 6); burst(E, 'spark', best.m.position.clone(), 4);
       E.cue('pop');
       look = best.m.position.clone(); lookT = 1.2;
@@ -276,12 +282,12 @@ function bubblesGame(E, o){
         b.m.position.y += b.vy * dt;
         b.m.position.x += Math.sin(b.age * 1.6 + b.ph) * 0.25 * dt;
         const k = 1 + Math.sin(b.age * 5 + b.ph) * 0.04; b.m.scale.set(b.r * k, b.r / k, b.r);
-        if (b.m.position.y > v.top + 0.4){ b.dead = true; E.scene.remove(b.m); }
+        if (b.m.position.y > v.top + 0.4){ b.dead = true; discard(E, b.m); }
       }
       for (let i = list.length - 1; i >= 0; i--) if (list[i].dead) list.splice(i, 1);
       if (lookT > 0){ lookT -= dt; E.lookOverride = look; g.mouth = 0.5 * Math.min(1, lookT * 2); } else { E.lookOverride = null; g.mouth = 0; }
     },
-    stop(){ for (const b of list) E.scene.remove(b.m); list.length = 0; E.lookOverride = null; }
+    stop(){ for (const b of list) discard(E, b.m); list.length = 0; E.lookOverride = null; }
   };
   return g;
 }

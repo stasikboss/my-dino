@@ -92,7 +92,8 @@ function closeGame(){
   gameOn = null; gameToken++;
   gameEl.hidden = true;
   document.body.classList.remove('in-game', 'in-game3d');
-  if (World.on) World.E.stopGame();
+  // stop a 3D game even if 3D was switched off meanwhile, so it doesn't come back when 3D does
+  if (World.E) try { World.E.stopGame(); } catch (e) {}
   gameBody.textContent = '';
   stopSpeech();
   inPlay = true;
@@ -185,6 +186,8 @@ function start3d(id){
       } });
     sayP('bubblesHello', null, 9).then(ask);
   }
+  // the engine could not start it (no friend drawn yet): back to the games rather than an empty meadow
+  if (!World.E.game) closeGame();
 }
 // taps on the 3D picture go to the game
 World.canvas.addEventListener('pointerdown', e => { if (gameOn && World.on && document.body.classList.contains('in-game3d')){ initAudio(); World.E.gamePointer('down', e.clientX, e.clientY); } });

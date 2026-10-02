@@ -15,7 +15,14 @@ function earnSticker(){
   stickers.push(st.id); saveStickers();
   return showReveal(st).then(() => st);
 }
+// one reveal at a time: a second sticker (growing up and a gift together) waits for the first to close
+let revealChain = Promise.resolve();
 function showReveal(st){
+  const p = revealChain.then(() => revealNow(st));
+  revealChain = p.catch(() => {});
+  return p;
+}
+function revealNow(st){
   return new Promise(res => {
     revealEl.textContent = '';
     const card = document.createElement('div'); card.className = 'reveal-card'; card.dir = 'rtl';
@@ -24,7 +31,8 @@ function showReveal(st){
     revealEl.hidden = false;
     sfx.hatch();
     FX.emit('confetti', innerWidth / 2, innerHeight * 0.35, 46, { speed: 360, g: 420, size: 11 });
-    const done = () => { if (revealEl.hidden) return; revealEl.hidden = true; revealEl.onclick = null; clearTimeout(timer); res(); };
+    let closed = false;
+    const done = () => { if (closed) return; closed = true; revealEl.hidden = true; revealEl.onclick = null; clearTimeout(timer); res(); };
     const timer = setTimeout(done, 5200);
     setTimeout(() => { revealEl.onclick = () => { initAudio(); sfx.tap(); done(); }; }, 600);
     sayP(stickers.length === STICKERS.length ? 'allStickers' : 'newSticker', { st: { he: st.he, ru: st.ru, en: st.en } }, 9);

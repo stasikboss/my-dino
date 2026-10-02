@@ -51,6 +51,8 @@ const World = {
     this.canvas.hidden = true;
     document.body.classList.remove('three');
     if (!was) return;
+    // a game played in 3D can't go on flat: back to the games
+    if (gameOn && document.body.classList.contains('in-game3d')) try { closeGame(); } catch (e) {}
     // redraw everything that was drawn in 3D with the flat drawings
     try {
       if (Pet.sp) Pet.mount(Pet.sp);

@@ -798,3 +798,6 @@ body.theme-1 .room[data-room="home"]{--wall:#e3f6ea;--wall2:#c3eacf;--wains:#a8d
 body.theme-2 .room[data-room="home"]{--wall:#e0f0ff;--wall2:#bddcfb;--wains:#a9cdef;--wains2:#7fb1e0}
 body.theme-3 .room[data-room="home"]{--wall:#efe8ff;--wall2:#d8cbff;--wains:#c9b8f5;--wains2:#a993ea}
 body.theme-4 .room[data-room="home"]{--wall:#fff5cc;--wall2:#ffe592;--wains:#ffd970;--wains2:#f2bf3c}
+/* pictures of friends sit as blocks, so a flat drawing and the 3D picture that replaces it take exactly the same room
+   (inline, the drawing left a few pixels of text line under it, and the cards jumped when the pictures arrived) */
+.friend .fb .pet,.g-pick .pet,.g-target .pet,.start-pet .pet,.night-pet .pet,.album-tab .pet,.dig-area .fossil .pet{display:block}

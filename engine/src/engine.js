@@ -214,7 +214,7 @@ E.celebrate = () => {
     r.inner.scale.setScalar(k0 * m);
     if (u >= 1){ r.inner.scale.setScalar(k0); return false; }
     return true;
-  } });
+  }, cancel(){ if (E.friend === r) r.inner.scale.setScalar(k0); } });
 };
 // walking happens on the floor of the home and the kitchen
 E.walkable = () => E.roomName === 'home' || E.roomName === 'kitchen';
@@ -455,7 +455,8 @@ E.hit = (x, y) => {
     let o = h.object, part = null, head = false;
     while (o){ if (!part && o.userData.part) part = o.userData.part; if (o === r.head) head = true; o = o.parent; }
     if (!h.object.visible) continue;
-    return { part: part || 'belly', head: head || HEAD_PARTS.has(part), point: h.point, object: h.object };
+    // the eyes and a hat have no part of their own: they belong to the head
+    return { part: part || (head ? 'head' : 'belly'), head: head || HEAD_PARTS.has(part), point: h.point, object: h.object };
   }
   return null;
 };

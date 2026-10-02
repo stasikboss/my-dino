@@ -170,7 +170,7 @@ const ROOM_SETUP = {
   kitchen(){
     setTray(FOOD_ORDER.map(f => trayButton(f, FOOD_ART[f], FOODS[f].he, { drag: {
       end: (d, x, y, tap) => {
-        if (World.on && eating) return false;
+        if (World.on && isEating()) return false;
         if (tap){ if (World.on){ hideGhost(); feed(f); return true; } const m = Pet.mouth(); flyGhostTo(d, m.x, m.y, () => { hideGhost(); feed(f); }); return true; }
         if (Pet.nearMouth(x, y) || Pet.hit(x, y)){ hideGhost(); feed(f, { x, y }); return true; }
         return false;
@@ -287,15 +287,18 @@ function markCountBadge(){
   }
 }
 function clearCountBadge(){ for (const b of trayEl.querySelectorAll('.badge')) b.remove(); for (const b of trayEl.querySelectorAll('.glow')) b.classList.remove('glow'); }
-let eating = false;
+// while the friend eats in 3D, the next food waits; the time limit is a safety net, so feeding can never get stuck
+let eatingUntil = 0;
+const isEating = () => performance.now() < eatingUntil;
+function startEating(p){ const until = eatingUntil = performance.now() + 4000; p.then(() => { if (eatingUntil === until) eatingUntil = 0; }); }
 function feed(f, from){
   const sp = Pet.sp;
   const m = Pet.mouth();
   lastTouch = performance.now();
-  if (World.on && eating) return;
+  if (World.on && isEating()) return;
   if (!DIET[sp].includes(f)){
     sfx.nope();
-    if (World.on){ eating = true; World.E.feed(f, false, from).then(() => { eating = false; }); } else Pet.flash('shake', 520);
+    if (World.on) startEating(World.E.feed(f, false, from)); else Pet.flash('shake', 520);
     say('wrongFood', { food: FOODS[f], foodAcc: { he: FOODS[f].he, ru: FOODS[f].ruAcc, en: FOODS[f].en }, diet: DIET_TEXT[sp] }, 7);
     for (const g of DIET[sp]) glowTray(g, true);
     setTimeout(() => { if (!countGame) for (const g of DIET[sp]) glowTray(g, false); }, 3500);
@@ -307,8 +310,7 @@ function feed(f, from){
   }
   if (World.on){
     // the food goes into the mouth and is eaten bite by bite; sometimes it's a favorite and the eyes turn to hearts
-    eating = true;
-    World.E.feed(f, Math.random() < 0.3 ? 'love' : true, from).then(() => { eating = false; });
+    startEating(World.E.feed(f, Math.random() < 0.3 ? 'love' : true, from));
   } else {
     Pet.chew(900); sfx.chomp(); sfx.yum();
     FX.emit('crumb', m.x, m.y, 8, { color: f === 'meat' ? '#d9573f' : f === 'fish' ? '#9fdcff' : f === 'fruit' ? '#ff4b5c' : '#5cbf55', speed: 120, g: 500, size: 7 });

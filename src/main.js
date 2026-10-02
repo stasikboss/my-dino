@@ -99,7 +99,11 @@ const BASKET_SVG = `<svg viewBox="0 0 100 110"><ellipse cx="50" cy="102" rx="40"
   <g fill="#fff"><circle cx="34" cy="48" r="3"/><circle cx="52" cy="46" r="3"/><circle cx="70" cy="50" r="3"/></g></svg>`;
 const eggWrap = $('egg-wrap');
 async function runIntro(sp){
-  stopSpeech();
+  stopSpeech(); stopMic(); closeWardrobe();
+  // hatching a new friend from the home: the room, its buttons, the clock and the gift step aside, and nothing ticks
+  inPlay = false;
+  hudEl.hidden = true; trayEl.hidden = true; navEl.hidden = true; clockEl.hidden = true; gamesEl.hidden = true; albumEl.hidden = true;
+  placeGift();
   startEl.hidden = true; chooseEl.hidden = true; nightEl.hidden = true;
   introEl.hidden = false;
   Music.play('hatch');
@@ -200,6 +204,7 @@ function beginSession(justHatched){
 }
 function showStart(){
   inPlay = false;
+  placeGift();
   Music.play('theme');
   hudEl.hidden = true; trayEl.hidden = true; navEl.hidden = true; clockEl.hidden = true;
   gamesEl.hidden = true; albumEl.hidden = true;
@@ -223,6 +228,7 @@ function startBedtime(){
 function showNight(){
   if (!bedtime) return;
   inPlay = false;
+  placeGift();
   stopLullaby();
   Music.stop();
   releaseAwake();
@@ -528,10 +534,11 @@ function idle(now){
   if (World.on && World.E.busyActing()) return;
   const walkRoom = room === 'home' || room === 'kitchen';
   if (room === 'play' || room === 'album') return;
-  const choices = World.on
-    ? [['wander', walkRoom ? 3 : 0], ['dance', 1.4], ['yawn', room === 'bed' ? 2 : 0.8], ['lookaround', 1.6], ['stretch', 0.8], ['wave', 1], ['excited', 1.2],
+  const lively = !bedtime && room !== 'bath';
+  const choices = bedtime ? [['yawn', 2], ['stretch', 1]] : World.on
+    ? [['wander', walkRoom ? 3 : 0], ['dance', lively ? 1.4 : 0], ['yawn', room === 'bed' ? 2 : 0.8], ['lookaround', 1.6], ['stretch', 0.8], ['wave', 1], ['excited', 1.2],
        ['butterfly', room === 'home' && now - lastButterfly > 150000 ? 1.4 : 0]]
-    : [['tilt', 2], ['excited', 1.5], ['hop', 1.2], ['look', 1.2], ['dance', 0.8], ['yawn', 0.6]];
+    : [['tilt', 2], ['excited', 1.5], ['hop', lively ? 1.2 : 0], ['look', 1.2], ['dance', lively ? 0.8 : 0], ['yawn', 0.6]];
   let sum = choices.reduce((a, c) => a + c[1], 0), x = Math.random() * sum, pick = choices[0][0];
   for (const [n, w] of choices){ x -= w; if (x <= 0){ pick = n; break; } }
   if (pick === 'wander') World.E.wander();

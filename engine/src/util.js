@@ -245,7 +245,8 @@ export function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x
    (cached materials, the common sphere) that other models still use. */
 export function release(obj){
   obj.traverse(o => {
-    if (o.geometry && !o.geometry.userData.shared) o.geometry.dispose();
+    // a sprite's geometry is one shared by all sprites, so it stays
+    if (o.geometry && !o.geometry.userData.shared && !o.isSprite) o.geometry.dispose();
     const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
     for (const m of ms) if (!m.userData.shared) m.dispose();
   });
