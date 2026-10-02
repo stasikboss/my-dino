@@ -7,6 +7,15 @@ const Pet = {
     this.sp = sp;
     const d = petData(sp);
     this.stage = stageOf(sp);
+    if (World.on){
+      // in 3D the friend is drawn by the engine; this element only carries the state classes it reads
+      stageEl.textContent = '';
+      World.E.setPet(sp, { stage: this.stage, outfit: d.outfit });
+      this.el = World.stateEl;
+      this.el.className = sleeping ? 'sleep' : '';
+      this.pupils = []; this.eyeEls = [];
+      return;
+    }
     stageEl.innerHTML = petSvg(sp, { stage: this.stage, outfit: d.outfit });
     this.el = stageEl.firstElementChild;
     this.pupils = Array.from(this.el.querySelectorAll('.pupil'));
@@ -37,14 +46,26 @@ const Pet = {
   },
   headTop(){
     if (!this.sp) return { x: innerWidth / 2, y: innerHeight * 0.35 };
+    if (World.on) return World.E.project('headTop');
     const h = SPECIES[this.sp].hat;
     return this.toScreen(h[0], h[1] - 6, true);
   },
-  mouth(){ const m = SPECIES[this.sp].mouth; return this.toScreen(m[0], m[1], true); },
-  center(){ return this.toScreen(120, 150); },
+  mouth(){ if (World.on) return World.E.project('mouth'); const m = SPECIES[this.sp].mouth; return this.toScreen(m[0], m[1], true); },
+  center(){ if (World.on) return World.E.project('center'); return this.toScreen(120, 150); },
+  // the friend's box on screen (for sizes and generous touch areas)
+  box(){
+    if (World.on){ const b = World.E.bounds(); return { left: b.left, top: b.top, width: b.right - b.left, height: b.bottom - b.top }; }
+    const r = stageEl.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height };
+  },
   // is a screen point on the pet? (a generous oval around its body)
   hit(px, py, pad = 0){
     if (!this.el || stageEl.classList.contains('gone')) return false;
+    if (World.on){
+      if (World.E.hit(px, py)) return true;
+      if (!pad) return false;
+      const b = World.E.bounds();
+      return px > b.left - pad && px < b.right + pad && py > b.top - pad && py < b.bottom + pad;
+    }
     const r = stageEl.getBoundingClientRect();
     const sc = STAGE_SCALE[this.stage];
     const cx = r.left + r.width / 2, cy = r.top + r.height * (1 - 0.5 * sc * 0.82);
@@ -54,15 +75,17 @@ const Pet = {
   },
   nearMouth(px, py, radius){
     const m = this.mouth();
-    return Math.hypot(px - m.x, py - m.y) < (radius || Math.max(60, stageEl.getBoundingClientRect().width * 0.2));
+    return Math.hypot(px - m.x, py - m.y) < (radius || Math.max(60, this.box().width * 0.2));
   },
   partAt(px, py){
+    if (World.on){ const h = World.E.hit(px, py); return h && PART_NAMES[h.part] ? h.part : null; }
     const p = this.toStage(px, py);
     let best = null, bd = 1e9;
     for (const [x, y, name] of PARTS[this.sp]){ const d = Math.hypot(p.x - x, p.y - y); if (d < bd){ bd = d; best = name; } }
     return best;
   },
   isHead(px, py){
+    if (World.on){ const h = World.E.hit(px, py); return !!(h && h.head); }
     const p = this.toStage(px, py);
     const h = SPECIES[this.sp].hat, m = SPECIES[this.sp].mouth;
     return p.y < (h[1] + m[1]) / 2 + 26 && Math.abs(p.x - h[0]) < 70;
@@ -71,7 +94,16 @@ const Pet = {
     if (!this.el) return;
     const el = this.el;
     clearTimeout(this.flashTimers[cls]);
-    el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls);
+    el.classList.remove(cls);
+    if (World.on){
+      // the engine starts a motion when it sees the class appear, so it must see one frame without it first
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.classList.add(cls);
+        this.flashTimers[cls] = setTimeout(() => el.classList.remove(cls), ms);
+      }));
+      return;
+    }
+    void el.getBoundingClientRect(); el.classList.add(cls);
     this.flashTimers[cls] = setTimeout(() => el.classList.remove(cls), ms);
   },
   expr(name, ms){
@@ -101,6 +133,7 @@ const Pet = {
   },
   look(px, py){
     if (!this.el || this.el.classList.contains('sleep')) return;
+    if (World.on){ World.E.lookAt(px, py); return; }
     const r = SPECIES[this.sp].eyes[2];
     for (let i = 0; i < this.pupils.length; i++){
       const e = SPECIES[this.sp].eyes[i];
@@ -112,9 +145,13 @@ const Pet = {
       this.pupils[i].setAttribute('transform', `translate(${(dx / d * m).toFixed(1)} ${(dy / d * m).toFixed(1)})`);
     }
   },
-  lookHome(){ for (const p of this.pupils || []) p.setAttribute('transform', 'translate(0 0)'); },
+  lookHome(){ if (World.on){ World.E.lookAt(null); return; } for (const p of this.pupils || []) p.setAttribute('transform', 'translate(0 0)'); },
   blink(){ if (this.el && !this.el.classList.contains('sleep') && !this.el.classList.contains('happy')) this.flash('blink', 130); },
-  wear(outfit){ petData(this.sp).outfit = outfit; savePets(); this.refresh(); this.expr('happy', 1200); this.flash('hop', 600); }
+  wear(outfit){
+    petData(this.sp).outfit = outfit; savePets();
+    if (World.on) World.E.setOutfit(outfit); else this.refresh();
+    this.expr('happy', 1200); this.flash('hop', 600);
+  }
 };
 
 /* ---------- particles: hearts, bubbles, sparkles, crumbs, drops, z's, music notes, confetti ---------- */

@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;height:100%;overflow:hidden;background:#000}canvas{position:fixed;inset:0;display:block}
+.ui{position:fixed;left:0;right:0;bottom:0;height:168px;border-top:2px dashed rgba(255,0,0,.4)}</style></head>
+<body><canvas id="c"></canvas><div class="ui"></div><div id="st" class=""></div><div id="stage"></div><script src="engine.js"></script>
+<script>
+const E = window.DinoEngine;
+E.init(document.getElementById('c'), {});
+E.setStateEl(document.getElementById('st'));
+E.setStageEl(document.getElementById('stage'));
+E.setSafe(80, 168);
+window.show = (room, sp, o) => { E.setRoom(room); E.setPet(sp, o || {}); E.frame(); };
+</script></body></html>

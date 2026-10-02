@@ -48,7 +48,7 @@ function pickBtn(sp, cls = 'g-pick'){
   const b = document.createElement('button');
   b.type = 'button'; b.className = cls; b.dataset.sp = sp;
   b.setAttribute('aria-label', PET_NAMES[sp].he);
-  b.innerHTML = petSvg(sp, { stage: 2 });
+  b.append(friendPic(sp, { size: 220 }));
   return b;
 }
 function tapOnce(btns){
@@ -114,7 +114,7 @@ async function gameEats(tok){
     const others = SPECIES_ORDER.filter(s => !DIET[s].includes(f));
     const yes = pick(eaters), no = pick(others);
     const col = document.createElement('div'); col.className = 'g-col';
-    const food = document.createElement('div'); food.className = 'g-food pop-in'; food.innerHTML = FOOD_ART[f];
+    const food = document.createElement('div'); food.className = 'g-food pop-in'; food.append(itemPic(f, FOOD_ART[f], 170));
     const row = document.createElement('div'); row.className = 'g-row';
     const cards = shuffle([yes, no]).map(s => pickBtn(s));
     row.append(...cards);
@@ -160,7 +160,7 @@ async function gameShadow(tok){
     const target = order[r % order.length];
     const opts3 = shuffle([target, ...shuffle(SPECIES_ORDER.filter(s => s !== target)).slice(0, profile.age <= 3 ? 1 : 2)]);
     const col = document.createElement('div'); col.className = 'g-col';
-    const sh = document.createElement('div'); sh.className = 'g-target shadow pop-in'; sh.innerHTML = petSvg(target, { stage: 2 });
+    const sh = document.createElement('div'); sh.className = 'g-target shadow pop-in'; sh.append(friendPic(target, { size: 300 }));
     const row = document.createElement('div'); row.className = 'g-row' + (opts3.length === 3 ? ' three' : '');
     const cards = opts3.map(s => pickBtn(s));
     row.append(...cards);
@@ -210,7 +210,7 @@ async function gameEgg(tok){
     if (!alive(tok)) return;
     const sp = order[r];
     const col = document.createElement('div'); col.className = 'g-col';
-    const t = document.createElement('div'); t.className = 'g-target pop-in'; t.innerHTML = petSvg(sp, { stage: 0 });
+    const t = document.createElement('div'); t.className = 'g-target pop-in'; t.append(friendPic(sp, { stage: 0, pose: 'happy', size: 300 }));
     const row = document.createElement('div'); row.className = 'g-row';
     const egg = document.createElement('button'); egg.type = 'button'; egg.className = 'choice-btn'; egg.dataset.k = 'egg'; egg.innerHTML = EGG_SVG + '<span dir="rtl">ביצה</span>';
     const born = document.createElement('button'); born.type = 'button'; born.className = 'choice-btn'; born.dataset.k = 'born'; born.innerHTML = BORN_SVG + '<span dir="rtl">נולד</span>';
@@ -303,8 +303,15 @@ async function gameDig(tok){
     const col = document.createElement('div'); col.className = 'g-col';
     const area = document.createElement('div'); area.className = 'dig-area';
     area.innerHTML = `<svg class="cracks" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 30 L20 34 L34 26 L60 36 L100 28 M0 74 L30 70 L52 80 L80 72 L100 78 M40 0 L44 18 M72 100 L68 84" fill="none" stroke="#7a5a32" stroke-width=".8"/></svg>
-      <div class="fossil">${petSvg(sp, { stage: 2 })}</div><canvas></canvas>
+      <div class="fossil"></div><canvas></canvas>
       <svg class="sweep" viewBox="0 0 64 64">${TOOL_ART.brush.replace(/<\/?svg[^>]*>/g, '')}</svg>`;
+    const fos = area.querySelector('.fossil');
+    if (World.on){
+      // in 3D the fossil is a picture; it wakes up by fading to a picture of the friend awake
+      const a1 = document.createElement('div'); a1.className = 'f-sleep'; a1.append(friendPic(sp, { pose: 'sleep', size: 420 }));
+      const a2 = document.createElement('div'); a2.className = 'f-awake'; a2.append(friendPic(sp, { pose: 'happy', size: 420 }));
+      fos.append(a1, a2);
+    } else fos.append(friendPic(sp, { pose: 'sleep', size: 420 }));
     col.append(area);
     gameBody.textContent = ''; gameBody.append(col);
     if (r === 0) say('digHello', null, 9);
@@ -383,7 +390,8 @@ function renderAlbum(){
     b.type = 'button'; b.className = 'album-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(sp === albumSp));
     b.setAttribute('aria-label', PET_NAMES[sp].he);
     b.style.setProperty('--c', mix(SPECIES[sp].c.body, 'w', 0.62));
-    b.innerHTML = petSvg(sp, { stage: 2 }) + `<span class="count">${factCount(sp)}/6</span>`;
+    b.append(friendPic(sp, { size: 84 }));
+    b.insertAdjacentHTML('beforeend', `<span class="count">${factCount(sp)}/6</span>`);
     b.addEventListener('click', () => { initAudio(); sfx.tap(); albumSp = sp; renderAlbum(); sayFrom(LINES.pickFriend, { sp }, 5); });
     tabs.append(b);
   }

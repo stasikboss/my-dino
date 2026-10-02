@@ -1,0 +1,14 @@
+{
+  "name": "my-dino-engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The 3D engine of My Dino: rooms, friends and pictures drawn with three.js. Built into ../engine.js.",
+  "scripts": {
+    "build": "node dev/build-engine.mjs --min",
+    "dev": "node dev/build-engine.mjs && node dev/build-preview.mjs"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "three": "^0.186.1"
+  }
+}

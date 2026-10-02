@@ -77,11 +77,11 @@ const navBtns = {};
 for (const r of ROOMS){
   const b = document.createElement('button');
   b.type = 'button'; b.className = 'nav-btn'; b.setAttribute('aria-label', ROOM_LABEL[r]);
-  b.innerHTML = ROOM_ICON[r];
   b.addEventListener('click', () => { initAudio(); sfx.tap(); setRoom(r); });
   navEl.append(b);
   navBtns[r] = b;
 }
+function renderNavIcons(){ for (const r of ROOMS){ navBtns[r].textContent = ''; navBtns[r].append(itemPic(r, ROOM_ICON[r], 46)); } }
 const navGlowTimers = {};
 function glowNav(r, ms){
   const b = navBtns[r]; if (!b) return;
@@ -100,8 +100,8 @@ function renderNav(){
 function trayButton(id, art, label, handlers){
   const b = document.createElement('button');
   b.type = 'button'; b.className = 'tray-btn'; b.dataset.id = id; b.setAttribute('aria-label', label);
-  b.innerHTML = art;
-  const item = { id, art };
+  b.append(itemPic(id === 'friends' ? 'egg' : id, art, 88));
+  const item = { id, get art(){ return artOf(b, art); } };
   if (handlers.tap && !handlers.drag){
     b.addEventListener('click', () => { initAudio(); handlers.tap(b); });
   } else {
@@ -129,6 +129,7 @@ function setRoom(r, quiet){
   if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
   roomEl.dataset.room = r;
+  World.room(r);
   stageEl.classList.toggle('in-tub', r === 'bath');
   stageEl.classList.toggle('small', r === 'play');
   stageEl.classList.toggle('gone', r === 'album');
@@ -199,24 +200,26 @@ const ROOM_SETUP = {
 
 /* ---------- touching the pet ---------- */
 let lastPatTalk = 0, rubDist = 0;
-stageEl.addEventListener('pointerdown', e => {
+function petDown(e, onCanvas){
   if (drag || !inPlay || !Pet.el) return;
+  if (onCanvas !== World.on) return;
+  if (onCanvas && !Pet.hit(e.clientX, e.clientY, 18)) return;
   initAudio();
   lastTouch = performance.now();
   const x = e.clientX, y = e.clientY;
   if (sleeping){ FX.emit('z', x, y - 20, 1, { size: 18 }); return; }
   rubDist = 0;
   stageEl._down = { x, y, t: performance.now() };
-  try { stageEl.setPointerCapture(e.pointerId); } catch (err) {}
-});
-stageEl.addEventListener('pointermove', e => {
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+}
+function petMove(e){
   if (!stageEl._down || drag) return;
   const d = stageEl._down;
   const dist = Math.hypot(e.clientX - d.x, e.clientY - d.y);
   rubDist += dist; d.x = e.clientX; d.y = e.clientY;
   if (rubDist > 70){ rubDist = 0; FX.emit('heart', e.clientX, e.clientY, 1, { speed: 60, size: 12 }); addNeed('fun', 1); if (Math.random() < 0.3) sfx.giggle(); Pet.expr('happy', 900); }
-});
-stageEl.addEventListener('pointerup', e => {
+}
+function petUp(e){
   const d = stageEl._down; stageEl._down = null;
   if (!d || drag || sleeping) return;
   if (performance.now() - d.t > 500) return;
@@ -230,7 +233,13 @@ stageEl.addEventListener('pointerup', e => {
   }
   addNeed('fun', 3);
   if (performance.now() - lastPatTalk > 7000){ lastPatTalk = performance.now(); say('pat', null, 2); }
-});
+}
+stageEl.addEventListener('pointerdown', e => petDown(e, false));
+stageEl.addEventListener('pointermove', petMove);
+stageEl.addEventListener('pointerup', petUp);
+World.canvas.addEventListener('pointerdown', e => petDown(e, true));
+World.canvas.addEventListener('pointermove', petMove);
+World.canvas.addEventListener('pointerup', petUp);
 
 /* ---------- kitchen ---------- */
 let countGame = null;
@@ -429,13 +438,15 @@ async function potty(){
   lastTouch = performance.now();
   await sayP('potty', null, 9);
   if (room !== 'bath'){ bath.busy = false; return; }
-  stallEl.hidden = false; stallEl.classList.add('open');
-  void stallEl.offsetWidth;
-  stallEl.classList.remove('open'); sfx.whoosh();
+  // a door closes in front of the friend (in 3D, the shower curtain), then opens again
+  const three = World.on;
+  const close = on => { if (three && World.on) World.E.setCurtain(on); else if (!three){ stallEl.classList.toggle('open', !on); } };
+  if (!three){ stallEl.hidden = false; stallEl.classList.add('open'); void stallEl.offsetWidth; }
+  close(true); sfx.whoosh();
   await wait(1300); sfx.plop();
   await wait(900); sfx.flush();
   await wait(1700);
-  stallEl.classList.add('open'); sfx.whoosh();
+  close(false); sfx.whoosh();
   Pet.expr('happy', 1500); Pet.flash('hop', 600);
   await wait(500); stallEl.hidden = true;
   bath.busy = false;
@@ -455,6 +466,7 @@ function goSleep(){
   if (bedtime && !teethToday){ say('bedBrush', null, 9); glowTray('brush'); return; }
   sleeping = true; sleepAt = performance.now();
   roomEl.classList.add('dark'); document.body.classList.add('lights-off');
+  if (World.on){ World.E.setDark(true); World.E.setBlanket(true); }
   Pet.setSleep(true); Pet.talk(false); Pet.lookHome();
   blanketEl.classList.remove('off');
   glowTray('lamp', false);
@@ -475,6 +487,7 @@ function wakeUp(quiet){
   sleeping = false;
   stopLullaby();
   roomEl.classList.remove('dark'); document.body.classList.remove('lights-off');
+  if (World.on){ World.E.setDark(false); World.E.setBlanket(false); }
   Pet.setSleep(false);
   blanketEl.classList.add('off');
   if (!quiet){ sfx.stretch(); Pet.flash('hop', 600); Pet.expr('happy', 1400); stopSpeech(); say('wake', null, 6); }
@@ -528,7 +541,7 @@ function openWardrobe(){
     const have = id === 'none' || owned.includes(id);
     if (!have) b.classList.add('locked');
     b.setAttribute('aria-pressed', String(cur === id));
-    b.innerHTML = outfitPreview(id);
+    if (id === 'none') b.innerHTML = outfitPreview(id); else b.append(itemPic('hat:' + id, outfitPreview(id), 80));
     b.addEventListener('click', () => {
       initAudio();
       if (!have){ sfx.nope(); say('lockedHat', null, 6); glowNav('play', 5000); return; }
@@ -539,9 +552,11 @@ function openWardrobe(){
     });
     outfitsEl.append(b);
   }
+  const was = wardrobeEl.hidden;
   wardrobeEl.hidden = false;
+  if (was) World.layout(true);
 }
-function closeWardrobe(){ wardrobeEl.hidden = true; }
+function closeWardrobe(){ if (wardrobeEl.hidden) return; wardrobeEl.hidden = true; World.layout(true); }
 $('wardrobe-close').addEventListener('click', closeWardrobe);
 
 /* Say it back: the child talks, the pet repeats it in a funny high voice. Recording is held in memory only for the

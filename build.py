@@ -46,7 +46,7 @@ floors = persp_floor('wood') + persp_floor('tile')
 room = (src / 'room.html').read_text().replace('${SUN_RAYS}', rays).replace('${RUG_FRINGE}', fringe).replace('${STARS}', ''.join(stars)).replace('${FLOORS}', floors)
 body = (src / 'body.html').read_text().replace('${ROOM}', room).replace('${TUB_FOAM}', foam).replace('${TUB_SHINE}', shine).replace('${QUILT_DOTS}', quilt)
 assert '${' not in body, body[body.index('${'):body.index('${') + 40]
-js = '\n'.join((src / f).read_text() for f in ['art.js', 'content.js', 'core.js', 'pet.js', 'rooms.js', 'games.js', 'main.js'])
+js = '\n'.join((src / f).read_text() for f in ['art.js', 'content.js', 'core.js', 'pet.js', 'world.js', 'rooms.js', 'games.js', 'main.js'])
 css = (src / 'style.css').read_text()
 html = f"""<!doctype html>
 <html lang="he" dir="rtl">
@@ -72,6 +72,7 @@ html = f"""<!doctype html>
 </head>
 <body>
 {body}
+<script src="engine.js"></script>
 <script>
 (() => {{
 'use strict';
@@ -107,7 +108,7 @@ print('play.html', len(html.encode()), 'bytes')
 
 # offline list for the service worker, with a version that changes whenever a file changes
 import hashlib, json
-assets = ['./', 'index.html', 'play.html', 'manifest.webmanifest', 'qr.js', 'og.jpg']
+assets = ['./', 'index.html', 'play.html', 'engine.js', 'manifest.webmanifest', 'qr.js', 'og.jpg']
 assets += sorted('fonts/' + p.name for p in (root / 'fonts').glob('*') if p.suffix in ('.woff2', '.css'))
 assets += sorted('icons/' + p.name for p in (root / 'icons').glob('*.png'))
 assets += sorted('screens/' + p.name for p in (root / 'screens').glob('*.jpg'))

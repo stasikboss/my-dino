@@ -1,3 +1,6 @@
-dev/
+/dev/
 __pycache__/
-engine/
+engine/node_modules/
+engine/dev/*.png
+engine/dev/engine.js
+engine/dev/preview.js

@@ -16,9 +16,9 @@ function renderStart(){
   document.title = titleText();
   const lock = lockReason();
   const sp = current;
-  startPet.innerHTML = sp ? petSvg(sp, { stage: stageOf(sp), outfit: petData(sp).outfit }) : `<div class="egg-wrap" style="width:100%">${eggSvg('trex', 0)}</div>`;
-  const svg = startPet.querySelector('.pet');
-  if (svg && lock) svg.classList.add('sleep');
+  startPet.textContent = '';
+  if (sp) startPet.append(friendPic(sp, { stage: stageOf(sp), outfit: petData(sp).outfit, pose: lock ? 'sleep' : '', size: 360 }));
+  else startPet.innerHTML = `<div class="egg-wrap" style="width:100%">${eggSvg('trex', 0)}</div>`;
   sleepMsg.hidden = !lock;
   if (lock){
     const who = 'ה' + (sp ? PET_NAMES[sp].he : 'חבר');
@@ -31,7 +31,9 @@ function renderStart(){
 
 /* Choosing a friend */
 const friendsEl = $('friends');
+let chooseFromStart = true;
 function openChoose(fromStart){
+  chooseFromStart = fromStart;
   stopSpeech(); stopMic();
   closeWardrobe();
   friendsEl.textContent = '';
@@ -40,7 +42,10 @@ function openChoose(fromStart){
     b.type = 'button'; b.className = 'friend' + (sp === current ? ' current' : ''); b.dir = 'rtl';
     const d = pets[sp];
     b.style.setProperty('--c', mix(SPECIES[sp].c.body, 'w', 0.55)); b.style.setProperty('--c2', mix(SPECIES[sp].c.body, 'w', 0.25));
-    b.innerHTML = `<span class="fb">${petSvg(sp, { stage: d && d.born ? stageOf(sp) : 2, outfit: d && d.outfit })}</span>` + `<span>${PET_NAMES[sp].he}</span>` + (IS_DINO[sp] ? '<span class="tag">דינוזאור</span>' : '<span class="tag">חיה של היום</span>');
+    const fb = document.createElement('span'); fb.className = 'fb';
+    fb.append(friendPic(sp, { stage: d && d.born ? stageOf(sp) : 2, outfit: d && d.outfit, size: 190 }));
+    b.append(fb);
+    b.insertAdjacentHTML('beforeend', `<span>${PET_NAMES[sp].he}</span>` + (IS_DINO[sp] ? '<span class="tag">דינוזאור</span>' : '<span class="tag">חיה של היום</span>'));
     b.addEventListener('click', () => pickFriend(sp, fromStart, b));
     friendsEl.append(b);
   }
@@ -99,7 +104,12 @@ async function runIntro(sp){
   $('tap-hint').style.display = '';
   const egg = FROM_EGG[sp];
   let taps = 0, done = false;
-  const draw = () => { eggWrap.innerHTML = egg ? eggSvg(sp, taps) : BASKET_SVG; eggWrap.firstElementChild.classList.add('egg-wobble'); };
+  // in 3D the egg is drawn by the engine under the (empty) tap area; if 3D stops midway, the flat egg comes back
+  let three = World.on;
+  const draw = () => { if (three) return; eggWrap.innerHTML = egg ? eggSvg(sp, taps) : BASKET_SVG; eggWrap.firstElementChild.classList.add('egg-wobble'); };
+  introEl.classList.toggle('in3d', three);
+  if (three){ eggWrap.textContent = ''; World.introStart(sp, !egg); Pet.el = World.stateEl; Pet.el.className = ''; }
+  World.onStop = () => { if (!three) return; three = false; introEl.classList.remove('in3d'); if (!done) draw(); else { eggWrap.innerHTML = `<div style="width:100%;height:100%">${petSvg(sp, { stage: 0 })}</div>`; } };
   draw();
   bubbleAnchor = () => { const r = eggWrap.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + 10 }; };
   say(egg ? 'hatchTap' : 'bornTap', null, 9);
@@ -111,7 +121,12 @@ async function runIntro(sp){
       const r = eggWrap.getBoundingClientRect();
       if (egg){
         sfx.crack(); buzz(20);
-        if (taps < 3){ draw(); eggWrap.firstElementChild.classList.remove('egg-wobble'); eggWrap.firstElementChild.classList.add('egg-tapped'); FX.emit('crumb', r.left + r.width / 2, r.top + r.height * 0.4, 6, { color: '#fff5e2', speed: 160, g: 500, size: 6 }); return; }
+        if (taps < 3){
+          if (three) World.E.crack();
+          else { draw(); eggWrap.firstElementChild.classList.remove('egg-wobble'); eggWrap.firstElementChild.classList.add('egg-tapped'); }
+          FX.emit('crumb', r.left + r.width / 2, r.top + r.height * 0.4, 6, { color: '#fff5e2', speed: 160, g: 500, size: 6 });
+          return;
+        }
       } else sfx.whoosh();
       done = true; res();
     };
@@ -123,9 +138,12 @@ async function runIntro(sp){
   sfx.hatch();
   FX.emit('confetti', r.left + r.width / 2, r.top + r.height * 0.4, 40, { speed: 340, g: 420, size: 11 });
   if (egg) FX.emit('crumb', r.left + r.width / 2, r.top + r.height * 0.4, 16, { color: '#fff5e2', speed: 260, g: 600, size: 9 });
-  eggWrap.innerHTML = `<div class="pop-in" style="width:100%;height:100%">${petSvg(sp, { stage: 0 })}</div>`;
-  const pet = eggWrap.querySelector('.pet'); pet.style.width = '100%'; pet.style.height = '100%'; pet.style.overflow = 'visible';
-  pet.classList.add('happy');
+  if (three) World.E.hatch();
+  else {
+    eggWrap.innerHTML = `<div class="pop-in" style="width:100%;height:100%">${petSvg(sp, { stage: 0 })}</div>`;
+    const pet = eggWrap.querySelector('.pet'); pet.style.width = '100%'; pet.style.height = '100%'; pet.style.overflow = 'visible';
+    pet.classList.add('happy');
+  }
   sfx.voice(sp);
   current = sp; store.set('ymd-current', sp);
   const d = petData(sp); d.born = true; d.days = []; savePets();
@@ -133,7 +151,10 @@ async function runIntro(sp){
   await wait(700);
   await unlockFact(sp, 'baby');
   await sayP('hello');
+  World.onStop = null;
+  World.introEnd();
   introEl.hidden = true;
+  introEl.classList.remove('in3d');
   bubbleAnchor = null;
   beginSession(true);
 }
@@ -199,8 +220,8 @@ function showNight(){
   stopLullaby();
   releaseAwake();
   const sp = current;
-  $('night-pet').innerHTML = petSvg(sp, { stage: stageOf(sp), outfit: petData(sp).outfit });
-  $('night-pet').firstElementChild.classList.add('sleep');
+  $('night-pet').textContent = '';
+  $('night-pet').append(friendPic(sp, { stage: stageOf(sp), outfit: petData(sp).outfit, pose: 'sleep', size: 280 }));
   $('night-title').textContent = 'לילה טוב, ' + PET_NAMES[sp].he;
   const he = nameIn('he');
   $('night-sub').textContent = he ? `${he} ${profile.g === 'f' ? 'טיפלה' : 'טיפל'} יפה ב${PET_NAMES[sp].he} היום.` : `טיפלנו יפה ב${PET_NAMES[sp].he} היום.`;
@@ -244,7 +265,7 @@ friendsBtn.addEventListener('click', () => { initAudio(); sfx.tap(); openChoose(
 const gateEl = $('gate'), gateForm = $('gate-form'), gateQ = $('gate-q'), gateInput = $('gate-answer'), gateErr = $('gate-error');
 const parentsEl = $('parents');
 const nameInputs = { he: $('name-he'), ru: $('name-ru'), en: $('name-en') };
-const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs') };
+const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs'), three: $('opt-three') };
 const langChips = Array.from(document.querySelectorAll('.lang-chip'));
 const lenChips = Array.from(document.querySelectorAll('[data-len]'));
 const ageChips = Array.from(document.querySelectorAll('[data-age]'));
@@ -363,6 +384,10 @@ for (const k of Object.keys(optInputs)) optInputs[k].addEventListener('change', 
   opts[k] = optInputs[k].checked; store.set('ymd-opts', opts);
   if (k === 'mic' && room === 'home' && inPlay) ROOM_SETUP.home();
   if (k === 'count' && !opts.count){ countGame = null; clearCountBadge(); }
+  if (k === 'three'){
+    if (!opts.three){ World.stop('off'); return; }
+    if (!World.restart()){ opts.three = false; optInputs.three.checked = false; store.set('ymd-opts', opts); }
+  }
 });
 langChips.forEach(ch => ch.addEventListener('click', () => {
   const l = ch.dataset.lang;
@@ -513,6 +538,7 @@ function frame(now){
       else { Pet.look(Pet.center().x + rand(-200, 200), Pet.center().y - 100); lookUntil = now + 1500; }
     }
   }
+  World.sync();
   drawFx(dt);
   requestAnimationFrame(frame);
 }
@@ -528,7 +554,7 @@ document.addEventListener('visibilitychange', () => {
     saveDays(true);
   }
 });
-addEventListener('resize', () => { sizeFx(); placeBubble(); });
+addEventListener('resize', () => { sizeFx(); World.layout(); World.introFit(); placeBubble(); });
 addEventListener('pagehide', () => saveDays(true));
 setInterval(() => { if (!startEl.hidden) renderStart(); }, 30000);
 
@@ -547,6 +573,8 @@ if (synth){
 renderNoVoice();
 setMuted(muted);
 sizeFx();
+World.start();
+renderNavIcons();
 renderNeeds();
 showStart();
 requestAnimationFrame(t => { lastT = t; frame(t); });

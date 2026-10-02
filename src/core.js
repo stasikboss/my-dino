@@ -44,7 +44,7 @@ let profile = (() => {
 const ageCfg = () => AGE[profile.age] || AGE[4];
 const nameIn = lang => String(profile[lang] || '').trim();
 function saveProfile(){ store.set('ymd-profile', profile); }
-let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true) }; })();
+let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true), three: cleanBool(o.three, true) }; })();
 
 /* ---------- the pets, the album, the hats ---------- */
 let current = store.get('ymd-current', null);

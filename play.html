@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Jr+xnIv5oZdArglehU1Z+sjNVJ/ffoAqIaZZphbHsYE=' 'sha256-sb9deyMt1ekQ8UVcbAi99I+An+T/77h6lRzTGeo8IEg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-DG6f1WHOzNDuufejzCejiRlX1ZYwlefIfqKMPrLTrIE=' 'sha256-sb9deyMt1ekQ8UVcbAi99I+An+T/77h6lRzTGeo8IEg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>הדינו שלי</title>
@@ -289,7 +289,7 @@ svg:not(.pet) [stroke-width="4"]{stroke-width:3.1}
 /* ---------- the drag ghost ---------- */
 .ghost{position:fixed;left:0;top:0;z-index:8;width:80px;height:80px;pointer-events:none;margin:-40px 0 0 -40px;filter:drop-shadow(0 8px 6px rgba(27,36,48,.25));
   transition:transform .08s}
-.ghost svg{width:100%;height:100%}
+.ghost svg,.ghost img{width:100%;height:100%}
 .ghost.fly{transition:left .45s cubic-bezier(.3,.7,.4,1),top .45s cubic-bezier(.3,.7,.4,1),transform .45s,opacity .3s}
 
 /* ---------- full screens ---------- */
@@ -743,9 +743,37 @@ body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
 
 .first-run{margin:0;max-width:24rem;padding:8px 16px;border-radius:16px;background:rgba(255,255,255,.7);font:500 15px/1.45 var(--font-body);color:#38536b;text-wrap:balance}
 
+/* ---------- 3D: the friend and the rooms drawn by the 3D engine on a canvas under the buttons ---------- */
+.world{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;touch-action:none;background:#ffe2c2;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.world[hidden]{display:none}
+.world.swap{animation:world-in .4s ease-out}
+@keyframes world-in{0%{opacity:.25}100%{opacity:1}}
+body.three .room,body.three .bed-back,body.three .tub,body.three .blanket{display:none!important}
+body.three .stage{pointer-events:none;visibility:hidden}
+body.three #intro.in3d{background:transparent}
+body.three #intro.in3d .egg-wrap{cursor:pointer}
+/* pictures of friends and items rendered by the engine stand in for the flat drawings */
+.pic{display:contents}
+img.pet,img.item{display:block;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
+.tray-btn img{width:84%;height:84%}
+.nav-btn img{width:46px;height:46px;transition:transform .2s;filter:drop-shadow(0 2px 2px rgba(60,30,10,.18))}
+.nav-btn[aria-current="true"] img{transform:scale(1.12) translateY(-2px)}
+.g-food img{width:82%;height:82%}
+.outfit-btn img{width:100%;height:100%}
+.outfit-btn.locked img{filter:grayscale(1) opacity(.35)}
+.fossil .f-sleep,.fossil .f-awake{position:absolute;inset:0}
+.fossil .f-awake{opacity:0}
+.fossil.alive .f-awake{opacity:1;transition:opacity .9s}
+.fossil.alive .f-sleep{opacity:0;transition:opacity .9s}
+@media (orientation:landscape) and (max-height:560px){.tray-btn img{width:48px;height:48px}.nav-btn img{width:36px;height:36px}}
+@media (min-width:700px) and (min-height:820px){.nav-btn img{width:60px;height:60px}}
+
 </style>
 </head>
 <body>
+<canvas class="world" id="world" hidden aria-hidden="true"></canvas>
+<div id="pet-state" hidden></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
   <linearGradient id="g-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3bd86"/><stop offset="1" stop-color="#cf8f52"/></linearGradient>
   <linearGradient id="g-wood-dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c98a4b"/><stop offset="1" stop-color="#8f5a2e"/></linearGradient>
@@ -1142,6 +1170,7 @@ body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
       <label class="check" for="opt-mic"><input type="checkbox" id="opt-mic" checked><span>״חזור אחריי״ במיקרופון<small>החבר חוזר על מה שהילד אומר בקול מצחיק. ההקלטה נשארת רק בזיכרון של המכשיר לכמה שניות ונמחקת. שום דבר לא נשמר ולא נשלח.</small></span></label>
       <label class="check" for="opt-count"><input type="checkbox" id="opt-count" checked><span>אתגרי ספירה במטבח<small>״תאכיל אותי 3 פעמים!״ והחבר סופר יחד</small></span></label>
       <label class="check" for="opt-needs"><input type="checkbox" id="opt-needs" checked><span>הצרכים יורדים לאט<small>רעב, ניקיון, אנרגיה וכיף. יורדים רק בזמן המשחק, אף פעם לא כשהמשחק סגור</small></span></label>
+      <label class="check" for="opt-three"><input type="checkbox" id="opt-three" checked><span>גרפיקה תלת־ממדית<small>החבר והחדרים בתלת־ממד. במכשיר ישן או איטי אפשר לכבות, והמשחק עובר לציור שטוח וקל יותר</small></span></label>
     </div>
 
     <div class="section">
@@ -1209,6 +1238,7 @@ body.in-game .toast{bottom:calc(var(--safe-b) + 14px)}
   </div>
 </div>
 
+<script src="engine.js"></script>
 <script>
 (() => {
 'use strict';
@@ -2058,7 +2088,7 @@ let profile = (() => {
 const ageCfg = () => AGE[profile.age] || AGE[4];
 const nameIn = lang => String(profile[lang] || '').trim();
 function saveProfile(){ store.set('ymd-profile', profile); }
-let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true) }; })();
+let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true), three: cleanBool(o.three, true) }; })();
 
 /* ---------- the pets, the album, the hats ---------- */
 let current = store.get('ymd-current', null);
@@ -2515,6 +2545,15 @@ const Pet = {
     this.sp = sp;
     const d = petData(sp);
     this.stage = stageOf(sp);
+    if (World.on){
+      // in 3D the friend is drawn by the engine; this element only carries the state classes it reads
+      stageEl.textContent = '';
+      World.E.setPet(sp, { stage: this.stage, outfit: d.outfit });
+      this.el = World.stateEl;
+      this.el.className = sleeping ? 'sleep' : '';
+      this.pupils = []; this.eyeEls = [];
+      return;
+    }
     stageEl.innerHTML = petSvg(sp, { stage: this.stage, outfit: d.outfit });
     this.el = stageEl.firstElementChild;
     this.pupils = Array.from(this.el.querySelectorAll('.pupil'));
@@ -2545,14 +2584,26 @@ const Pet = {
   },
   headTop(){
     if (!this.sp) return { x: innerWidth / 2, y: innerHeight * 0.35 };
+    if (World.on) return World.E.project('headTop');
     const h = SPECIES[this.sp].hat;
     return this.toScreen(h[0], h[1] - 6, true);
   },
-  mouth(){ const m = SPECIES[this.sp].mouth; return this.toScreen(m[0], m[1], true); },
-  center(){ return this.toScreen(120, 150); },
+  mouth(){ if (World.on) return World.E.project('mouth'); const m = SPECIES[this.sp].mouth; return this.toScreen(m[0], m[1], true); },
+  center(){ if (World.on) return World.E.project('center'); return this.toScreen(120, 150); },
+  // the friend's box on screen (for sizes and generous touch areas)
+  box(){
+    if (World.on){ const b = World.E.bounds(); return { left: b.left, top: b.top, width: b.right - b.left, height: b.bottom - b.top }; }
+    const r = stageEl.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height };
+  },
   // is a screen point on the pet? (a generous oval around its body)
   hit(px, py, pad = 0){
     if (!this.el || stageEl.classList.contains('gone')) return false;
+    if (World.on){
+      if (World.E.hit(px, py)) return true;
+      if (!pad) return false;
+      const b = World.E.bounds();
+      return px > b.left - pad && px < b.right + pad && py > b.top - pad && py < b.bottom + pad;
+    }
     const r = stageEl.getBoundingClientRect();
     const sc = STAGE_SCALE[this.stage];
     const cx = r.left + r.width / 2, cy = r.top + r.height * (1 - 0.5 * sc * 0.82);
@@ -2562,15 +2613,17 @@ const Pet = {
   },
   nearMouth(px, py, radius){
     const m = this.mouth();
-    return Math.hypot(px - m.x, py - m.y) < (radius || Math.max(60, stageEl.getBoundingClientRect().width * 0.2));
+    return Math.hypot(px - m.x, py - m.y) < (radius || Math.max(60, this.box().width * 0.2));
   },
   partAt(px, py){
+    if (World.on){ const h = World.E.hit(px, py); return h && PART_NAMES[h.part] ? h.part : null; }
     const p = this.toStage(px, py);
     let best = null, bd = 1e9;
     for (const [x, y, name] of PARTS[this.sp]){ const d = Math.hypot(p.x - x, p.y - y); if (d < bd){ bd = d; best = name; } }
     return best;
   },
   isHead(px, py){
+    if (World.on){ const h = World.E.hit(px, py); return !!(h && h.head); }
     const p = this.toStage(px, py);
     const h = SPECIES[this.sp].hat, m = SPECIES[this.sp].mouth;
     return p.y < (h[1] + m[1]) / 2 + 26 && Math.abs(p.x - h[0]) < 70;
@@ -2579,7 +2632,16 @@ const Pet = {
     if (!this.el) return;
     const el = this.el;
     clearTimeout(this.flashTimers[cls]);
-    el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls);
+    el.classList.remove(cls);
+    if (World.on){
+      // the engine starts a motion when it sees the class appear, so it must see one frame without it first
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.classList.add(cls);
+        this.flashTimers[cls] = setTimeout(() => el.classList.remove(cls), ms);
+      }));
+      return;
+    }
+    void el.getBoundingClientRect(); el.classList.add(cls);
     this.flashTimers[cls] = setTimeout(() => el.classList.remove(cls), ms);
   },
   expr(name, ms){
@@ -2609,6 +2671,7 @@ const Pet = {
   },
   look(px, py){
     if (!this.el || this.el.classList.contains('sleep')) return;
+    if (World.on){ World.E.lookAt(px, py); return; }
     const r = SPECIES[this.sp].eyes[2];
     for (let i = 0; i < this.pupils.length; i++){
       const e = SPECIES[this.sp].eyes[i];
@@ -2620,9 +2683,13 @@ const Pet = {
       this.pupils[i].setAttribute('transform', `translate(${(dx / d * m).toFixed(1)} ${(dy / d * m).toFixed(1)})`);
     }
   },
-  lookHome(){ for (const p of this.pupils || []) p.setAttribute('transform', 'translate(0 0)'); },
+  lookHome(){ if (World.on){ World.E.lookAt(null); return; } for (const p of this.pupils || []) p.setAttribute('transform', 'translate(0 0)'); },
   blink(){ if (this.el && !this.el.classList.contains('sleep') && !this.el.classList.contains('happy')) this.flash('blink', 130); },
-  wear(outfit){ petData(this.sp).outfit = outfit; savePets(); this.refresh(); this.expr('happy', 1200); this.flash('hop', 600); }
+  wear(outfit){
+    petData(this.sp).outfit = outfit; savePets();
+    if (World.on) World.E.setOutfit(outfit); else this.refresh();
+    this.expr('happy', 1200); this.flash('hop', 600);
+  }
 };
 
 /* ---------- particles: hearts, bubbles, sparkles, crumbs, drops, z's, music notes, confetti ---------- */
@@ -2765,6 +2832,164 @@ addEventListener('pointermove', moveDrag, { passive: false });
 addEventListener('pointerup', e => endDrag(e, false));
 addEventListener('pointercancel', e => endDrag(e, true));
 
+/* ---------- the 3D world ----------
+   When the device can draw 3D (and a parent hasn't switched it off), the rooms and the friend are drawn by the 3D
+   engine on a canvas under the game's buttons. Everything else in the game stays the same: it keeps setting the
+   friend's state (happy, talking, asleep...) and asks the friend where its mouth or head is, and the Pet object
+   passes those questions on to the engine. Pictures of friends and items for cards and buttons are rendered by the
+   engine too. If the device has no 3D, loses it, or draws too slowly, the game switches to the flat drawings. */
+const World = {
+  on: false, E: null, canvas: $('world'), stateEl: $('pet-state'), why: '', slowChecks: 0, started: 0,
+  // the engine needs WebGL 2; if making the context fails anyway, start() falls back to flat
+  supported(){ return typeof WebGL2RenderingContext !== 'undefined'; },
+  start(){
+    if (this.on) return true;
+    if (!window.DinoEngine){ this.why = 'no-engine'; return false; }
+    if (!opts.three){ this.why = 'off'; return false; }
+    if (!this.supported()){ this.why = 'no-webgl'; return false; }
+    try {
+      this.E = window.DinoEngine;
+      if (!this.E.ready){
+        const phone = (isAndroid || isIOS) && Math.min(screen.width, screen.height) < 600;
+        this.E.init(this.canvas, { maxDpr: 2, startDpr: phone ? 1.5 : 2, shadowSize: phone ? 1024 : 2048 });
+        // the device took the 3D away (it can, when memory runs low): carry on flat, and come back when it returns
+        this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.stop('lost'); }, false);
+        this.canvas.addEventListener('webglcontextrestored', () => { if (this.why === 'lost' && opts.three) this.restart(); }, false);
+        // build the rooms and their shaders in the background while the start screen is up
+        setTimeout(() => { try { this.E.warm(['home', 'kitchen', 'bath', 'bed', 'play', 'studio']); } catch (e) {} }, 1200);
+      }
+      this.E.setStateEl(this.stateEl);
+      this.E.setStageEl(stageEl);
+      this.on = true; this.why = ''; this.slowChecks = 0; this.started = performance.now();
+      this.E.paused = false;
+      this.canvas.hidden = false;
+      document.body.classList.add('three');
+      this.layout();
+      return true;
+    } catch (e) {
+      this.stop('error');
+      return false;
+    }
+  },
+  // back to the flat drawings, keeping the game where it is
+  stop(why){
+    const was = this.on;
+    this.on = false; this.why = why || 'off';
+    picQueue.length = 0;
+    if (this.E){ this.E.paused = true; try { this.E.clearEgg(); this.E.setFit(null); } catch (e) {} }
+    this.canvas.hidden = true;
+    document.body.classList.remove('three');
+    if (!was) return;
+    // redraw everything that was drawn in 3D with the flat drawings
+    try {
+      if (Pet.sp) Pet.mount(Pet.sp);
+      if (inPlay) setRoom(room, true);
+      renderNavIcons();
+      if (this.onStop) this.onStop();
+      if (!startEl.hidden) renderStart();
+      if (!chooseEl.hidden) openChoose(chooseFromStart);
+    } catch (e) {}
+  },
+  onStop: null,
+  // back to 3D, redrawing the friend, the room and the pictures
+  restart(){
+    if (!this.start()) return false;
+    try {
+      if (Pet.sp) Pet.mount(Pet.sp);
+      if (inPlay) setRoom(room, true);
+      renderNavIcons();
+      if (!startEl.hidden) renderStart();
+    } catch (e) {}
+    return true;
+  },
+  layout(smooth){
+    if (!this.on) return;
+    const hud = $('hud').getBoundingClientRect(), tray = trayEl.getBoundingClientRect(), nav = navEl.getBoundingClientRect();
+    const top = (hud.height ? hud.bottom : 70) + 10;
+    let bottomEdge = tray.height ? tray.top : nav.height ? nav.top : innerHeight - 160;
+    // with the wardrobe open, the friend steps up above it, so the hats can be seen
+    if (!wardrobeEl.hidden && wardrobeEl.offsetHeight) bottomEdge = Math.min(bottomEdge, innerHeight - wardrobeEl.offsetHeight);
+    this.E.setSafe(top, Math.max(80, innerHeight - bottomEdge + 4), smooth);
+  },
+  // draw only while the 3D scene can be seen
+  sync(){
+    if (!this.on) return;
+    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen);
+    this.E.paused = !seen;
+  },
+  // hatching: the egg (or the basket) in a soft studio, drawn where the tap area is
+  introStart(sp, born){
+    if (!this.on) return false;
+    this.E.setRoom('studio');
+    this.E.showEgg(sp, born);
+    this.introFit();
+    this.E.paused = false;
+    return true;
+  },
+  introFit(){ if (this.on && this.E.egg) this.E.setFit(eggWrap.getBoundingClientRect(), 1.25); },
+  introEnd(){ if (!this.on) return; this.E.clearEgg(); this.E.setFit(null); },
+  room(name){
+    if (!this.on) return;
+    this.E.setRoom(name);
+    this.E.setLayout(name === 'play' ? 'small' : 'normal');
+    this.layout();
+    if (!reduceMotion){ this.canvas.classList.remove('swap'); void this.canvas.offsetWidth; this.canvas.classList.add('swap'); }
+  },
+  // too slow to be fun: after it has settled, a few checks in a row below about 20 frames a second switch to flat
+  watch(){
+    if (!this.on || this.E.paused || document.hidden) return;
+    if (performance.now() - this.started < 6000) return;
+    if (this.E.frameAvg > 50 && this.E.dpr <= 1){
+      // remembered, so the next time starts flat; a parent can switch it back on
+      if (++this.slowChecks >= 3){ opts.three = false; store.set('ymd-opts', opts); this.stop('slow'); }
+    }
+    else this.slowChecks = 0;
+  }
+};
+setInterval(() => World.watch(), 2000);
+
+/* Pictures of friends and items. In 3D they are rendered by the engine (cached), one per frame so nothing stalls;
+   until a picture is ready, the flat drawing stands in. */
+const picQueue = [];
+let picBusy = false;
+function pumpPics(){
+  if (picBusy) return;
+  picBusy = true;
+  requestAnimationFrame(function step(){
+    const t0 = performance.now();
+    while (picQueue.length && performance.now() - t0 < 12){
+      const job = picQueue.shift();
+      if (!job.el.isConnected || !World.on) continue;
+      let url = '';
+      try { url = job.make(); } catch (e) { url = ''; }
+      if (World.E) World.E.busyUntil = performance.now() + 400;
+      if (url) job.el.innerHTML = `<img class="${job.cls}" src="${url}" alt="" draggable="false">`;
+    }
+    if (picQueue.length) requestAnimationFrame(step); else picBusy = false;
+  });
+}
+function picHolder(fallback, cls, make){
+  const holder = document.createElement('span');
+  holder.className = 'pic';
+  holder.innerHTML = fallback;
+  if (World.on){ picQueue.push({ el: holder, cls, make }); pumpPics(); }
+  return holder;
+}
+const pxFor = cssPx => Math.round(cssPx * Math.min(2, window.devicePixelRatio || 1));
+// a friend; o: { stage, outfit, pose: 'happy' | 'sleep' | 'talk', size (CSS px) }
+function friendPic(sp, o = {}){
+  const svg = petSvg(sp, { stage: o.stage == null ? 2 : o.stage, outfit: o.outfit });
+  const h = picHolder(svg, 'pet', () => World.E.snapshot(sp, { stage: o.stage == null ? 2 : o.stage, outfit: o.outfit || '', pose: o.pose || '', w: pxFor(o.size || 200) }));
+  if (o.pose === 'sleep' || o.pose === 'happy'){ const el = h.querySelector('.pet'); if (el) el.classList.add(o.pose); }
+  return h;
+}
+// an item: food, tool, room or hat; fallback is the flat drawing
+function itemPic(name, fallback, size = 64){
+  return picHolder(fallback, 'item', () => World.E.icon(name, pxFor(size)));
+}
+// the drag picture follows the tray button's own picture
+function artOf(btn, fallback){ const img = btn && btn.querySelector('img.item'); return img ? img.outerHTML : fallback; }
+
 /* ---------- rooms, needs, and everything the child can do with the pet ---------- */
 const roomEl = $('room'), trayEl = $('tray'), navEl = $('nav'), hudEl = $('hud'), needsEl = $('needs');
 const tubEl = $('tub'), blanketEl = $('blanket'), bedBackEl = $('bed-back'), stallEl = $('stall');
@@ -2844,11 +3069,11 @@ const navBtns = {};
 for (const r of ROOMS){
   const b = document.createElement('button');
   b.type = 'button'; b.className = 'nav-btn'; b.setAttribute('aria-label', ROOM_LABEL[r]);
-  b.innerHTML = ROOM_ICON[r];
   b.addEventListener('click', () => { initAudio(); sfx.tap(); setRoom(r); });
   navEl.append(b);
   navBtns[r] = b;
 }
+function renderNavIcons(){ for (const r of ROOMS){ navBtns[r].textContent = ''; navBtns[r].append(itemPic(r, ROOM_ICON[r], 46)); } }
 const navGlowTimers = {};
 function glowNav(r, ms){
   const b = navBtns[r]; if (!b) return;
@@ -2867,8 +3092,8 @@ function renderNav(){
 function trayButton(id, art, label, handlers){
   const b = document.createElement('button');
   b.type = 'button'; b.className = 'tray-btn'; b.dataset.id = id; b.setAttribute('aria-label', label);
-  b.innerHTML = art;
-  const item = { id, art };
+  b.append(itemPic(id === 'friends' ? 'egg' : id, art, 88));
+  const item = { id, get art(){ return artOf(b, art); } };
   if (handlers.tap && !handlers.drag){
     b.addEventListener('click', () => { initAudio(); handlers.tap(b); });
   } else {
@@ -2896,6 +3121,7 @@ function setRoom(r, quiet){
   if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
   roomEl.dataset.room = r;
+  World.room(r);
   stageEl.classList.toggle('in-tub', r === 'bath');
   stageEl.classList.toggle('small', r === 'play');
   stageEl.classList.toggle('gone', r === 'album');
@@ -2966,24 +3192,26 @@ const ROOM_SETUP = {
 
 /* ---------- touching the pet ---------- */
 let lastPatTalk = 0, rubDist = 0;
-stageEl.addEventListener('pointerdown', e => {
+function petDown(e, onCanvas){
   if (drag || !inPlay || !Pet.el) return;
+  if (onCanvas !== World.on) return;
+  if (onCanvas && !Pet.hit(e.clientX, e.clientY, 18)) return;
   initAudio();
   lastTouch = performance.now();
   const x = e.clientX, y = e.clientY;
   if (sleeping){ FX.emit('z', x, y - 20, 1, { size: 18 }); return; }
   rubDist = 0;
   stageEl._down = { x, y, t: performance.now() };
-  try { stageEl.setPointerCapture(e.pointerId); } catch (err) {}
-});
-stageEl.addEventListener('pointermove', e => {
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+}
+function petMove(e){
   if (!stageEl._down || drag) return;
   const d = stageEl._down;
   const dist = Math.hypot(e.clientX - d.x, e.clientY - d.y);
   rubDist += dist; d.x = e.clientX; d.y = e.clientY;
   if (rubDist > 70){ rubDist = 0; FX.emit('heart', e.clientX, e.clientY, 1, { speed: 60, size: 12 }); addNeed('fun', 1); if (Math.random() < 0.3) sfx.giggle(); Pet.expr('happy', 900); }
-});
-stageEl.addEventListener('pointerup', e => {
+}
+function petUp(e){
   const d = stageEl._down; stageEl._down = null;
   if (!d || drag || sleeping) return;
   if (performance.now() - d.t > 500) return;
@@ -2997,7 +3225,13 @@ stageEl.addEventListener('pointerup', e => {
   }
   addNeed('fun', 3);
   if (performance.now() - lastPatTalk > 7000){ lastPatTalk = performance.now(); say('pat', null, 2); }
-});
+}
+stageEl.addEventListener('pointerdown', e => petDown(e, false));
+stageEl.addEventListener('pointermove', petMove);
+stageEl.addEventListener('pointerup', petUp);
+World.canvas.addEventListener('pointerdown', e => petDown(e, true));
+World.canvas.addEventListener('pointermove', petMove);
+World.canvas.addEventListener('pointerup', petUp);
 
 /* ---------- kitchen ---------- */
 let countGame = null;
@@ -3196,13 +3430,15 @@ async function potty(){
   lastTouch = performance.now();
   await sayP('potty', null, 9);
   if (room !== 'bath'){ bath.busy = false; return; }
-  stallEl.hidden = false; stallEl.classList.add('open');
-  void stallEl.offsetWidth;
-  stallEl.classList.remove('open'); sfx.whoosh();
+  // a door closes in front of the friend (in 3D, the shower curtain), then opens again
+  const three = World.on;
+  const close = on => { if (three && World.on) World.E.setCurtain(on); else if (!three){ stallEl.classList.toggle('open', !on); } };
+  if (!three){ stallEl.hidden = false; stallEl.classList.add('open'); void stallEl.offsetWidth; }
+  close(true); sfx.whoosh();
   await wait(1300); sfx.plop();
   await wait(900); sfx.flush();
   await wait(1700);
-  stallEl.classList.add('open'); sfx.whoosh();
+  close(false); sfx.whoosh();
   Pet.expr('happy', 1500); Pet.flash('hop', 600);
   await wait(500); stallEl.hidden = true;
   bath.busy = false;
@@ -3222,6 +3458,7 @@ function goSleep(){
   if (bedtime && !teethToday){ say('bedBrush', null, 9); glowTray('brush'); return; }
   sleeping = true; sleepAt = performance.now();
   roomEl.classList.add('dark'); document.body.classList.add('lights-off');
+  if (World.on){ World.E.setDark(true); World.E.setBlanket(true); }
   Pet.setSleep(true); Pet.talk(false); Pet.lookHome();
   blanketEl.classList.remove('off');
   glowTray('lamp', false);
@@ -3242,6 +3479,7 @@ function wakeUp(quiet){
   sleeping = false;
   stopLullaby();
   roomEl.classList.remove('dark'); document.body.classList.remove('lights-off');
+  if (World.on){ World.E.setDark(false); World.E.setBlanket(false); }
   Pet.setSleep(false);
   blanketEl.classList.add('off');
   if (!quiet){ sfx.stretch(); Pet.flash('hop', 600); Pet.expr('happy', 1400); stopSpeech(); say('wake', null, 6); }
@@ -3295,7 +3533,7 @@ function openWardrobe(){
     const have = id === 'none' || owned.includes(id);
     if (!have) b.classList.add('locked');
     b.setAttribute('aria-pressed', String(cur === id));
-    b.innerHTML = outfitPreview(id);
+    if (id === 'none') b.innerHTML = outfitPreview(id); else b.append(itemPic('hat:' + id, outfitPreview(id), 80));
     b.addEventListener('click', () => {
       initAudio();
       if (!have){ sfx.nope(); say('lockedHat', null, 6); glowNav('play', 5000); return; }
@@ -3306,9 +3544,11 @@ function openWardrobe(){
     });
     outfitsEl.append(b);
   }
+  const was = wardrobeEl.hidden;
   wardrobeEl.hidden = false;
+  if (was) World.layout(true);
 }
-function closeWardrobe(){ wardrobeEl.hidden = true; }
+function closeWardrobe(){ if (wardrobeEl.hidden) return; wardrobeEl.hidden = true; World.layout(true); }
 $('wardrobe-close').addEventListener('click', closeWardrobe);
 
 /* Say it back: the child talks, the pet repeats it in a funny high voice. Recording is held in memory only for the
@@ -3452,7 +3692,7 @@ function pickBtn(sp, cls = 'g-pick'){
   const b = document.createElement('button');
   b.type = 'button'; b.className = cls; b.dataset.sp = sp;
   b.setAttribute('aria-label', PET_NAMES[sp].he);
-  b.innerHTML = petSvg(sp, { stage: 2 });
+  b.append(friendPic(sp, { size: 220 }));
   return b;
 }
 function tapOnce(btns){
@@ -3518,7 +3758,7 @@ async function gameEats(tok){
     const others = SPECIES_ORDER.filter(s => !DIET[s].includes(f));
     const yes = pick(eaters), no = pick(others);
     const col = document.createElement('div'); col.className = 'g-col';
-    const food = document.createElement('div'); food.className = 'g-food pop-in'; food.innerHTML = FOOD_ART[f];
+    const food = document.createElement('div'); food.className = 'g-food pop-in'; food.append(itemPic(f, FOOD_ART[f], 170));
     const row = document.createElement('div'); row.className = 'g-row';
     const cards = shuffle([yes, no]).map(s => pickBtn(s));
     row.append(...cards);
@@ -3564,7 +3804,7 @@ async function gameShadow(tok){
     const target = order[r % order.length];
     const opts3 = shuffle([target, ...shuffle(SPECIES_ORDER.filter(s => s !== target)).slice(0, profile.age <= 3 ? 1 : 2)]);
     const col = document.createElement('div'); col.className = 'g-col';
-    const sh = document.createElement('div'); sh.className = 'g-target shadow pop-in'; sh.innerHTML = petSvg(target, { stage: 2 });
+    const sh = document.createElement('div'); sh.className = 'g-target shadow pop-in'; sh.append(friendPic(target, { size: 300 }));
     const row = document.createElement('div'); row.className = 'g-row' + (opts3.length === 3 ? ' three' : '');
     const cards = opts3.map(s => pickBtn(s));
     row.append(...cards);
@@ -3614,7 +3854,7 @@ async function gameEgg(tok){
     if (!alive(tok)) return;
     const sp = order[r];
     const col = document.createElement('div'); col.className = 'g-col';
-    const t = document.createElement('div'); t.className = 'g-target pop-in'; t.innerHTML = petSvg(sp, { stage: 0 });
+    const t = document.createElement('div'); t.className = 'g-target pop-in'; t.append(friendPic(sp, { stage: 0, pose: 'happy', size: 300 }));
     const row = document.createElement('div'); row.className = 'g-row';
     const egg = document.createElement('button'); egg.type = 'button'; egg.className = 'choice-btn'; egg.dataset.k = 'egg'; egg.innerHTML = EGG_SVG + '<span dir="rtl">ביצה</span>';
     const born = document.createElement('button'); born.type = 'button'; born.className = 'choice-btn'; born.dataset.k = 'born'; born.innerHTML = BORN_SVG + '<span dir="rtl">נולד</span>';
@@ -3707,8 +3947,15 @@ async function gameDig(tok){
     const col = document.createElement('div'); col.className = 'g-col';
     const area = document.createElement('div'); area.className = 'dig-area';
     area.innerHTML = `<svg class="cracks" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 30 L20 34 L34 26 L60 36 L100 28 M0 74 L30 70 L52 80 L80 72 L100 78 M40 0 L44 18 M72 100 L68 84" fill="none" stroke="#7a5a32" stroke-width=".8"/></svg>
-      <div class="fossil">${petSvg(sp, { stage: 2 })}</div><canvas></canvas>
+      <div class="fossil"></div><canvas></canvas>
       <svg class="sweep" viewBox="0 0 64 64">${TOOL_ART.brush.replace(/<\/?svg[^>]*>/g, '')}</svg>`;
+    const fos = area.querySelector('.fossil');
+    if (World.on){
+      // in 3D the fossil is a picture; it wakes up by fading to a picture of the friend awake
+      const a1 = document.createElement('div'); a1.className = 'f-sleep'; a1.append(friendPic(sp, { pose: 'sleep', size: 420 }));
+      const a2 = document.createElement('div'); a2.className = 'f-awake'; a2.append(friendPic(sp, { pose: 'happy', size: 420 }));
+      fos.append(a1, a2);
+    } else fos.append(friendPic(sp, { pose: 'sleep', size: 420 }));
     col.append(area);
     gameBody.textContent = ''; gameBody.append(col);
     if (r === 0) say('digHello', null, 9);
@@ -3787,7 +4034,8 @@ function renderAlbum(){
     b.type = 'button'; b.className = 'album-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(sp === albumSp));
     b.setAttribute('aria-label', PET_NAMES[sp].he);
     b.style.setProperty('--c', mix(SPECIES[sp].c.body, 'w', 0.62));
-    b.innerHTML = petSvg(sp, { stage: 2 }) + `<span class="count">${factCount(sp)}/6</span>`;
+    b.append(friendPic(sp, { size: 84 }));
+    b.insertAdjacentHTML('beforeend', `<span class="count">${factCount(sp)}/6</span>`);
     b.addEventListener('click', () => { initAudio(); sfx.tap(); albumSp = sp; renderAlbum(); sayFrom(LINES.pickFriend, { sp }, 5); });
     tabs.append(b);
   }
@@ -3826,9 +4074,9 @@ function renderStart(){
   document.title = titleText();
   const lock = lockReason();
   const sp = current;
-  startPet.innerHTML = sp ? petSvg(sp, { stage: stageOf(sp), outfit: petData(sp).outfit }) : `<div class="egg-wrap" style="width:100%">${eggSvg('trex', 0)}</div>`;
-  const svg = startPet.querySelector('.pet');
-  if (svg && lock) svg.classList.add('sleep');
+  startPet.textContent = '';
+  if (sp) startPet.append(friendPic(sp, { stage: stageOf(sp), outfit: petData(sp).outfit, pose: lock ? 'sleep' : '', size: 360 }));
+  else startPet.innerHTML = `<div class="egg-wrap" style="width:100%">${eggSvg('trex', 0)}</div>`;
   sleepMsg.hidden = !lock;
   if (lock){
     const who = 'ה' + (sp ? PET_NAMES[sp].he : 'חבר');
@@ -3841,7 +4089,9 @@ function renderStart(){
 
 /* Choosing a friend */
 const friendsEl = $('friends');
+let chooseFromStart = true;
 function openChoose(fromStart){
+  chooseFromStart = fromStart;
   stopSpeech(); stopMic();
   closeWardrobe();
   friendsEl.textContent = '';
@@ -3850,7 +4100,10 @@ function openChoose(fromStart){
     b.type = 'button'; b.className = 'friend' + (sp === current ? ' current' : ''); b.dir = 'rtl';
     const d = pets[sp];
     b.style.setProperty('--c', mix(SPECIES[sp].c.body, 'w', 0.55)); b.style.setProperty('--c2', mix(SPECIES[sp].c.body, 'w', 0.25));
-    b.innerHTML = `<span class="fb">${petSvg(sp, { stage: d && d.born ? stageOf(sp) : 2, outfit: d && d.outfit })}</span>` + `<span>${PET_NAMES[sp].he}</span>` + (IS_DINO[sp] ? '<span class="tag">דינוזאור</span>' : '<span class="tag">חיה של היום</span>');
+    const fb = document.createElement('span'); fb.className = 'fb';
+    fb.append(friendPic(sp, { stage: d && d.born ? stageOf(sp) : 2, outfit: d && d.outfit, size: 190 }));
+    b.append(fb);
+    b.insertAdjacentHTML('beforeend', `<span>${PET_NAMES[sp].he}</span>` + (IS_DINO[sp] ? '<span class="tag">דינוזאור</span>' : '<span class="tag">חיה של היום</span>'));
     b.addEventListener('click', () => pickFriend(sp, fromStart, b));
     friendsEl.append(b);
   }
@@ -3909,7 +4162,12 @@ async function runIntro(sp){
   $('tap-hint').style.display = '';
   const egg = FROM_EGG[sp];
   let taps = 0, done = false;
-  const draw = () => { eggWrap.innerHTML = egg ? eggSvg(sp, taps) : BASKET_SVG; eggWrap.firstElementChild.classList.add('egg-wobble'); };
+  // in 3D the egg is drawn by the engine under the (empty) tap area; if 3D stops midway, the flat egg comes back
+  let three = World.on;
+  const draw = () => { if (three) return; eggWrap.innerHTML = egg ? eggSvg(sp, taps) : BASKET_SVG; eggWrap.firstElementChild.classList.add('egg-wobble'); };
+  introEl.classList.toggle('in3d', three);
+  if (three){ eggWrap.textContent = ''; World.introStart(sp, !egg); Pet.el = World.stateEl; Pet.el.className = ''; }
+  World.onStop = () => { if (!three) return; three = false; introEl.classList.remove('in3d'); if (!done) draw(); else { eggWrap.innerHTML = `<div style="width:100%;height:100%">${petSvg(sp, { stage: 0 })}</div>`; } };
   draw();
   bubbleAnchor = () => { const r = eggWrap.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + 10 }; };
   say(egg ? 'hatchTap' : 'bornTap', null, 9);
@@ -3921,7 +4179,12 @@ async function runIntro(sp){
       const r = eggWrap.getBoundingClientRect();
       if (egg){
         sfx.crack(); buzz(20);
-        if (taps < 3){ draw(); eggWrap.firstElementChild.classList.remove('egg-wobble'); eggWrap.firstElementChild.classList.add('egg-tapped'); FX.emit('crumb', r.left + r.width / 2, r.top + r.height * 0.4, 6, { color: '#fff5e2', speed: 160, g: 500, size: 6 }); return; }
+        if (taps < 3){
+          if (three) World.E.crack();
+          else { draw(); eggWrap.firstElementChild.classList.remove('egg-wobble'); eggWrap.firstElementChild.classList.add('egg-tapped'); }
+          FX.emit('crumb', r.left + r.width / 2, r.top + r.height * 0.4, 6, { color: '#fff5e2', speed: 160, g: 500, size: 6 });
+          return;
+        }
       } else sfx.whoosh();
       done = true; res();
     };
@@ -3933,9 +4196,12 @@ async function runIntro(sp){
   sfx.hatch();
   FX.emit('confetti', r.left + r.width / 2, r.top + r.height * 0.4, 40, { speed: 340, g: 420, size: 11 });
   if (egg) FX.emit('crumb', r.left + r.width / 2, r.top + r.height * 0.4, 16, { color: '#fff5e2', speed: 260, g: 600, size: 9 });
-  eggWrap.innerHTML = `<div class="pop-in" style="width:100%;height:100%">${petSvg(sp, { stage: 0 })}</div>`;
-  const pet = eggWrap.querySelector('.pet'); pet.style.width = '100%'; pet.style.height = '100%'; pet.style.overflow = 'visible';
-  pet.classList.add('happy');
+  if (three) World.E.hatch();
+  else {
+    eggWrap.innerHTML = `<div class="pop-in" style="width:100%;height:100%">${petSvg(sp, { stage: 0 })}</div>`;
+    const pet = eggWrap.querySelector('.pet'); pet.style.width = '100%'; pet.style.height = '100%'; pet.style.overflow = 'visible';
+    pet.classList.add('happy');
+  }
   sfx.voice(sp);
   current = sp; store.set('ymd-current', sp);
   const d = petData(sp); d.born = true; d.days = []; savePets();
@@ -3943,7 +4209,10 @@ async function runIntro(sp){
   await wait(700);
   await unlockFact(sp, 'baby');
   await sayP('hello');
+  World.onStop = null;
+  World.introEnd();
   introEl.hidden = true;
+  introEl.classList.remove('in3d');
   bubbleAnchor = null;
   beginSession(true);
 }
@@ -4009,8 +4278,8 @@ function showNight(){
   stopLullaby();
   releaseAwake();
   const sp = current;
-  $('night-pet').innerHTML = petSvg(sp, { stage: stageOf(sp), outfit: petData(sp).outfit });
-  $('night-pet').firstElementChild.classList.add('sleep');
+  $('night-pet').textContent = '';
+  $('night-pet').append(friendPic(sp, { stage: stageOf(sp), outfit: petData(sp).outfit, pose: 'sleep', size: 280 }));
   $('night-title').textContent = 'לילה טוב, ' + PET_NAMES[sp].he;
   const he = nameIn('he');
   $('night-sub').textContent = he ? `${he} ${profile.g === 'f' ? 'טיפלה' : 'טיפל'} יפה ב${PET_NAMES[sp].he} היום.` : `טיפלנו יפה ב${PET_NAMES[sp].he} היום.`;
@@ -4054,7 +4323,7 @@ friendsBtn.addEventListener('click', () => { initAudio(); sfx.tap(); openChoose(
 const gateEl = $('gate'), gateForm = $('gate-form'), gateQ = $('gate-q'), gateInput = $('gate-answer'), gateErr = $('gate-error');
 const parentsEl = $('parents');
 const nameInputs = { he: $('name-he'), ru: $('name-ru'), en: $('name-en') };
-const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs') };
+const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs'), three: $('opt-three') };
 const langChips = Array.from(document.querySelectorAll('.lang-chip'));
 const lenChips = Array.from(document.querySelectorAll('[data-len]'));
 const ageChips = Array.from(document.querySelectorAll('[data-age]'));
@@ -4173,6 +4442,10 @@ for (const k of Object.keys(optInputs)) optInputs[k].addEventListener('change', 
   opts[k] = optInputs[k].checked; store.set('ymd-opts', opts);
   if (k === 'mic' && room === 'home' && inPlay) ROOM_SETUP.home();
   if (k === 'count' && !opts.count){ countGame = null; clearCountBadge(); }
+  if (k === 'three'){
+    if (!opts.three){ World.stop('off'); return; }
+    if (!World.restart()){ opts.three = false; optInputs.three.checked = false; store.set('ymd-opts', opts); }
+  }
 });
 langChips.forEach(ch => ch.addEventListener('click', () => {
   const l = ch.dataset.lang;
@@ -4323,6 +4596,7 @@ function frame(now){
       else { Pet.look(Pet.center().x + rand(-200, 200), Pet.center().y - 100); lookUntil = now + 1500; }
     }
   }
+  World.sync();
   drawFx(dt);
   requestAnimationFrame(frame);
 }
@@ -4338,7 +4612,7 @@ document.addEventListener('visibilitychange', () => {
     saveDays(true);
   }
 });
-addEventListener('resize', () => { sizeFx(); placeBubble(); });
+addEventListener('resize', () => { sizeFx(); World.layout(); World.introFit(); placeBubble(); });
 addEventListener('pagehide', () => saveDays(true));
 setInterval(() => { if (!startEl.hidden) renderStart(); }, 30000);
 
@@ -4357,6 +4631,8 @@ if (synth){
 renderNoVoice();
 setMuted(muted);
 sizeFx();
+World.start();
+renderNavIcons();
 renderNeeds();
 showStart();
 requestAnimationFrame(t => { lastT = t; frame(t); });
