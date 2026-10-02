@@ -14,25 +14,41 @@ const GAME_ICON = {
     <g fill="#9edc8a"><circle cx="24" cy="38" r="5"/><circle cx="36" cy="54" r="6"/><circle cx="26" cy="62" r="3.5"/></g>
     <path d="M58 46 H94 Q92 72 76 72 Q60 72 58 46 Z" fill="#e8c27a" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><path d="M60 52 H92" stroke="#c98a4b" stroke-width="3"/>
     <circle cx="76" cy="40" r="11" fill="#a6b5d0" stroke="${INK}" stroke-width="3.5"/><circle cx="72" cy="38" r="2" fill="${INK}"/><circle cx="80" cy="38" r="2" fill="${INK}"/></svg>`,
+  catch: `<svg viewBox="0 0 100 80"><path d="M20 70 Q50 80 80 70" fill="none" stroke="#7cc85a" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="50" cy="40" r="17" fill="#ff4b5c" stroke="${INK}" stroke-width="4"/><path d="M50 23 Q52 14 58 12" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+    <path d="M58 16 Q68 10 70 20 Q62 22 58 16 Z" fill="#7cc85a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M42 34 Q44 30 48 30" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M24 14 V30 M78 18 V32 M30 6 V16" stroke="#9fd0ff" stroke-width="4" stroke-linecap="round"/></svg>`,
+  jump: `<svg viewBox="0 0 100 80"><path d="M6 72 H94" stroke="#7cc85a" stroke-width="6" stroke-linecap="round"/><ellipse cx="62" cy="64" rx="16" ry="9" fill="#a8b1bb" stroke="${INK}" stroke-width="4"/>
+    <path d="M12 52 Q30 18 54 30" fill="none" stroke="#ffd35c" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>
+    <path d="M70 12 l5 10 11 1.5 -8 7.5 2 11 -10 -5.5 -10 5.5 2 -11 -8 -7.5 11 -1.5 Z" fill="#ffd23a" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>
+    <circle cx="18" cy="56" r="10" fill="#7cc85a" stroke="${INK}" stroke-width="4"/><circle cx="21" cy="53" r="2.4" fill="${INK}"/></svg>`,
+  bubbles: `<svg viewBox="0 0 100 80"><g fill="rgba(160,215,255,.45)" stroke="${INK}" stroke-width="3.5"><circle cx="34" cy="44" r="20"/><circle cx="70" cy="30" r="14"/><circle cx="72" cy="62" r="10"/></g>
+    <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M24 36 Q27 30 33 29"/><path d="M63 24 Q65 21 69 20"/></g>
+    <text x="34" y="54" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="26" fill="#ff5d8f" stroke="${INK}" stroke-width="1.5">3</text></svg>`,
   size: `<svg viewBox="0 0 120 80"><rect x="10" y="10" width="44" height="62" rx="12" fill="#9a8cf0" stroke="${INK}" stroke-width="4"/>
     <rect x="70" y="42" width="24" height="30" rx="8" fill="#ffd35c" stroke="${INK}" stroke-width="4"/>
     <path d="M104 14 V70 M98 20 L104 12 L110 20 M98 64 L104 72 L110 64" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 };
 const GAMES = [
+  { id: 'catch', label: 'תופסים אוכל', three: true },
+  { id: 'jump', label: 'קופצים וכוכבים', three: true },
+  { id: 'bubbles', label: 'סופרים בועות', three: true },
   { id: 'dig', label: 'חופרים מאובן' },
   { id: 'eats', label: 'מי אוכל מה?' },
   { id: 'shadow', label: 'של מי הצל?' },
   { id: 'egg', label: 'ביצה או נולד?' },
   { id: 'size', label: 'מי יותר גדול?', wide: true }
 ];
-let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
+let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size', 'catch', 'jump', 'bubbles']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
 function renderGames(){
   const g = $('games-grid');
   g.textContent = '';
   for (const gm of GAMES){
+    if (gm.three && !World.on) continue;
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'game-tile' + (gm.wide ? ' wide' : ''); b.dir = 'rtl';
-    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '');
+    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '') + (gm.three ? '<span class="new3d">חדש</span>' : '');
+    if (gm.three) b.classList.add('three');
     b.addEventListener('click', () => { initAudio(); sfx.tap(); startGame(gm.id); });
     g.append(b);
   }
@@ -58,6 +74,8 @@ function tapOnce(btns){
   });
 }
 function startGame(id){
+  Music.play('game');
+  if (GAME3D_IDS.includes(id)){ start3d(id); return; }
   stopSpeech(); stopMic();
   gameOn = id; gameToken++;
   inPlay = false;
@@ -73,7 +91,8 @@ function startGame(id){
 function closeGame(){
   gameOn = null; gameToken++;
   gameEl.hidden = true;
-  document.body.classList.remove('in-game');
+  document.body.classList.remove('in-game', 'in-game3d');
+  if (World.on) World.E.stopGame();
   gameBody.textContent = '';
   stopSpeech();
   inPlay = true;
@@ -97,8 +116,79 @@ async function finishGame(tok, id){
   if (next){
     owned.push(next); store.set('ymd-owned', owned);
     setTimeout(() => { Pet.wear(next); FX.emit('sparkle', Pet.headTop().x, Pet.headTop().y, 14, { speed: 200 }); sfx.sparkle(); say('newHat', null, 9); }, 300);
+  } else setTimeout(() => { if (inPlay) earnSticker(); }, 500);
+}
+
+/* ---------- the 3D action games: the friend itself plays, out in the meadow ---------- */
+const GAME3D_IDS = ['catch', 'jump', 'bubbles'];
+const NB = {
+  he: ['בועה אחת', 'שתי בועות', 'שלוש בועות', 'ארבע בועות', 'חמש בועות'],
+  ru: ['один пузырь', 'два пузыря', 'три пузыря', 'четыре пузыря', 'пять пузырей'],
+  en: ['one bubble', 'two bubbles', 'three bubbles', 'four bubbles', 'five bubbles']
+};
+function countLang(){ const on = LANGS.filter(l => langsOn[l]); return on.length ? pick(on) : 'he'; }
+function sayCount(n, lang){ if (n >= 1 && n <= 10) sayFrom({ he: [COUNT.he[n - 1]], ru: [COUNT.ru[n - 1]], en: [COUNT.en[n - 1]] }, null, 9, lang); }
+function start3d(id){
+  if (!World.on){ return; }
+  stopSpeech(); stopMic();
+  gameOn = id; gameToken++;
+  const tok = gameToken;
+  inPlay = false;
+  closeWardrobe();
+  gameEl.hidden = false;
+  gameEl.className = 'game g3d g-' + id;
+  gameBody.textContent = '';
+  document.body.classList.add('in-game', 'in-game3d');
+  bubbleAnchor = () => ({ x: innerWidth / 2, y: 0 });
+  const sp = Pet.sp;
+  const lang = countLang();
+  const young = profile.age <= 3;
+  const done = () => finishGame(tok, id);
+  if (id === 'catch'){
+    const goal = young ? 4 : 6;
+    setDots(goal, 0);
+    let lastYuck = 0;
+    World.E.startGame('catch', { foods: FOOD_ORDER, diet: DIET[sp], goal,
+      onScore: n => { if (!alive(tok)) return; setDots(goal, n); sayCount(n, lang); addNeed('food', 6); },
+      onYuck: () => { if (!alive(tok)) return; const now = performance.now(); if (now - lastYuck > 5000){ lastYuck = now; say('catchYuck', { diet: DIET_TEXT[sp] }, 5); } },
+      onDone: done });
+    say('catchHello', { diet: DIET_TEXT[sp] }, 9);
+  } else if (id === 'jump'){
+    const goal = young ? 5 : 8;
+    setDots(goal, 0);
+    World.E.startGame('jump', { goal, speed: young ? 1.25 : 1.5,
+      onScore: n => { if (!alive(tok)) return; setDots(goal, n); sayCount(n, lang); },
+      onDone: done });
+    say('jumpHello', null, 9);
+  } else if (id === 'bubbles'){
+    const rounds = 3, top = profile.age >= 5 ? 5 : young ? 3 : 4;
+    let round = 0, target = 0, taking = false;
+    setDots(rounds, 0);
+    const ask = () => {
+      if (!alive(tok)) return;
+      target = 2 + Math.floor(Math.random() * (top - 1));
+      taking = true;
+      World.E.game && World.E.game.resetCount && World.E.game.resetCount();
+      say('bubblesAsk', { nb: { he: NB.he[target - 1], ru: NB.ru[target - 1], en: NB.en[target - 1] } }, 9);
+    };
+    World.E.startGame('bubbles', { max: 7,
+      onPop: n => {
+        if (!alive(tok) || !taking) return;
+        if (n < target){ sayCount(n, lang); return; }
+        if (n === target){
+          taking = false; round++;
+          setDots(rounds, round);
+          say('countDone', { n: { he: NUM_WORD.he[target - 1], ru: NUM_WORD.ru[target - 1], en: NUM_WORD.en[target - 1] } }, 9, lang);
+          sfx.yes(); Pet.act('dance', { dur: 2 });
+          if (round >= rounds) setTimeout(done, 1600); else setTimeout(ask, 2600);
+        }
+      } });
+    sayP('bubblesHello', null, 9).then(ask);
   }
 }
+// taps on the 3D picture go to the game
+World.canvas.addEventListener('pointerdown', e => { if (gameOn && World.on && document.body.classList.contains('in-game3d')){ initAudio(); World.E.gamePointer('down', e.clientX, e.clientY); } });
+World.canvas.addEventListener('pointermove', e => { if (gameOn && World.on && document.body.classList.contains('in-game3d') && (e.buttons || e.pointerType === 'touch')) World.E.gamePointer('move', e.clientX, e.clientY); });
 
 /* Who eats what: one food, two friends; tap the one who eats it. */
 async function gameEats(tok){
@@ -204,7 +294,7 @@ async function gameEgg(tok){
   setDots(rounds, 0);
   // always at least one friend that is born, so the answer is not always "egg"
   let order = shuffle(SPECIES_ORDER).slice(0, rounds);
-  if (order.every(s => FROM_EGG[s])) order[rounds - 1] = pick(['elephant', 'lion']);
+  if (order.every(s => FROM_EGG[s])) order[rounds - 1] = pick(['elephant', 'lion', 'kangaroo']);
   if (order.every(s => !FROM_EGG[s])) order[0] = pick(['trex', 'penguin']);
   for (let r = 0; r < rounds; r++){
     if (!alive(tok)) return;
@@ -296,7 +386,7 @@ async function gameSize(tok){
 async function gameDig(tok){
   const n = profile.age >= 5 ? 3 : 2;
   setDots(n, 0);
-  const order = shuffle(['trex', 'trike', 'stego', 'brachio']);
+  const order = shuffle(['trex', 'trike', 'stego', 'brachio', 'anky']);
   for (let r = 0; r < n; r++){
     if (!alive(tok)) return;
     const sp = order[r];
@@ -385,6 +475,14 @@ function renderAlbum(){
   const tabs = $('album-tabs'), cards = $('cards');
   if (!albumSp) albumSp = current || 'trex';
   tabs.textContent = '';
+  {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'album-tab sticker-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(albumSp === 'stickers'));
+    b.setAttribute('aria-label', 'מדבקות');
+    b.innerHTML = `<span class="sticker">${stickerSvg(STICKERS.find(s => s.id === 'star'))}</span><span class="count">${stickers.length}/${STICKERS.length}</span>`;
+    b.addEventListener('click', () => { initAudio(); sfx.tap(); albumSp = 'stickers'; renderAlbum(); });
+    tabs.append(b);
+  }
   for (const sp of SPECIES_ORDER){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'album-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(sp === albumSp));
@@ -396,6 +494,7 @@ function renderAlbum(){
     tabs.append(b);
   }
   cards.textContent = '';
+  if (albumSp === 'stickers'){ renderStickerPage(cards); return; }
   const fresh = new Set(todayFacts.map(([s, k]) => s + ':' + k));
   for (const k of FACT_KINDS){
     const has = hasFact(albumSp, k);

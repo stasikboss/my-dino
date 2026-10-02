@@ -147,6 +147,20 @@ const Pet = {
   },
   lookHome(){ if (World.on){ World.E.lookAt(null); return; } for (const p of this.pupils || []) p.setAttribute('transform', 'translate(0 0)'); },
   blink(){ if (this.el && !this.el.classList.contains('sleep') && !this.el.classList.contains('happy')) this.flash('blink', 130); },
+  // a whole action (purr, giggle, sneeze, lookback, stomp, shakehead, dizzy, yawn, stretch, dance, lookaround,
+  // surprise, love, wave, header, shakedry). In 3D the engine plays it; flat, the closest simple motion stands in.
+  act(name, o){
+    if (!this.el) return;
+    if (World.on){ World.E.act(name, o); return; }
+    const FLAT = { purr: ['squish', 'happy'], giggle: ['wiggle', 'happy'], sneeze: ['shake', 'wide'], lookback: ['wiggle', 'tilt'], stomp: ['hop', 'happy'], shakehead: ['shake'],
+      dizzy: ['wiggle', 'tilt'], yawn: ['nod', 'tilt'], stretch: ['hop'], dance: ['hop', 'happy'], lookaround: ['nod', 'tilt'], surprise: ['hop', 'wide'], love: ['squish', 'happy'],
+      wave: ['hop', 'happy'], header: ['hop', 'happy'], shakedry: ['wiggle', 'happy'] };
+    const f = FLAT[name]; if (!f) return;
+    this.flash(f[0], { hop: 600, squish: 360, wiggle: 700, shake: 520, nod: 700 }[f[0]] || 600);
+    if (f[1] === 'tilt'){ this.el.classList.add('tilt'); setTimeout(() => this.el && this.el.classList.remove('tilt'), 1300); }
+    else if (f[1]) this.expr(f[1], 1200);
+    if (name === 'dance'){ setTimeout(() => this.flash('hop', 600), 700); setTimeout(() => this.flash('hop', 600), 1400); }
+  },
   wear(outfit){
     petData(this.sp).outfit = outfit; savePets();
     if (World.on) World.E.setOutfit(outfit); else this.refresh();

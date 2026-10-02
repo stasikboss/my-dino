@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-DG6f1WHOzNDuufejzCejiRlX1ZYwlefIfqKMPrLTrIE=' 'sha256-sb9deyMt1ekQ8UVcbAi99I+An+T/77h6lRzTGeo8IEg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VqwqPBcj4CKjRN5DXYzLvpbpIXAwlnsVsIghogNOwfg=' 'sha256-sb9deyMt1ekQ8UVcbAi99I+An+T/77h6lRzTGeo8IEg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>הדינו שלי</title>
@@ -769,6 +769,55 @@ img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
 @media (orientation:landscape) and (max-height:560px){.tray-btn img{width:48px;height:48px}.nav-btn img{width:36px;height:36px}}
 @media (min-width:700px) and (min-height:820px){.nav-btn img{width:60px;height:60px}}
 
+/* 3D games: the meadow and the friend are the game; only the top bar sits over them */
+.game.g3d{background:transparent;pointer-events:none}
+.game.g3d .game-top{pointer-events:auto}
+.game.g3d .game-body{display:none}
+body.in-game3d .hud,body.in-game3d .tray,body.in-game3d .nav,body.in-game3d .games,body.in-game3d .album,body.in-game3d .clock{display:none!important}
+body.in-game3d .bubble{pointer-events:none}
+body.in-game3d .world{touch-action:none}
+.game-tile.three{background:linear-gradient(#fff9e8,#ffeec8)}
+.game-tile .new3d{position:absolute;top:8px;inset-inline-start:10px;font:700 12px/1 var(--font-display);color:#fff;background:linear-gradient(#ff8a72,#ff5d5d);padding:4px 8px;border-radius:999px;box-shadow:0 2px 0 #c6303d}
+.gi-catch{--gc:#ffe0e0}.gi-jump{--gc:#e2f4d0}.gi-bubbles{--gc:#dff1ff}
+.games{overflow-y:auto;align-content:start;padding-top:6px;padding-bottom:10px;-webkit-overflow-scrolling:touch}
+
+/* the daily surprise gift */
+.gift{position:fixed;z-index:6;right:max(14px,env(safe-area-inset-right));bottom:calc(var(--nav-h) + var(--safe-b) + var(--tray-h) + 14px);width:clamp(84px,22vw,120px);height:clamp(84px,22vw,120px);border:0;padding:0;background:none;cursor:pointer;filter:drop-shadow(0 10px 10px rgba(90,40,10,.25))}
+.gift img,.gift svg{width:100%;height:100%;display:block;pointer-events:none}
+.gift.arrive{animation:gift-in .7s cubic-bezier(.2,1.4,.4,1) backwards,gift-wobble 1.6s ease-in-out .8s infinite}
+.gift.opening{animation:gift-open .65s ease-in forwards}
+@keyframes gift-in{0%{transform:translateY(-60vh) rotate(-20deg);opacity:0}70%{transform:translateY(8px) rotate(4deg);opacity:1}100%{transform:none}}
+@keyframes gift-wobble{0%,70%,100%{transform:none}76%{transform:rotate(-9deg) scale(1.04)}84%{transform:rotate(8deg) scale(1.04)}92%{transform:rotate(-5deg)}}
+@keyframes gift-open{0%{transform:none}30%{transform:rotate(-12deg) scale(1.1)}55%{transform:rotate(12deg) scale(1.15)}80%{transform:scale(1.35);opacity:1}100%{transform:scale(1.6);opacity:0}}
+/* a new sticker, shown big */
+.reveal{position:fixed;inset:0;z-index:11;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(255,240,200,.55),rgba(40,20,60,.55));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);cursor:pointer}
+.reveal-card{display:grid;justify-items:center;gap:8px;padding:22px 26px 20px;border-radius:32px;background:linear-gradient(#fffdf8,#fff1dc);box-shadow:0 8px 0 #e6c9a0,0 24px 50px rgba(60,20,10,.35);animation:pop-card .5s cubic-bezier(.2,1.5,.4,1) backwards}
+@keyframes pop-card{0%{transform:scale(.4) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
+.reveal-kicker{font:700 clamp(22px,6vw,30px)/1 var(--font-display);color:#ff6a3d}
+.reveal-name{font:700 clamp(20px,5.4vw,26px)/1.1 var(--font-display);color:var(--text)}
+.reveal-count{font:600 15px/1 var(--font-display);color:var(--text-soft)}
+.sticker{display:block;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 6px rgba(80,40,20,.25))}
+.sticker svg{display:block;width:100%;height:100%}
+.sticker.big{width:min(56vw,230px);height:min(56vw,230px);animation:sticker-spin .9s cubic-bezier(.2,1.2,.4,1) .15s backwards}
+@keyframes sticker-spin{0%{transform:scale(.2) rotate(-200deg)}100%{transform:none}}
+/* the album page of stickers */
+.sticker-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(26vw,110px),1fr));gap:12px;padding:4px 2px 14px}
+.sticker-cell{aspect-ratio:1;border:0;border-radius:24px;background:linear-gradient(#fffefb,#fff4e4);box-shadow:var(--lift-sm),inset 0 2px 0 #fff;display:grid;place-items:center;padding:12%;cursor:pointer}
+.sticker-cell .sticker{width:100%;height:100%}
+.sticker-cell.locked{background:linear-gradient(#f5ede2,#ece0cf);box-shadow:0 3px 0 #e2d2bb,inset 0 2px 6px rgba(120,80,40,.1)}
+.sticker-q{font:700 34px/1 var(--font-display);color:#cbb79b}
+.album-tab.sticker-tab .sticker{width:70%;height:70%;margin:auto}
+.album-tab.sticker-tab{display:grid;place-items:center}
+/* painting the home */
+.theme-btn .swatch{width:78%;aspect-ratio:1;border-radius:50%;background:conic-gradient(var(--a) 0 50%,var(--b) 50% 100%);box-shadow:inset 0 0 0 4px #fff,0 3px 8px rgba(80,40,20,.25)}
+.theme-btn .need{position:absolute;bottom:6px;font:700 13px/1 var(--font-display);color:#c25b2a;background:#fff3c4;border-radius:999px;padding:3px 7px}
+.theme-btn.locked .swatch{filter:grayscale(.7) opacity(.5)}
+.theme-btn.locked::after{display:none}
+body.theme-1 .room[data-room="home"]{--wall:#e3f6ea;--wall2:#c3eacf;--wains:#a8dcc0;--wains2:#7cc3a0}
+body.theme-2 .room[data-room="home"]{--wall:#e0f0ff;--wall2:#bddcfb;--wains:#a9cdef;--wains2:#7fb1e0}
+body.theme-3 .room[data-room="home"]{--wall:#efe8ff;--wall2:#d8cbff;--wains:#c9b8f5;--wains2:#a993ea}
+body.theme-4 .room[data-room="home"]{--wall:#fff5cc;--wall2:#ffe592;--wains:#ffd970;--wains2:#f2bf3c}
+
 </style>
 </head>
 <body>
@@ -1045,6 +1094,7 @@ img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
 
 <div class="bubble" id="bubble" role="status" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="reveal" id="reveal" hidden></div>
 
 <!-- start -->
 <div class="screen sky" id="start">
@@ -1095,7 +1145,7 @@ img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
 </div>
 
 <div class="sheet" id="wardrobe" hidden dir="rtl">
-  <div class="sheet-row"><strong style="font:700 22px/1 var(--font-display)">הארון</strong>
+  <div class="sheet-row"><strong id="sheet-title" style="font:700 22px/1 var(--font-display)">הארון</strong>
     <button class="soft-btn" type="button" id="wardrobe-close" aria-label="סגירה"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 14 L34 34 M34 14 L14 34" stroke="#1b2430" stroke-width="6" stroke-linecap="round"/></svg></button></div>
   <div class="outfits" id="outfits"></div>
 </div>
@@ -1170,6 +1220,7 @@ img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
       <label class="check" for="opt-mic"><input type="checkbox" id="opt-mic" checked><span>״חזור אחריי״ במיקרופון<small>החבר חוזר על מה שהילד אומר בקול מצחיק. ההקלטה נשארת רק בזיכרון של המכשיר לכמה שניות ונמחקת. שום דבר לא נשמר ולא נשלח.</small></span></label>
       <label class="check" for="opt-count"><input type="checkbox" id="opt-count" checked><span>אתגרי ספירה במטבח<small>״תאכיל אותי 3 פעמים!״ והחבר סופר יחד</small></span></label>
       <label class="check" for="opt-needs"><input type="checkbox" id="opt-needs" checked><span>הצרכים יורדים לאט<small>רעב, ניקיון, אנרגיה וכיף. יורדים רק בזמן המשחק, אף פעם לא כשהמשחק סגור</small></span></label>
+      <label class="check" for="opt-music"><input type="checkbox" id="opt-music" checked><span>מוזיקת רקע<small>מנגינה שקטה לכל חדר, שמתרככת כשהחבר מדבר ונעצרת כשהוא ישן</small></span></label>
       <label class="check" for="opt-three"><input type="checkbox" id="opt-three" checked><span>גרפיקה תלת־ממדית<small>החבר והחדרים בתלת־ממד. במכשיר ישן או איטי אפשר לכבות, והמשחק עובר לציור שטוח וקל יותר</small></span></label>
     </div>
 
@@ -1242,7 +1293,7 @@ img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
 <script>
 (() => {
 'use strict';
-/* ---------- artwork: seven original characters drawn as SVG on a 240x240 stage, hats, foods and tools ----------
+/* ---------- artwork: nine original characters drawn as SVG on a 240x240 stage, hats, foods and tools ----------
    Every character shares one rig so the game can animate them the same way:
    .p-tail (wags), .p-body (breathes), .p-head (tilts, nods), .eye (blinks, looks, closes, smiles), .mouth (talks, eats).
    Coordinates are in stage units; the ground is at y=226. */
@@ -1462,6 +1513,45 @@ const SPECIES = {
     }
   },
 
+  anky: {
+    line: '#28407e',
+    iris: '#3a5aa8', gloss: [[54, 152, 14, 6], [124, 150, 18, 7]], ao: [96, 196, 26, 9],
+    c: { body: '#5f91f0', dark: '#4677d6', far: '#4677d6', belly: '#e1eaff', armor: '#ffd06e', armor2: '#f2b347', beak: '#3d5fa8' },
+    mouth: [64, 186], headPivot: [92, 186], hat: [68, 142, 1.15], eyes: [[52, 166], [84, 166], 10],
+    body(c){
+      const knob = (x, y, r, f) => `<path d="M${x - r} ${y + r * 0.35} Q${x - r * 0.9} ${y - r * 0.9} ${x} ${y - r * 1.15} Q${x + r * 0.9} ${y - r * 0.9} ${x + r} ${y + r * 0.35} Z" fill="${f}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`;
+      // the bony club at the end of the tail: two round lobes
+      const tail = `<g class="p-tail" style="transform-origin:196px 190px"><path d="M194 176 C210 172 220 172 228 176 C228 186 214 192 196 200 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+          <ellipse cx="229" cy="180" rx="13" ry="11" fill="${c.armor2}" stroke="${INK}" stroke-width="${SW}"/><ellipse cx="225" cy="176" rx="7" ry="5" fill="${c.armor}" opacity=".9"/></g>`;
+      // side spikes along the lower edge of the shell, pointing out
+      const spikes = [[76, 184, -70], [98, 202, -100], [124, 206, -95], [150, 206, -85], [176, 202, -80], [198, 188, -60]].map(s =>
+        `<path transform="rotate(${s[2] + 90} ${s[0]} ${s[1]})" d="M${s[0] - 6} ${s[1]} L${s[0]} ${s[1] + 14} L${s[0] + 6} ${s[1]} Z" fill="${c.armor2}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`).join('');
+      // rows of armor knobs on the back
+      const rows = [[[108, 146, 8], [130, 138, 9], [154, 138, 9], [176, 146, 8]], [[94, 166, 7], [118, 160, 8], [142, 156, 8], [166, 160, 8], [188, 168, 7]], [[104, 184, 6], [128, 180, 7], [152, 180, 7], [176, 184, 6]]];
+      const knobs = rows.map((row, i) => row.map((k, j) => knob(k[0], k[1], k[2], (i + j) % 2 ? c.armor : c.armor2)).join('')).join('');
+      return `${tail}
+        <path d="${legPath(116, 140, 198)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="${legPath(160, 184, 198)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        ${spikes}
+        <path d="M70 192 C66 150 104 128 142 128 C184 128 212 152 208 190 C204 210 172 212 140 212 C108 212 74 210 70 192 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M80 198 C92 190 114 188 140 188 C166 188 188 190 200 198 C190 208 166 210 140 210 C112 210 90 208 80 198 Z" fill="${c.belly}" opacity=".85"/>
+        ${knobs}
+        <path d="${legPath(88, 114, 194)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="${legPath(170, 196, 194)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        ${toes(88, 114, 224)}${toes(170, 196, 224)}`;
+    },
+    head(c){
+      return `<path d="M96 168 C110 172 116 188 108 200 L84 196 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M84 146 L96 132 L98 150 Z M50 146 L36 134 L40 152 Z" fill="${c.armor2}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M28 172 C26 148 46 138 68 138 C92 138 110 150 108 174 C106 194 88 200 66 200 C44 200 30 192 28 172 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
+        <g fill="${c.armor}" stroke="${INK}" stroke-width="2.5"><ellipse cx="58" cy="146" rx="6" ry="4"/><ellipse cx="76" cy="144" rx="6" ry="4"/><ellipse cx="94" cy="152" rx="5" ry="3.5"/></g>
+        ${eyeSvg(52, 166, 10)}${eyeSvg(84, 166, 10)}
+        ${cheeks(38, 98, 182, 7, 5)}
+        <path d="M54 194 Q64 200 74 194 Q64 206 54 194 Z" fill="${c.beak}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+        ${mouthSvg(64, 184, 22)}`;
+    }
+  },
+
   elephant: {
     line: '#46527a',
     iris: '#5a6f96', gloss: [[100, 54, 17, 8], [96, 150, 12, 6]], ao: [120, 138, 46, 11],
@@ -1545,9 +1635,35 @@ const SPECIES = {
             <path d="M107 100 Q120 94 133 100 L120 110 Z" fill="${c.beak}" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/></g>
         </g>`;
     }
+  },
+
+  kangaroo: {
+    line: '#7a3a14',
+    iris: '#6b3d1e', gloss: [[104, 48, 13, 6], [100, 140, 10, 16]], ao: [120, 120, 30, 8],
+    c: { body: '#de9057', dark: '#bf6f3c', belly: '#f9dfc4', ear: '#ffb3a7', nose: '#5a3426' },
+    mouth: [120, 100], headPivot: [120, 112], hat: [120, 40, 1.05], eyes: [[104, 66], [136, 66], 10],
+    body(c){
+      return `<g class="p-tail" style="transform-origin:150px 204px"><path d="M140 196 C170 196 200 206 232 222 C206 226 172 224 146 218 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/></g>
+        <g fill="${c.dark}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"><path d="M70 222 Q72 210 92 210 Q108 210 110 222 Z"/><path d="M130 222 Q132 210 148 210 Q168 210 170 222 Z"/></g>
+        <path d="M120 104 C144 104 158 128 162 158 C166 194 150 216 120 216 C90 216 74 194 78 158 C82 128 96 104 120 104 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
+        <g fill="${c.body}" stroke="${INK}" stroke-width="${SW}"><ellipse cx="88" cy="190" rx="22" ry="27"/><ellipse cx="152" cy="190" rx="22" ry="27"/></g>
+        <ellipse cx="120" cy="168" rx="25" ry="40" fill="${c.belly}"/>
+        <g class="p-arm-l">${thick('M104 132 Q96 144 102 156', 9, c.body)}<ellipse cx="103" cy="158" rx="6" ry="5" fill="${c.dark}" stroke="${INK}" stroke-width="2.5"/></g>
+        <g class="p-arm-r">${thick('M136 132 Q144 144 138 156', 9, c.body)}<ellipse cx="137" cy="158" rx="6" ry="5" fill="${c.dark}" stroke="${INK}" stroke-width="2.5"/></g>`;
+    },
+    head(c){
+      return `<g class="p-ear-l" style="transform-origin:98px 50px"><path d="M100 52 C84 34 82 8 88 2 C100 6 108 28 108 48 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M100 44 C90 32 89 16 92 10 C99 16 103 30 103 42 Z" fill="${c.ear}"/></g>
+        <g class="p-ear-r" style="transform-origin:142px 50px"><path d="M140 52 C156 34 158 8 152 2 C140 6 132 28 132 48 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M140 44 C150 32 151 16 148 10 C141 16 137 30 137 42 Z" fill="${c.ear}"/></g>
+        <path d="M84 72 C84 50 100 40 120 40 C140 40 156 50 156 72 C156 92 142 112 120 112 C98 112 84 92 84 72 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
+        <ellipse cx="120" cy="94" rx="20" ry="15" fill="${c.belly}"/>
+        <path d="M112 84 Q120 80 128 84 Q126 91 120 92 Q114 91 112 84 Z" fill="${c.nose}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+        ${eyeSvg(104, 66, 10)}${eyeSvg(136, 66, 10)}
+        ${cheeks(92, 148, 86, 7, 5)}
+        ${mouthSvg(120, 99, 16)}`;
+    }
   }
 };
-const SPECIES_ORDER = ['trex', 'trike', 'stego', 'brachio', 'elephant', 'lion', 'penguin'];
+const SPECIES_ORDER = ['trex', 'trike', 'stego', 'brachio', 'anky', 'elephant', 'lion', 'penguin', 'kangaroo'];
 
 /* Hats and glasses, drawn around (0,0) = top of the head, about 60 units wide. */
 const OUTFITS = {
@@ -1727,13 +1843,15 @@ const PET_NAMES = {
   brachio: { he: 'ברכיוזאורוס', ru: 'брахиозавр', en: 'Brachiosaurus', enA: 'a Brachiosaurus', enThe: 'the Brachiosaurus', short: 'ברכיוזאורוס' },
   elephant: { he: 'פיל', ru: 'слон', en: 'elephant', enA: 'an elephant', enThe: 'the elephant', short: 'פיל' },
   lion: { he: 'אריה', ru: 'лев', en: 'lion', enA: 'a lion', enThe: 'the lion', short: 'אריה' },
-  penguin: { he: 'פינגווין', ru: 'пингвин', en: 'penguin', enA: 'a penguin', enThe: 'the penguin', short: 'פינגווין' }
+  penguin: { he: 'פינגווין', ru: 'пингвин', en: 'penguin', enA: 'a penguin', enThe: 'the penguin', short: 'פינגווין' },
+  anky: { he: 'אנקילוזאורוס', ru: 'анкилозавр', en: 'Ankylosaurus', enA: 'an Ankylosaurus', enThe: 'the Ankylosaurus', short: 'אנקילוזאורוס' },
+  kangaroo: { he: 'קנגורו', ru: 'кенгуру', en: 'kangaroo', enA: 'a kangaroo', enThe: 'the kangaroo', short: 'קנגורו' }
 };
-const IS_DINO = { trex: true, trike: true, stego: true, brachio: true, elephant: false, lion: false, penguin: false };
-const FROM_EGG = { trex: true, trike: true, stego: true, brachio: true, elephant: false, lion: false, penguin: true };
+const IS_DINO = { trex: true, trike: true, stego: true, brachio: true, anky: true, elephant: false, lion: false, penguin: false, kangaroo: false };
+const FROM_EGG = { trex: true, trike: true, stego: true, brachio: true, anky: true, elephant: false, lion: false, penguin: true, kangaroo: false };
 // Rough length in meters, for "who is bigger"; pairs that are too close (or bigger in one way, smaller in another) are skipped.
-const REAL_SIZE = { brachio: 22, trex: 12, trike: 9, stego: 9, elephant: 6.5, lion: 2.5, penguin: 1.1 };
-const SIZE_SKIP = [['trike', 'stego'], ['elephant', 'stego']];
+const REAL_SIZE = { brachio: 22, trex: 12, trike: 9, stego: 9, anky: 7, elephant: 6.5, lion: 2.5, kangaroo: 2, penguin: 1.1 };
+const SIZE_SKIP = [['trike', 'stego'], ['elephant', 'stego'], ['anky', 'trike'], ['anky', 'stego'], ['anky', 'elephant'], ['kangaroo', 'lion']];
 
 const FOODS = {
   meat: { he: 'בשר', ru: 'мясо', ruAcc: 'мясо', en: 'meat' },
@@ -1745,7 +1863,7 @@ const FOODS = {
 };
 const DIET = {
   trex: ['meat'], trike: ['fern'], stego: ['fern'], brachio: ['leaves'],
-  elephant: ['grass', 'leaves', 'fruit'], lion: ['meat'], penguin: ['fish']
+  elephant: ['grass', 'leaves', 'fruit'], lion: ['meat'], penguin: ['fish'], anky: ['fern'], kangaroo: ['grass', 'leaves']
 };
 const DIET_TEXT = {
   trex: { he: 'בשר', ru: 'мясо', en: 'meat' },
@@ -1754,7 +1872,9 @@ const DIET_TEXT = {
   brachio: { he: 'עלים מעצים גבוהים', ru: 'листья с высоких деревьев', en: 'leaves from tall trees' },
   elephant: { he: 'עשב, עלים ופירות', ru: 'траву, листья и фрукты', en: 'grass, leaves and fruit' },
   lion: { he: 'בשר', ru: 'мясо', en: 'meat' },
-  penguin: { he: 'דגים', ru: 'рыбу', en: 'fish' }
+  penguin: { he: 'דגים', ru: 'рыбу', en: 'fish' },
+  anky: { he: 'צמחים נמוכים, כמו שרכים', ru: 'низкие растения, например папоротник', en: 'low plants, like ferns' },
+  kangaroo: { he: 'עשב ועלים', ru: 'траву и листья', en: 'grass and leaves' }
 };
 const FEATURE = {
   trex: { he: 'ראש גדול וידיים קטנות', ru: 'большая голова и маленькие лапки', en: 'a big head and tiny arms' },
@@ -1763,7 +1883,9 @@ const FEATURE = {
   brachio: { he: 'צוואר ארוך ארוך', ru: 'очень длинная шея', en: 'a very long neck' },
   elephant: { he: 'חדק ואוזניים גדולות', ru: 'хобот и большие уши', en: 'a trunk and big ears' },
   lion: { he: 'רעמה גדולה', ru: 'большая грива', en: 'a big mane' },
-  penguin: { he: 'כנפיים קטנות ובטן לבנה', ru: 'маленькие крылья и белый животик', en: 'little flippers and a white belly' }
+  penguin: { he: 'כנפיים קטנות ובטן לבנה', ru: 'маленькие крылья и белый животик', en: 'little flippers and a white belly' },
+  anky: { he: 'שריון על הגב, ופטיש של עצם בזנב', ru: 'броня на спине и костяная булава на хвосте', en: 'armor on its back and a bony club on its tail' },
+  kangaroo: { he: 'רגליים חזקות לקפיצה וזנב ארוך', ru: 'сильные ноги для прыжков и длинный хвост', en: 'strong legs for hopping and a long tail' }
 };
 
 /* Body parts the bath names while the sponge is on them. Points are in stage units. */
@@ -1774,7 +1896,9 @@ const PARTS = {
   brachio: [[104, 112, 'neck'], [88, 52, 'head'], [160, 158, 'back'], [108, 204, 'legs'], [214, 200, 'tail']],
   elephant: [[104, 138, 'trunk'], [44, 100, 'ears'], [196, 100, 'ears'], [120, 66, 'head'], [120, 180, 'belly'], [120, 210, 'legs']],
   lion: [[120, 38, 'mane'], [60, 96, 'mane'], [180, 96, 'mane'], [120, 104, 'face'], [120, 190, 'belly'], [120, 218, 'paws'], [196, 168, 'tail']],
-  penguin: [[60, 168, 'flippers'], [180, 168, 'flippers'], [120, 168, 'belly'], [120, 58, 'head'], [120, 222, 'feet'], [120, 110, 'beak']]
+  penguin: [[60, 168, 'flippers'], [180, 168, 'flippers'], [120, 168, 'belly'], [120, 58, 'head'], [120, 222, 'feet'], [120, 110, 'beak']],
+  anky: [[142, 152, 'armor'], [66, 168, 'head'], [228, 180, 'club'], [140, 202, 'belly'], [101, 210, 'legs']],
+  kangaroo: [[94, 24, 'ears'], [146, 24, 'ears'], [120, 72, 'head'], [120, 170, 'belly'], [102, 148, 'arms'], [152, 190, 'legs'], [90, 216, 'feet'], [200, 214, 'tail']]
 };
 const PART_NAMES = {
   head: { he: 'הראש', ru: 'голову', en: 'head' },
@@ -1795,7 +1919,9 @@ const PART_NAMES = {
   paws: { he: 'הכפות', ru: 'лапы', en: 'paws' },
   flippers: { he: 'הכנפיים', ru: 'крылышки', en: 'flippers' },
   feet: { he: 'הרגליים', ru: 'лапки', en: 'feet' },
-  beak: { he: 'המקור', ru: 'клюв', en: 'beak' }
+  beak: { he: 'המקור', ru: 'клюв', en: 'beak' },
+  armor: { he: 'השריון', ru: 'броню', en: 'armor' },
+  club: { he: 'הפטיש בזנב', ru: 'булаву на хвосте', en: 'tail club' }
 };
 
 /* The album: six cards per friend. Each card opens through something done in the game. */
@@ -1872,15 +1998,31 @@ const FACTS = {
     baby: { he: 'פינגווינים בוקעים מביצה. אבא פינגווין קיסרי מחמם את הביצה על הרגליים!', ru: 'Пингвины вылупляются из яиц. Папа императорский пингвин греет яйцо на лапах!', en: 'Penguins hatch from eggs. An emperor penguin dad keeps the egg warm on his feet!' },
     size: { he: 'הפינגווין הקיסרי, הכי גדול, בגובה של ילד בן חמש בערך.', ru: 'Императорский пингвин, самый большой, ростом примерно с пятилетнего ребёнка.', en: 'The emperor penguin, the biggest one, is about as tall as a five-year-old.' },
     fun: { he: 'פינגווינים הם ציפורים, וציפורים הן הדינוזאורים של היום!', ru: 'Пингвины — это птицы, а птицы — это динозавры наших дней!', en: 'Penguins are birds, and birds are the dinosaurs of today!' }
+  },
+  anky: {
+    eats: { he: 'אנקילוזאורוס אכל צמחים נמוכים, כמו שרכים.', ru: 'Анкилозавр ел низкие растения, например папоротники.', en: 'Ankylosaurus ate low plants, like ferns.' },
+    body: { he: 'הגב שלו היה מכוסה בשריון של עצם, ואפילו לעפעפיים היה שריון!', ru: 'Его спина была покрыта костяной бронёй, и даже веки были в броне!', en: 'Its back was covered in bony armor, and even its eyelids had armor!' },
+    home: { he: 'אנקילוזאורוס חי באמריקה, באותה תקופה כמו טירנוזאורוס וטריצרטופס.', ru: 'Анкилозавр жил в Америке, в одно время с тираннозавром и трицератопсом.', en: 'Ankylosaurus lived in America, at the same time as T.\u00a0rex and Triceratops.' },
+    baby: { he: 'אנקילוזאורוס בקע מביצה, כמו כל הדינוזאורים.', ru: 'Анкилозавр вылупился из яйца, как все динозавры.', en: 'Ankylosaurus hatched from an egg, like all dinosaurs.' },
+    size: { he: 'אנקילוזאורוס היה כבד כמו פיל!', ru: 'Анкилозавр весил как слон!', en: 'An Ankylosaurus was as heavy as an elephant!' },
+    fun: { he: 'בסוף הזנב היה לו גוש עצם כבד, כמו פטיש. מדענים חושבים שהוא הניף אותו כדי לשמור על עצמו.', ru: 'На конце хвоста у него была тяжёлая костяная булава, как молоток. Учёные думают, что он размахивал ею, чтобы защищаться.', en: 'At the end of its tail was a heavy bony club, like a hammer. Scientists think it swung it to protect itself.' }
+  },
+  kangaroo: {
+    eats: { he: 'קנגורו אוכלים צמחים: בעיקר עשב, וגם עלים.', ru: 'Кенгуру едят растения: в основном траву, а ещё листья.', en: 'Kangaroos eat plants: mostly grass, and leaves too.' },
+    body: { he: 'יש לי רגליים אחוריות חזקות לקפיצה, וזנב ארוך וחזק. כשאני הולך לאט, אני נשען על הזנב כמו על רגל חמישית!', ru: 'У меня сильные задние ноги для прыжков и длинный сильный хвост. Когда я иду медленно, я опираюсь на хвост, как на пятую ногу!', en: 'I have strong back legs for hopping, and a long, strong tail. When I walk slowly, I lean on my tail like a fifth leg!' },
+    home: { he: 'קנגורו חיים באוסטרליה, בקבוצות.', ru: 'Кенгуру живут в Австралии, группами.', en: 'Kangaroos live in Australia, in groups called mobs.' },
+    baby: { he: 'קנגורו לא בוקעים מביצה. התינוק נולד קטן קטן, בגודל של ענב, וגדל בכיס של אמא.', ru: 'Кенгуру не вылупляются из яиц. Малыш рождается крошечным, размером с виноградинку, и растёт в сумке у мамы.', en: "Kangaroos don't hatch from eggs. The baby is born tiny, the size of a grape, and grows in mom's pouch. It's called a joey." },
+    size: { he: 'הקנגורו האדום, הכי גדול, יכול להיות גבוה כמו אדם מבוגר!', ru: 'Рыжий кенгуру, самый большой, бывает ростом со взрослого человека!', en: 'The red kangaroo, the biggest one, can be as tall as a grown-up!' },
+    fun: { he: 'בקפיצה אחת גדולה, קנגורו יכול לקפוץ רחוק כמו שתי מכוניות!', ru: 'Одним большим прыжком кенгуру может прыгнуть на длину двух машин!', en: 'In one big hop, a kangaroo can jump as far as two cars are long!' }
   }
 };
 // Parent questions for the goodnight screen, one per card (Hebrew; for the grown-up to ask out loud).
 const ASK = {
   eats: (p) => [`מה אוכל ${PET_NAMES[p].he}?`, DIET_TEXT[p].he],
   body: (p) => [`מה מיוחד בגוף של ${PET_NAMES[p].he}?`, FEATURE[p].he],
-  home: (p) => [`איפה גר ${PET_NAMES[p].he}?`, { trex: 'באמריקה, לפני המון זמן', trike: 'באמריקה, לפני המון זמן', stego: 'באמריקה, לפני המון המון זמן', brachio: 'באמריקה, לפני המון המון זמן', elephant: 'באפריקה, במשפחות גדולות', lion: 'באפריקה, בלהקה', penguin: 'בעיקר במקומות קרים, וגם בחמים' }[p]],
+  home: (p) => [`איפה גר ${PET_NAMES[p].he}?`, { trex: 'באמריקה, לפני המון זמן', trike: 'באמריקה, לפני המון זמן', stego: 'באמריקה, לפני המון המון זמן', brachio: 'באמריקה, לפני המון המון זמן', elephant: 'באפריקה, במשפחות גדולות', lion: 'באפריקה, בלהקה', penguin: 'בעיקר במקומות קרים, וגם בחמים', anky: 'באמריקה, לפני המון זמן', kangaroo: 'באוסטרליה' }[p]],
   baby: (p) => [`${PET_NAMES[p].he} בוקע מביצה או נולד?`, FROM_EGG[p] ? 'בוקע מביצה' : 'נולד'],
-  size: (p) => [`כמה גדול ${PET_NAMES[p].he}?`, { trex: 'ארוך כמו אוטובוס', trike: 'כבד כמו ארבע מכוניות', stego: 'גדול כמו אוטובוס', brachio: 'ארוך כמעט כמו שני אוטובוסים', elephant: 'החיה הכי גדולה ביבשה היום', lion: 'החתול השני הכי גדול, אחרי הטיגריס', penguin: 'הקיסרי, בגובה של ילד בן חמש' }[p]],
+  size: (p) => [`כמה גדול ${PET_NAMES[p].he}?`, { trex: 'ארוך כמו אוטובוס', trike: 'כבד כמו ארבע מכוניות', stego: 'גדול כמו אוטובוס', brachio: 'ארוך כמעט כמו שני אוטובוסים', elephant: 'החיה הכי גדולה ביבשה היום', lion: 'החתול השני הכי גדול, אחרי הטיגריס', penguin: 'הקיסרי, בגובה של ילד בן חמש', anky: 'כבד כמו פיל', kangaroo: 'הקנגורו האדום, גבוה כמו אדם מבוגר' }[p]],
   fun: (p) => [`ספר לי משהו מצחיק על ${PET_NAMES[p].he}`, FACTS[p].fun.he]
 };
 const OFFLINE_IDEAS = [
@@ -1957,6 +2099,30 @@ const LINES = {
     en: ['Bath time! Grab the sponge.']
   },
   scrub: { he: ['מקרצפים את {part}!'], ru: ['Моем {part}!'], en: ['Scrubbing my {part}!'] },
+  sneeze: { he: ['אפצ\'י! סליחה! זה דגדג לי באף.', 'אפצ\'י! האף שלי מדגדג!'], ru: ['Апчхи! Ой, щекотно в носу!', 'Апчхи! Извини!'], en: ['Achoo! That tickled my nose!', 'Achoo! Excuse me!'] },
+  tickle: { he: ['חחח! הבטן שלי מדגדגת!', 'חי חי חי! עוד פעם!'], ru: ['Ха-ха! Животик щекотно!', 'Хи-хи-хи! Ещё раз!'], en: ['Ha ha! My belly tickles!', 'Hee hee hee! Again!'] },
+  tail: { he: ['היי, זה הזנב שלי!', 'מי נגע לי בזנב?'], ru: ['Эй, это мой хвост!', 'Кто трогает мой хвост?'], en: ["Hey, that's my tail!", 'Who touched my tail?'] },
+  foot: { he: ['הופ! קפיצה!', 'הרגליים שלי חזקות!'], ru: ['Оп! Прыжок!', 'У меня сильные ноги!'], en: ['Hop! A jump!', 'I have strong legs!'] },
+  dizzy: { he: ['וואו, הכול מסתובב!', 'אוי, הראש שלי מסתובב!'], ru: ['Ух ты, всё кружится!', 'Ой, голова кружится!'], en: ['Whoa, everything is spinning!', "Oh, I'm so dizzy!"] },
+  dance: { he: { m: ['בוא נרקוד!', 'אני אוהב לרקוד!'], f: ['בואי נרקוד!', 'אני אוהב לרקוד!'] }, ru: ['Давай танцевать!', 'Я люблю танцевать!'], en: ["Let's dance!", 'I love to dance!'] },
+  catchHello: {
+    he: { m: ['{name}, תפוס את מה שאני אוכל! אני אוכל {diet}.'], f: ['{name}, תפסי את מה שאני אוכל! אני אוכל {diet}.'] },
+    ru: ['{name}, лови то, что я ем! Я ем {diet}.'], en: ['{name}, catch what I eat! I eat {diet}.']
+  },
+  catchYuck: { he: ['אוי, את זה אני לא אוכל!', 'לא את זה! אני אוכל {diet}.'], ru: ['Ой, это я не ем!', 'Не это! Я ем {diet}.'], en: ["Oops, I don't eat that!", 'Not that one! I eat {diet}.'] },
+  jumpHello: {
+    he: { m: ['{name}, לחץ על המסך ואני אקפוץ! בוא נאסוף כוכבים.'], f: ['{name}, לחצי על המסך ואני אקפוץ! בואי נאסוף כוכבים.'] },
+    ru: ['{name}, нажми на экран, и я прыгну! Давай соберём звёзды.'], en: ["{name}, tap the screen and I'll jump! Let's collect stars."]
+  },
+  bubblesHello: { he: { m: ['בועות! בוא נספור אותן.'], f: ['בועות! בואי נספור אותן.'] }, ru: ['Пузыри! Давай их считать.'], en: ["Bubbles! Let's count them."] },
+  bubblesAsk: { he: { m: ['פוצץ {nb}!'], f: ['פוצצי {nb}!'] }, ru: ['Лопни {nb}!'], en: ['Pop {nb}!'] },
+  giftHere: { he: { m: ['יש פה מתנה! בוא נפתח אותה!'], f: ['יש פה מתנה! בואי נפתח אותה!'] }, ru: ['Тут подарок! Давай откроем!'], en: ["There's a present! Let's open it!"] },
+  newSticker: { he: ['מדבקה חדשה: {st}! הדבקנו אותה באלבום.'], ru: ['Новая наклейка: {st}! Мы наклеили её в альбом.'], en: ["A new sticker: {st}! It's in the album now."] },
+  allStickers: { he: ['אספנו את כל המדבקות! איזה יופי!'], ru: ['Мы собрали все наклейки! Ура!'], en: ['We collected all the stickers! Hooray!'] },
+  stickerLocked: { he: ['את המדבקה הזאת עוד לא מצאנו. אולי במתנה של מחר!'], ru: ['Эту наклейку мы ещё не нашли. Может, в завтрашнем подарке!'], en: ["We haven't found this sticker yet. Maybe in tomorrow's present!"] },
+  themeLocked: { he: ['הצבע הזה ייפתח כשנאסוף {nst}!'], ru: ['Этот цвет откроется, когда мы соберём {nst}!'], en: ["This color opens when we collect {nst}!"] },
+  themeNew: { he: ['איזה צבע יפה! החדר כמו חדש.'], ru: ['Какой красивый цвет! Комната как новая.'], en: ['What a pretty color! The room looks brand new.'] },
+  butterfly: { he: ['פרפר! הוא נחת לי על האף!'], ru: ['Бабочка! Она села мне на нос!'], en: ['A butterfly! It landed on my nose!'] },
   rinse: { he: ['שוטפים את הקצף! שששש...'], ru: ['Смываем пену! Шшш...'], en: ['Rinse off the bubbles! Shhh...'] },
   rinseFirst: {
     he: { m: ['קודם ספוג וקצף, ואחר כך מקלחת!'], f: ['קודם ספוג וקצף, ואחר כך מקלחת!'] },
@@ -2088,7 +2254,7 @@ let profile = (() => {
 const ageCfg = () => AGE[profile.age] || AGE[4];
 const nameIn = lang => String(profile[lang] || '').trim();
 function saveProfile(){ store.set('ymd-profile', profile); }
-let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true), three: cleanBool(o.three, true) }; })();
+let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true), three: cleanBool(o.three, true), music: cleanBool(o.music, true) }; })();
 
 /* ---------- the pets, the album, the hats ---------- */
 let current = store.get('ymd-current', null);
@@ -2157,7 +2323,7 @@ function lockReason(){
 }
 
 /* ---------- sound effects, made on the fly (no audio files) ---------- */
-let AC = null, master = null, noiseBuf = null, silentEl = null, lastUnlock = 0;
+let AC = null, master = null, noiseBuf = null, silentEl = null, lastUnlock = 0, fxBus = null, musicBus = null;
 const mic = { busy: false };
 let sleeping = false;
 let muted = store.get('ymd-muted', false) === true;
@@ -2172,13 +2338,26 @@ function initAudio(){
       AC = new Ctx();
       const comp = AC.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
       master = AC.createGain(); master.gain.value = muted ? 0 : VOL;
-      master.connect(comp); comp.connect(AC.destination);
+      // the compressor keeps the loud moments in check, so everything can sit a little louder after it
+      const makeup = AC.createGain(); makeup.gain.value = 2;
+      master.connect(comp); comp.connect(makeup); makeup.connect(AC.destination);
       const len = Math.floor(AC.sampleRate * 1.2);
       noiseBuf = AC.createBuffer(1, len, AC.sampleRate);
       const d = noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      // two buses: effects and music; both get a touch of a soft room reverb
+      fxBus = AC.createGain(); fxBus.connect(master);
+      musicBus = AC.createGain(); musicBus.gain.value = opts.music ? 1 : 0; musicBus.connect(master);
+      try {
+        const conv = AC.createConvolver(); conv.buffer = impulse(1.5, 2.8);
+        const s1 = AC.createGain(); s1.gain.value = 0.16; fxBus.connect(s1); s1.connect(conv);
+        const s2 = AC.createGain(); s2.gain.value = 0.28; musicBus.connect(s2); s2.connect(conv);
+        conv.connect(master);
+      } catch (e) {}
     }
     if (AC.state !== 'running'){ const p = AC.resume(); if (p && p.catch) p.catch(() => {}); }
   } catch (e) { AC = null; }
+  // music asked for before the first touch starts now
+  try { if (AC && Music.name && !Music.timer) Music.play(Music.name); } catch (e) {}
   // older iPhones: a silent looping <audio> lets Web Audio play with the ring/silent switch on
   if (isIOS && !('audioSession' in navigator)){
     try {
@@ -2190,6 +2369,11 @@ function initAudio(){
 ['touchend', 'pointerup', 'click', 'keydown'].forEach(type => document.addEventListener(type, () => {
   if (!AC || AC.state !== 'running' || (silentEl && silentEl.paused)) initAudio();
 }, { capture: true, passive: true }));
+function impulse(sec, decay){
+  const n = Math.floor(AC.sampleRate * sec), b = AC.createBuffer(2, n, AC.sampleRate);
+  for (let c = 0; c < 2; c++){ const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay); }
+  return b;
+}
 const audioOn = () => !!(AC && master && !muted && (AC.state === 'running' || performance.now() - lastUnlock < 1000));
 function envelope(g, t0, peak, dur, attack = 0.008){
   g.gain.setValueAtTime(0.0001, t0);
@@ -2203,7 +2387,7 @@ function noise(dur, type, f0, f1, q, vol, when = 0){
   const fl = AC.createBiquadFilter(); fl.type = type; fl.Q.value = q;
   fl.frequency.setValueAtTime(f0, t0); fl.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
   const g = AC.createGain(); envelope(g, t0, vol, dur, 0.01);
-  src.connect(fl); fl.connect(g); g.connect(master);
+  src.connect(fl); fl.connect(g); g.connect(fxBus || master);
   src.start(t0, Math.random() * 0.4); src.stop(t0 + dur + 0.05);
 }
 function tone(freq, dur, type, vol, when = 0, glideTo = 0, vib = 0){
@@ -2214,8 +2398,26 @@ function tone(freq, dur, type, vol, when = 0, glideTo = 0, vib = 0){
   if (glideTo) o.frequency.exponentialRampToValueAtTime(glideTo, t0 + dur);
   if (vib){ const l = AC.createOscillator(), lg = AC.createGain(); l.frequency.value = vib; lg.gain.value = freq * 0.05; l.connect(lg); lg.connect(o.frequency); l.start(t0); l.stop(t0 + dur + 0.05); }
   const g = AC.createGain(); envelope(g, t0, vol, dur);
-  o.connect(g); g.connect(master);
+  o.connect(g); g.connect(fxBus || master);
   o.start(t0); o.stop(t0 + dur + 0.05);
+}
+/* A little voice: a buzzy tone shaped by two vowel resonances, with a pitch that rises and falls. */
+function voc(f0, dur, when, o = {}){
+  if (!audioOn()) return;
+  const t0 = AC.currentTime + when;
+  const osc = AC.createOscillator(); osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(f0, t0);
+  if (o.peak) osc.frequency.linearRampToValueAtTime(o.peak, t0 + dur * 0.35);
+  osc.frequency.exponentialRampToValueAtTime(o.end || f0 * 0.85, t0 + dur);
+  const l = AC.createOscillator(), lg = AC.createGain(); l.frequency.value = o.vib || 6; lg.gain.value = f0 * 0.035; l.connect(lg); lg.connect(osc.frequency);
+  const out = AC.createGain(); envelope(out, t0, o.vol || 0.5, dur, 0.025);
+  for (const [F, Q, k] of [[o.F1 || 700, 5, 1], [o.F2 || 1200, 7, 0.6]]){
+    const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = F; bp.Q.value = Q;
+    const gk = AC.createGain(); gk.gain.value = k;
+    osc.connect(bp); bp.connect(gk); gk.connect(out);
+  }
+  out.connect(fxBus || master);
+  osc.start(t0); osc.stop(t0 + dur + 0.05); l.start(t0); l.stop(t0 + dur + 0.05);
 }
 const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
 const sfx = {
@@ -2242,16 +2444,39 @@ const sfx = {
   yawn(){ tone(320, 1.1, 'sine', 0.08, 0, 180, 5); },
   snore(){ noise(1.1, 'lowpass', 300, 160, 2, 0.07); },
   stretch(){ tone(260, 0.5, 'triangle', 0.1, 0, 520); },
+  // reactions to touch
+  purr(sp){
+    if (sp === 'lion'){ for (let i = 0; i < 12; i++) noise(0.05, 'lowpass', 240, 170, 5, 0.16, i * 0.065); }
+    else if (sp === 'penguin'){ [0, 0.12, 0.24].forEach((t, i) => tone(900 + i * 80, 0.1, 'sine', 0.06, t, 1100 + i * 80)); }
+    else { const f = sp === 'trex' || sp === 'elephant' ? 300 : 420; tone(f, 0.45, 'sine', 0.1, 0, f * 1.45, 5); tone(f * 1.5, 0.35, 'sine', 0.04, 0.12, f * 2); }
+  },
+  ahh(){ tone(480, 0.22, 'sine', 0.07, 0, 600); tone(560, 0.26, 'sine', 0.08, 0.32, 720); },
+  achoo(){ noise(0.34, 'bandpass', 4200, 1100, 0.9, 0.34); tone(740, 0.18, 'triangle', 0.08, 0, 300); },
+  laugh(){ [0, 1, 2, 3, 4, 5].forEach(i => tone(780 - i * 40 + (i % 2) * 120, 0.08, 'triangle', 0.09, i * 0.095, 0, 22)); },
+  dizzy(){ for (let i = 0; i < 6; i++) tone(950 - i * 90, 0.13, 'sine', 0.06, i * 0.08, 760 - i * 80); tone(200, 0.4, 'triangle', 0.1, 0.5, 420); },
+  chomp1(){ noise(0.09, 'bandpass', rand(1100, 1400), 600, 1.1, 0.9); tone(rand(150, 190), 0.09, 'sine', 0.14, 0, 90); },
+  bounce(){ tone(rand(170, 230), 0.12, 'sine', 0.16, 0, 110); },
+  // a bouncy little tune for dancing (about four seconds)
+  danceTune(){
+    const mel = [72, 76, 79, 76, 74, 77, 81, 77, 72, 76, 79, 84, 83, 79, 76, 72];
+    mel.forEach((n, i) => { tone(NOTE(n), 0.16, 'triangle', 0.07, i * 0.25); if (i % 2 === 0) tone(NOTE(n - 24), 0.2, 'sine', 0.08, i * 0.25); });
+    for (let i = 0; i < 16; i++) noise(0.04, 'highpass', 6000, 6000, 1, i % 4 === 0 ? 0.08 : 0.03, i * 0.25);
+  },
+  tada(){ [0, 7, 12].forEach((s2, i) => tone(NOTE(72 + s2), 0.22, 'triangle', 0.1, i * 0.07)); },
   voice(sp){
-    // each friend's own little sound when tapped: cute, never scary
-    if (sp === 'trex'){ noise(0.42, 'lowpass', 900, 260, 3, 0.3); tone(170, 0.42, 'sawtooth', 0.06, 0, 120); }
-    else if (sp === 'lion'){ noise(0.38, 'bandpass', 500, 260, 2.5, 0.34); tone(220, 0.38, 'sawtooth', 0.05, 0, 150); }
-    else if (sp === 'elephant'){ tone(392, 0.5, 'sawtooth', 0.09, 0, 660, 6); tone(390, 0.5, 'square', 0.03, 0, 650); }
-    else if (sp === 'penguin'){ [0, 0.14].forEach(t => tone(780, 0.11, 'square', 0.05, t, 600)); }
-    else if (sp === 'trike'){ tone(260, 0.3, 'triangle', 0.16, 0, 200); noise(0.2, 'lowpass', 600, 300, 2, 0.15); }
-    else if (sp === 'stego'){ tone(300, 0.22, 'triangle', 0.15, 0, 380); tone(380, 0.2, 'triangle', 0.12, 0.2, 300); }
-    else { tone(180, 0.6, 'triangle', 0.16, 0, 140, 3); }
-  }
+    // each friend's own little voice when tapped: cute, never scary
+    if (sp === 'trex'){ voc(150, 0.5, 0, { peak: 210, end: 120, F1: 750, F2: 1150, vol: 0.55 }); noise(0.4, 'lowpass', 700, 240, 3, 0.16); }
+    else if (sp === 'lion'){ voc(170, 0.45, 0, { peak: 230, end: 130, F1: 800, F2: 1250, vol: 0.5 }); noise(0.36, 'bandpass', 480, 260, 2.5, 0.18); }
+    else if (sp === 'elephant'){ tone(392, 0.5, 'sawtooth', 0.07, 0, 660, 6); voc(400, 0.5, 0, { peak: 620, end: 560, F1: 900, F2: 1600, vol: 0.4 }); }
+    else if (sp === 'penguin'){ [0, 0.13, 0.26].forEach((t, i) => voc(620 + i * 40, 0.1, t, { peak: 820, end: 560, F1: 900, F2: 2400, vol: 0.45, vib: 10 })); }
+    else if (sp === 'trike'){ voc(190, 0.24, 0, { peak: 240, end: 170, F1: 520, F2: 900, vol: 0.5 }); voc(170, 0.3, 0.26, { peak: 210, end: 140, F1: 480, F2: 860, vol: 0.45 }); }
+    else if (sp === 'stego'){ voc(300, 0.18, 0, { peak: 360, end: 280, F1: 560, F2: 1800, vol: 0.45 }); voc(320, 0.2, 0.2, { peak: 400, end: 300, F1: 560, F2: 1800, vol: 0.45 }); }
+    else if (sp === 'anky'){ voc(165, 0.2, 0, { peak: 205, end: 150, F1: 500, F2: 950, vol: 0.5 }); voc(150, 0.32, 0.24, { peak: 190, end: 120, F1: 470, F2: 900, vol: 0.48 }); noise(0.3, 'lowpass', 600, 260, 2, 0.08, 0.24); }
+    else if (sp === 'kangaroo'){ [0, 0.11, 0.22].forEach(t => { noise(0.04, 'bandpass', 2000, 1400, 2.5, 0.7, t); tone(1500, 0.03, 'sine', 0.06, t, 1100); }); voc(360, 0.18, 0.36, { peak: 460, end: 340, F1: 700, F2: 1700, vol: 0.42 }); }
+    else { voc(120, 0.7, 0, { peak: 150, end: 100, F1: 380, F2: 820, vol: 0.55, vib: 4 }); }
+  },
+  // a soft step; bigger friends step heavier
+  step(sp){ const heavy = sp === 'trex' || sp === 'elephant' || sp === 'brachio' || sp === 'trike' || sp === 'anky'; noise(0.07, 'lowpass', heavy ? 260 : 520, heavy ? 140 : 300, 1.5, heavy ? 0.09 : 0.05); }
 };
 // A music box lullaby (Brahms' Wiegenlied, 1868), played softly while the pet sleeps.
 const LULLABY = [[64, 1], [64, 1], [67, 3], [64, 1], [64, 1], [67, 3], [64, 1], [67, 1], [72, 2], [71, 2], [69, 2], [69, 2], [67, 2],
@@ -2266,6 +2491,90 @@ function playLullaby(){
   lullabyTimer = setTimeout(() => { if (sleeping) playLullaby(); }, (t + 1.5) * 1000);
 }
 function stopLullaby(){ clearTimeout(lullabyTimer); lullabyTimer = 0; }
+/* ---------- background music ----------
+   A soft tune for each place, made on the spot with simple instruments (a kalimba, plucks, a music box, a bass,
+   a shaker). Four chords to a loop, eighth notes; the melody uses notes that fit each chord, and every fourth time
+   round it rests so the tune breathes. It plays quietly under everything, dips while the friend speaks, and stops
+   while the friend sleeps (the lullaby plays then) or the microphone listens. */
+const C_MAJ = [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]];       // I vi IV V
+const C_PLAIN = [[0, 4, 7], [5, 9, 12], [0, 4, 7], [7, 11, 14]];     // I IV I V
+const SONGS = {
+  theme: { bpm: 104, root: 60, prog: C_MAJ, lead: 'kalimba', arp: [0, 2, 1, 2, 0, 2, 1, 2], arpVoice: 'pluck', bass: true, shaker: true, vol: 1,
+    mel: [[[0, 16, 1], [1, 19, 1], [2, 24, 2], [4, 19, 1], [5, 16, 1], [6, 19, 2], [8, 21, 2], [10, 19, 1], [11, 16, 1], [12, 12, 3], [16, 21, 2], [18, 24, 1], [19, 21, 1], [20, 17, 2], [22, 16, 2], [24, 19, 2], [26, 14, 1], [27, 16, 1], [28, 19, 3]],
+          [[0, 24, 2], [2, 19, 2], [4, 16, 1], [5, 19, 1], [6, 24, 2], [8, 21, 3], [11, 24, 1], [12, 21, 2], [16, 17, 1], [17, 21, 1], [18, 24, 3], [22, 21, 2], [24, 23, 2], [26, 19, 2], [28, 14, 2], [30, 19, 2]]] },
+  home: { bpm: 96, root: 60, prog: C_MAJ, lead: 'kalimba', arp: [0, 1, 2, 1, 0, 1, 2, 1], arpVoice: 'kalimba', bass: true, vol: 0.9,
+    mel: [[[0, 16, 2], [2, 19, 2], [4, 24, 3], [8, 21, 2], [10, 16, 2], [12, 19, 3], [16, 17, 2], [18, 21, 2], [20, 24, 3], [24, 23, 2], [26, 19, 2], [28, 14, 3]],
+          [[0, 19, 3], [3, 16, 1], [4, 12, 3], [8, 16, 3], [11, 21, 1], [12, 19, 3], [16, 21, 3], [19, 17, 1], [20, 12, 3], [24, 14, 2], [26, 19, 2], [28, 23, 3]]] },
+  kitchen: { bpm: 112, root: 65, prog: C_MAJ, lead: 'pluck', arp: [0, -1, 1, 2, 0, -1, 2, 1], arpVoice: 'pluck', bass: true, shaker: true, vol: 0.85,
+    mel: [[[0, 12, 1], [1, 16, 1], [2, 19, 1], [3, 24, 1], [4, 19, 2], [8, 21, 1], [9, 16, 1], [10, 21, 1], [11, 24, 1], [12, 21, 2], [16, 17, 1], [17, 21, 1], [18, 24, 1], [19, 29, 1], [20, 24, 2], [24, 19, 1], [25, 23, 1], [26, 26, 1], [27, 23, 1], [28, 19, 3]],
+          [[0, 24, 2], [2, 24, 1], [3, 19, 1], [4, 16, 2], [8, 21, 2], [10, 21, 1], [11, 16, 1], [12, 12, 2], [16, 24, 2], [18, 21, 1], [19, 17, 1], [20, 21, 2], [24, 19, 2], [26, 23, 1], [27, 26, 1], [28, 31, 2]]] },
+  bath: { bpm: 88, root: 67, prog: C_MAJ, lead: 'musicbox', arp: [0, 1, 2, 3, 2, 1, 0, 1], arpVoice: 'kalimba', bass: false, bubbles: true, vol: 0.8,
+    mel: [[[0, 19, 3], [4, 16, 3], [8, 21, 3], [12, 16, 3], [16, 17, 3], [20, 21, 3], [24, 19, 4], [28, 14, 3]], [[0, 24, 4], [4, 19, 2], [6, 16, 2], [8, 12, 6], [16, 21, 4], [20, 17, 2], [22, 21, 2], [24, 19, 6]]] },
+  bed: { bpm: 72, root: 65, prog: C_PLAIN, lead: 'musicbox', arp: [0, 1, 2, 1, 0, 1, 2, 1], arpVoice: 'musicbox', bass: false, vol: 0.7,
+    mel: [[[0, 16, 3], [4, 19, 3], [8, 21, 3], [12, 17, 3], [16, 16, 3], [20, 12, 3], [24, 14, 4], [28, 11, 3]], [[0, 24, 4], [4, 19, 4], [8, 17, 4], [12, 21, 4], [16, 19, 4], [20, 16, 4], [24, 14, 6]]] },
+  game: { bpm: 126, root: 62, prog: C_MAJ, lead: 'pluck', arp: [0, 2, 1, 2, 0, 2, 1, 2], arpVoice: 'pluck', bass: true, shaker: true, kick: true, vol: 0.9,
+    mel: [[[0, 12, 1], [1, 16, 1], [2, 19, 1], [4, 24, 2], [6, 19, 2], [8, 21, 1], [9, 19, 1], [10, 16, 2], [12, 21, 2], [14, 24, 2], [16, 21, 1], [17, 24, 1], [18, 29, 2], [20, 24, 2], [22, 21, 2], [24, 23, 1], [25, 26, 1], [26, 31, 2], [28, 26, 2], [30, 23, 2]],
+          [[0, 24, 2], [2, 19, 1], [3, 16, 1], [4, 19, 2], [6, 24, 2], [8, 28, 2], [10, 24, 1], [11, 21, 1], [12, 16, 2], [16, 17, 2], [18, 21, 1], [19, 24, 1], [20, 29, 2], [24, 26, 1], [25, 23, 1], [26, 19, 2], [28, 23, 4]]] },
+  hatch: { bpm: 76, root: 57, prog: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]], lead: 'musicbox', arp: [0, 1, 2, 3, 2, 1, 0, 1], arpVoice: 'kalimba', bass: false, vol: 0.75,
+    mel: [[[0, 15, 4], [8, 12, 4], [16, 15, 4], [24, 17, 6]], [[0, 19, 4], [8, 15, 4], [16, 22, 4], [24, 17, 6]]] }
+};
+function mVoice(kind, midi, t, vol, out, len){
+  const f = NOTE(midi);
+  const g = AC.createGain(); g.connect(out);
+  const osc = (type, freq, k, decay) => { const o = AC.createOscillator(); o.type = type; o.frequency.value = freq; const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol * k, t + 0.006); e.gain.exponentialRampToValueAtTime(0.0001, t + decay); o.connect(e); e.connect(g); o.start(t); o.stop(t + decay + 0.05); };
+  if (kind === 'kalimba'){ osc('sine', f, 1, 0.9); osc('sine', f * 5.4, 0.12, 0.12); }
+  else if (kind === 'pluck'){ osc('triangle', f, 0.9, 0.28); osc('sine', f * 2, 0.25, 0.15); }
+  else if (kind === 'musicbox'){ osc('sine', f, 0.9, 1.4); osc('sine', f * 3, 0.18, 0.5); osc('sine', f * 4.02, 0.06, 0.25); }
+  else if (kind === 'bass'){ const o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f; const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500; const e = AC.createGain(); const d = Math.max(0.2, len); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol, t + 0.02); e.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(lp); lp.connect(e); e.connect(g); o.start(t); o.stop(t + d + 0.05); }
+}
+const Music = {
+  song: null, name: '', step: 0, loop: 0, nextT: 0, timer: 0, out: null, held: false,
+  play(name){
+    if (!SONGS[name]) name = '';
+    if (name === this.name && this.timer) return;
+    this.stop(true);
+    this.name = name;
+    if (!name || !AC || !musicBus) return;
+    this.song = SONGS[name];
+    this.out = AC.createGain(); this.out.gain.value = 0.0001; this.out.connect(musicBus);
+    this.out.gain.exponentialRampToValueAtTime(0.075 * (this.song.vol || 1), AC.currentTime + 1.2);
+    this.step = 0; this.loop = 0; this.nextT = AC.currentTime + 0.15;
+    this.timer = setInterval(() => this.tick(), 90);
+  },
+  // fade out what's playing (soft: keep the name, so returning to the same place resumes)
+  stop(keepName){
+    clearInterval(this.timer); this.timer = 0;
+    if (this.out && AC){ const o = this.out; try { o.gain.cancelScheduledValues(AC.currentTime); o.gain.setTargetAtTime(0.0001, AC.currentTime, 0.25); } catch (e) {} setTimeout(() => { try { o.disconnect(); } catch (e) {} }, 1600); }
+    this.out = null; this.song = null;
+    if (!keepName) this.name = '';
+  },
+  tick(){
+    if (!this.song || !AC) return;
+    if (AC.state !== 'running' || muted || !opts.music || mic.busy || sleeping || document.hidden){ this.nextT = AC.currentTime + 0.1; return; }
+    const S = this.song, stepDur = 60 / S.bpm / 2;
+    if (this.nextT < AC.currentTime - 0.2) this.nextT = AC.currentTime + 0.05;
+    while (this.nextT < AC.currentTime + 0.35){ this.note(this.step, this.nextT, stepDur); this.nextT += stepDur; this.step = (this.step + 1) % 32; if (this.step === 0) this.loop++; }
+  },
+  note(st, t, sd){
+    const S = this.song, out = this.out, bar = Math.floor(st / 8), inBar = st % 8;
+    const chord = S.prog[bar];
+    // arpeggio
+    const ai = S.arp[inBar];
+    if (ai >= 0){ const n = S.root + chord[ai % 3] + 12 * (ai === 3 ? 1 : 0); mVoice(S.arpVoice, n, t, 0.33, out); }
+    // bass on beats one and three
+    if (S.bass && (inBar === 0 || inBar === 4)) mVoice('bass', S.root + chord[0] - 12, t, 0.75, out, sd * 3.5);
+    // melody: A, A, B, rest
+    const which = this.loop % 4;
+    if (which !== 3){
+      const mel = S.mel[which === 2 ? 1 : 0];
+      for (const [ms, off] of mel) if (ms === st){ let n = S.root + off; while (n > 86) n -= 12; mVoice(S.lead, n, t, 0.6, out); }
+    }
+    if (S.shaker && inBar % 2 === 1){ const src = AC.createBufferSource(); src.buffer = noiseBuf; const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000; const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.18, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.05); src.connect(hp); hp.connect(e); e.connect(out); src.start(t, Math.random()); src.stop(t + 0.08); }
+    if (S.kick && inBar % 4 === 0){ const o = AC.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.14); const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.7, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.18); o.connect(e); e.connect(out); o.start(t); o.stop(t + 0.2); }
+    if (S.bubbles && Math.random() < 0.12){ const o = AC.createOscillator(); o.type = 'sine'; const f0 = 500 + Math.random() * 500; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 2.2, t + 0.07); const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.12, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.08); o.connect(e); e.connect(out); o.start(t); o.stop(t + 0.1); }
+  },
+  setOn(on){ if (musicBus && AC) musicBus.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.2); }
+};
 function buzz(ms){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
 
 /* ---------- the voice ----------
@@ -2536,6 +2845,52 @@ function showBubble(text, lang){
 function hideBubbleSoon(){ clearTimeout(bubbleHideTimer); bubbleHideTimer = setTimeout(() => { if (!cur) bubbleEl.hidden = true; }, 900); }
 function hideBubble(){ clearTimeout(bubbleHideTimer); bubbleEl.hidden = true; }
 
+/* ---------- stickers: a collection for the album ----------
+   Earned from the daily surprise gift, from finishing a game, and when the friend grows. Each is a small drawing
+   with a name in the three languages. */
+const STICKERS = [
+  { id: 'foot', he: 'עקבת דינוזאור', ru: 'след динозавра', en: 'a dino footprint',
+    svg: '<path d="M50 88 C30 88 24 70 30 58 C34 50 42 50 50 50 C58 50 66 50 70 58 C76 70 70 88 50 88 Z" fill="#7cc85a"/><path d="M30 48 C22 38 24 22 32 20 C40 18 42 34 38 46 Z M50 44 C44 32 46 12 50 10 C54 12 56 32 50 44 Z M70 48 C66 34 68 18 76 20 C84 22 78 38 70 48 Z" fill="#5fa846"/>' },
+  { id: 'egg', he: 'ביצה מנוקדת', ru: 'пятнистое яйцо', en: 'a spotted egg',
+    svg: '<path d="M50 10 C70 10 82 44 82 62 C82 80 68 92 50 92 C32 92 18 80 18 62 C18 44 30 10 50 10 Z" fill="#fff5e2"/><g fill="#9edc8a"><circle cx="38" cy="40" r="7"/><circle cx="62" cy="58" r="9"/><circle cx="38" cy="74" r="6"/><circle cx="60" cy="28" r="4"/></g><path d="M32 30 Q37 18 46 16" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>' },
+  { id: 'bone', he: 'עצם מאובנת', ru: 'окаменелая кость', en: 'a fossil bone',
+    svg: '<g transform="rotate(-30 50 50)"><rect x="26" y="42" width="48" height="16" rx="8" fill="#f3e2bf"/><circle cx="24" cy="40" r="11" fill="#f3e2bf"/><circle cx="24" cy="60" r="11" fill="#f3e2bf"/><circle cx="76" cy="40" r="11" fill="#f3e2bf"/><circle cx="76" cy="60" r="11" fill="#f3e2bf"/><path d="M30 48 H70" stroke="#e1c993" stroke-width="3" stroke-linecap="round"/></g>' },
+  { id: 'volcano', he: 'הר געש', ru: 'вулкан', en: 'a volcano',
+    svg: '<path d="M8 88 L36 34 H64 L92 88 Z" fill="#a0694a"/><path d="M36 34 Q42 46 50 38 Q58 46 64 34 Z" fill="#ff7a3c"/><path d="M40 30 Q38 18 46 14 Q50 4 58 10 Q68 8 66 20 Q74 26 62 30 Z" fill="#c9c3d6"/><path d="M44 52 L40 66 M58 50 L62 64" stroke="#ff7a3c" stroke-width="5" stroke-linecap="round"/>' },
+  { id: 'fern', he: 'שרך ירוק', ru: 'зелёный папоротник', en: 'a green fern',
+    svg: '<path d="M50 92 Q48 50 56 10" fill="none" stroke="#3f8f34" stroke-width="5" stroke-linecap="round"/><g fill="#6cc24a">' + [0, 1, 2, 3, 4, 5].map(i => `<ellipse cx="${40 - i}" cy="${80 - i * 12}" rx="${14 - i * 1.6}" ry="5" transform="rotate(-25 ${40 - i} ${80 - i * 12})"/><ellipse cx="${62 - i * 0.5}" cy="${76 - i * 12}" rx="${14 - i * 1.6}" ry="5" transform="rotate(25 ${62 - i * 0.5} ${76 - i * 12})"/>`).join('') + '</g>' },
+  { id: 'sun', he: 'שמש מחייכת', ru: 'улыбчивое солнце', en: 'a smiling sun',
+    svg: '<g stroke="#ffb020" stroke-width="7" stroke-linecap="round">' + [0, 1, 2, 3, 4, 5, 6, 7].map(i => { const a = i * Math.PI / 4; return `<path d="M${50 + Math.cos(a) * 32} ${50 + Math.sin(a) * 32} L${50 + Math.cos(a) * 44} ${50 + Math.sin(a) * 44}"/>`; }).join('') + '</g><circle cx="50" cy="50" r="24" fill="#ffd23a"/><circle cx="42" cy="46" r="3" fill="#6b4026"/><circle cx="58" cy="46" r="3" fill="#6b4026"/><path d="M41 57 Q50 65 59 57" fill="none" stroke="#6b4026" stroke-width="3.5" stroke-linecap="round"/>' },
+  { id: 'rainbow', he: 'קשת בענן', ru: 'радуга', en: 'a rainbow',
+    svg: '<g fill="none" stroke-width="8">' + ['#ff5d5d', '#ffa53b', '#ffd23a', '#7cc85a', '#4fb8ff', '#9a8cf0'].map((c, i) => `<path d="M${14 + i * 7} 72 A${36 - i * 7} ${36 - i * 7} 0 0 1 ${86 - i * 7} 72" stroke="${c}"/>`).join('') + '</g><g fill="#fff"><circle cx="16" cy="74" r="9"/><circle cx="26" cy="76" r="8"/><circle cx="84" cy="74" r="9"/><circle cx="74" cy="76" r="8"/></g>' },
+  { id: 'moon', he: 'ירח וכוכב', ru: 'луна и звезда', en: 'a moon and a star',
+    svg: '<path d="M62 14 A36 36 0 1 0 84 70 A30 30 0 1 1 62 14 Z" fill="#ffe08a"/><path d="M72 22 l3 7 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1 Z" fill="#fff3c4"/><circle cx="40" cy="56" r="3" fill="#6b4026"/><path d="M36 66 Q42 70 48 66" fill="none" stroke="#6b4026" stroke-width="3" stroke-linecap="round"/>' },
+  { id: 'star', he: 'כוכב זהב', ru: 'золотая звезда', en: 'a gold star',
+    svg: '<path d="M50 8 L61 36 L91 38 L68 57 L76 87 L50 70 L24 87 L32 57 L9 38 L39 36 Z" fill="#ffd23a" stroke-linejoin="round"/><circle cx="43" cy="50" r="3" fill="#6b4026"/><circle cx="57" cy="50" r="3" fill="#6b4026"/><path d="M44 59 Q50 64 56 59" fill="none" stroke="#6b4026" stroke-width="3" stroke-linecap="round"/>' },
+  { id: 'heart', he: 'לב', ru: 'сердечко', en: 'a heart',
+    svg: '<path d="M50 86 C20 64 10 46 18 30 C26 16 44 18 50 32 C56 18 74 16 82 30 C90 46 80 64 50 86 Z" fill="#ff5d8f"/><path d="M28 34 Q32 26 40 26" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>' },
+  { id: 'flower', he: 'פרח', ru: 'цветок', en: 'a flower',
+    svg: '<path d="M50 60 V92" stroke="#5fa846" stroke-width="6" stroke-linecap="round"/><ellipse cx="62" cy="80" rx="10" ry="5" fill="#7cc85a" transform="rotate(-30 62 80)"/><g fill="#ff9ec4">' + [0, 1, 2, 3, 4, 5].map(i => { const a = i * Math.PI / 3; return `<circle cx="${50 + Math.cos(a) * 18}" cy="${40 + Math.sin(a) * 18}" r="13"/>`; }).join('') + '</g><circle cx="50" cy="40" r="11" fill="#ffd23a"/>' },
+  { id: 'paw', he: 'כף רגל של אריה', ru: 'лапа льва', en: "a lion's paw",
+    svg: '<ellipse cx="50" cy="64" rx="22" ry="19" fill="#f2b53e"/><g fill="#f2b53e"><ellipse cx="24" cy="40" rx="9" ry="11"/><ellipse cx="40" cy="26" rx="9" ry="11"/><ellipse cx="60" cy="26" rx="9" ry="11"/><ellipse cx="76" cy="40" rx="9" ry="11"/></g><ellipse cx="50" cy="66" rx="12" ry="9" fill="#ffd27a"/>' },
+  { id: 'fish', he: 'דג כחול', ru: 'синяя рыбка', en: 'a blue fish',
+    svg: '<path d="M14 50 C26 28 58 26 72 50 C58 74 26 72 14 50 Z" fill="#4fb8ff"/><path d="M70 50 L92 34 L88 50 L92 66 Z" fill="#3d97d6"/><circle cx="30" cy="46" r="4" fill="#1b2430"/><path d="M42 40 Q48 50 42 60" fill="none" stroke="#9fdcff" stroke-width="4" stroke-linecap="round"/>' },
+  { id: 'crown', he: 'כתר', ru: 'корона', en: 'a crown',
+    svg: '<path d="M14 74 L18 30 L36 50 L50 22 L64 50 L82 30 L86 74 Z" fill="#ffc83d" stroke-linejoin="round"/><rect x="14" y="70" width="72" height="12" rx="4" fill="#f0a91e"/><circle cx="50" cy="56" r="6" fill="#ff5d8f"/><circle cx="32" cy="62" r="4" fill="#4fb8ff"/><circle cx="68" cy="62" r="4" fill="#7cc85a"/>' },
+  { id: 'balloon', he: 'בלון', ru: 'воздушный шарик', en: 'a balloon',
+    svg: '<path d="M50 72 Q46 82 52 92" fill="none" stroke="#6b4026" stroke-width="2.5"/><ellipse cx="50" cy="40" rx="24" ry="30" fill="#ff5d5d"/><path d="M46 70 L54 70 L50 76 Z" fill="#e04444"/><path d="M38 24 Q42 16 50 16" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>' },
+  { id: 'apple', he: 'תפוח אדום', ru: 'красное яблоко', en: 'a red apple',
+    svg: '<path d="M50 30 C30 18 14 34 18 56 C22 78 38 90 50 84 C62 90 78 78 82 56 C86 34 70 18 50 30 Z" fill="#ff4b5c"/><path d="M50 30 Q50 18 56 10" fill="none" stroke="#6b4026" stroke-width="4" stroke-linecap="round"/><path d="M56 16 Q70 8 74 20 Q64 24 56 16 Z" fill="#7cc85a"/><path d="M30 44 Q32 36 40 34" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>' },
+  { id: 'drop', he: 'טיפת מים', ru: 'капелька', en: 'a water drop',
+    svg: '<path d="M50 10 C62 32 78 46 78 62 C78 78 66 90 50 90 C34 90 22 78 22 62 C22 46 38 32 50 10 Z" fill="#4fb8ff"/><path d="M36 60 Q36 74 46 78" fill="none" stroke="#dff4ff" stroke-width="5" stroke-linecap="round"/><circle cx="43" cy="56" r="3" fill="#1b2430"/><circle cx="57" cy="56" r="3" fill="#1b2430"/><path d="M45 66 Q50 70 55 66" fill="none" stroke="#1b2430" stroke-width="3" stroke-linecap="round"/>' },
+  { id: 'tooth', he: 'שן נוצצת', ru: 'блестящий зуб', en: 'a sparkly tooth',
+    svg: '<path d="M26 26 C26 14 40 12 50 18 C60 12 74 14 74 26 C74 42 70 52 66 72 C64 84 56 84 54 72 L50 58 L46 72 C44 84 36 84 34 72 C30 52 26 42 26 26 Z" fill="#ffffff" stroke="#c7d6e6" stroke-width="3"/><path d="M80 14 l3 7 7 1 -5 4 1 7 -6 -3 -6 3 1 -7 -5 -4 7 -1 Z" fill="#ffd23a"/><circle cx="18" cy="60" r="4" fill="#9fdcff"/>' }
+];
+const STICKER_IDS = STICKERS.map(s => s.id);
+let stickers = (() => { const r = store.get('ymd-stickers', []); return Array.isArray(r) ? STICKER_IDS.filter(id => r.includes(id)) : []; })();
+const saveStickers = () => store.set('ymd-stickers', stickers);
+const stickerSvg = st => `<svg viewBox="0 0 100 100" aria-hidden="true">${st.svg}</svg>`;
+
 /* ---------- the pet on the stage: drawing, where its parts are on screen, and how it moves ---------- */
 const VB = { x: -10, y: -40, w: 260, h: 280 };
 const stageEl = $('stage');
@@ -2685,6 +3040,20 @@ const Pet = {
   },
   lookHome(){ if (World.on){ World.E.lookAt(null); return; } for (const p of this.pupils || []) p.setAttribute('transform', 'translate(0 0)'); },
   blink(){ if (this.el && !this.el.classList.contains('sleep') && !this.el.classList.contains('happy')) this.flash('blink', 130); },
+  // a whole action (purr, giggle, sneeze, lookback, stomp, shakehead, dizzy, yawn, stretch, dance, lookaround,
+  // surprise, love, wave, header, shakedry). In 3D the engine plays it; flat, the closest simple motion stands in.
+  act(name, o){
+    if (!this.el) return;
+    if (World.on){ World.E.act(name, o); return; }
+    const FLAT = { purr: ['squish', 'happy'], giggle: ['wiggle', 'happy'], sneeze: ['shake', 'wide'], lookback: ['wiggle', 'tilt'], stomp: ['hop', 'happy'], shakehead: ['shake'],
+      dizzy: ['wiggle', 'tilt'], yawn: ['nod', 'tilt'], stretch: ['hop'], dance: ['hop', 'happy'], lookaround: ['nod', 'tilt'], surprise: ['hop', 'wide'], love: ['squish', 'happy'],
+      wave: ['hop', 'happy'], header: ['hop', 'happy'], shakedry: ['wiggle', 'happy'] };
+    const f = FLAT[name]; if (!f) return;
+    this.flash(f[0], { hop: 600, squish: 360, wiggle: 700, shake: 520, nod: 700 }[f[0]] || 600);
+    if (f[1] === 'tilt'){ this.el.classList.add('tilt'); setTimeout(() => this.el && this.el.classList.remove('tilt'), 1300); }
+    else if (f[1]) this.expr(f[1], 1200);
+    if (name === 'dance'){ setTimeout(() => this.flash('hop', 600), 700); setTimeout(() => this.flash('hop', 600), 1400); }
+  },
   wear(outfit){
     petData(this.sp).outfit = outfit; savePets();
     if (World.on) World.E.setOutfit(outfit); else this.refresh();
@@ -2858,9 +3227,14 @@ const World = {
         // build the rooms and their shaders in the background while the start screen is up
         setTimeout(() => { try { this.E.warm(['home', 'kitchen', 'bath', 'bed', 'play', 'studio']); } catch (e) {} }, 1200);
       }
+      // sounds that the engine starts at the right moment (a bite, a sneeze, a bounce)
+      const CUES = { sneeze: () => sfx.achoo(), dizzy: () => sfx.dizzy(), chomp1: () => sfx.chomp1(), yum: () => sfx.tada(), boing: () => sfx.boing(), bounce: () => sfx.bounce(), giggle: () => sfx.laugh(),
+        nope: () => sfx.nope(), jump: () => sfx.stretch(), star: () => sfx.sparkle(), bump: () => sfx.bounce(), pop: () => sfx.pop(), step: () => sfx.step(Pet.sp) };
+      this.E.cue = n => { try { if (CUES[n]) CUES[n](); } catch (e) {} };
       this.E.setStateEl(this.stateEl);
       this.E.setStageEl(stageEl);
       this.on = true; this.why = ''; this.slowChecks = 0; this.started = performance.now();
+      try { this.E.setTheme('home', homeTheme); } catch (e) {}
       this.E.paused = false;
       this.canvas.hidden = false;
       document.body.classList.add('three');
@@ -2914,7 +3288,7 @@ const World = {
   // draw only while the 3D scene can be seen
   sync(){
     if (!this.on) return;
-    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen);
+    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen) || (!!gameOn && document.body.classList.contains('in-game3d') && !modalOpen);
     this.E.paused = !seen;
   },
   // hatching: the egg (or the basket) in a soft studio, drawn where the tap area is
@@ -2928,12 +3302,19 @@ const World = {
   },
   introFit(){ if (this.on && this.E.egg) this.E.setFit(eggWrap.getBoundingClientRect(), 1.25); },
   introEnd(){ if (!this.on) return; this.E.clearEgg(); this.E.setFit(null); },
+  lastRoom: '',
   room(name){
     if (!this.on) return;
+    const prev = this.lastRoom; this.lastRoom = name;
     this.E.setRoom(name);
     this.E.setLayout(name === 'play' ? 'small' : 'normal');
     this.layout();
     if (!reduceMotion){ this.canvas.classList.remove('swap'); void this.canvas.offsetWidth; this.canvas.classList.add('swap'); }
+    // in the home and the kitchen, the friend walks in from the side (and sometimes waves hello)
+    if (prev !== name && this.E.walkable() && !reduceMotion){
+      const side = ROOMS.indexOf(name) > ROOMS.indexOf(prev) ? 1 : -1;
+      this.E.enter(side).then(() => { if (this.on && Math.random() < 0.5) this.E.act('wave'); });
+    }
   },
   // too slow to be fun: after it has settled, a few checks in a row below about 20 frames a second switch to flat
   watch(){
@@ -2963,7 +3344,8 @@ function pumpPics(){
       let url = '';
       try { url = job.make(); } catch (e) { url = ''; }
       if (World.E) World.E.busyUntil = performance.now() + 400;
-      if (url) job.el.innerHTML = `<img class="${job.cls}" src="${url}" alt="" draggable="false">`;
+      // built with DOM calls, not an HTML string: no markup pattern in the page for the browser's look-ahead to fetch
+      if (url){ const img = new Image(); img.className = job.cls; img.alt = ''; img.draggable = false; img.src = url; job.el.replaceChildren(img); }
     }
     if (picQueue.length) requestAnimationFrame(step); else picBusy = false;
   });
@@ -3118,9 +3500,10 @@ function setRoom(r, quiet){
   const prev = room;
   if (prev !== r){ stopSpeech(); stopMic(); }
   room = r;
-  if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
+  if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el && !(World.on && (r === 'home' || r === 'kitchen'))) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
   roomEl.dataset.room = r;
+  Music.play({ home: 'home', kitchen: 'kitchen', bath: 'bath', bed: 'bed', play: 'game', album: 'theme' }[r]);
   World.room(r);
   stageEl.classList.toggle('in-tub', r === 'bath');
   stageEl.classList.toggle('small', r === 'play');
@@ -3134,6 +3517,7 @@ function setRoom(r, quiet){
   closeWardrobe();
   renderNav();
   ROOM_SETUP[r]();
+  placeGift();
   setTimeout(placeBubble, 520);
   if (!quiet && prev !== r) roomHello(r);
 }
@@ -3152,6 +3536,7 @@ const ROOM_SETUP = {
     setTray([
       hasMic ? trayButton('mic', TOOL_ART.mic, 'חזור אחריי', { tap: b => talkBack(b) }) : null,
       trayButton('hanger', TOOL_ART.hanger, 'ארון בגדים', { tap: () => openWardrobe() }),
+      trayButton('paint', PAINT_SVG, 'צבע לחדר', { tap: () => openPaint() }),
       trayButton('ball', TOOL_ART.ball, 'כדור', { drag: { end: (d, x, y, tap) => { kickBall(d, x, y, tap); return true; } } }),
       trayButton('friends', `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="20" ry="24" fill="#fff5e2" stroke="${INK}" stroke-width="3.5"/><g fill="#7cc85a"><circle cx="24" cy="30" r="5"/><circle cx="40" cy="38" r="6"/><circle cx="28" cy="48" r="4"/></g><path d="M22 14 l4 6 l6 -8 l6 8 l4 -6" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`, 'חבר אחר', { tap: () => openChoose(false) })
     ]);
@@ -3159,8 +3544,9 @@ const ROOM_SETUP = {
   kitchen(){
     setTray(FOOD_ORDER.map(f => trayButton(f, FOOD_ART[f], FOODS[f].he, { drag: {
       end: (d, x, y, tap) => {
-        if (tap){ const m = Pet.mouth(); flyGhostTo(d, m.x, m.y, () => { hideGhost(); feed(f); }); return true; }
-        if (Pet.nearMouth(x, y) || Pet.hit(x, y)){ hideGhost(); feed(f); return true; }
+        if (World.on && eating) return false;
+        if (tap){ if (World.on){ hideGhost(); feed(f); return true; } const m = Pet.mouth(); flyGhostTo(d, m.x, m.y, () => { hideGhost(); feed(f); }); return true; }
+        if (Pet.nearMouth(x, y) || Pet.hit(x, y)){ hideGhost(); feed(f, { x, y }); return true; }
         return false;
       }
     } })));
@@ -3215,16 +3601,36 @@ function petUp(e){
   const d = stageEl._down; stageEl._down = null;
   if (!d || drag || sleeping) return;
   if (performance.now() - d.t > 500) return;
-  const x = e.clientX, y = e.clientY;
-  if (Pet.isHead(x, y)){
-    Pet.expr('happy', 1100); Pet.flash('squish', 360); sfx.voice(Pet.sp);
-    FX.emit('heart', x, y - 10, 4, { angle: -Math.PI / 2, speed: 150, size: 13 });
-  } else {
-    Pet.flash('wiggle', 700); Pet.expr('happy', 900); sfx.giggle();
-    FX.emit('heart', x, y, 3, { angle: -Math.PI / 2, speed: 130, size: 11 });
-  }
+  reactTo(e.clientX, e.clientY);
+}
+/* A tap on the friend: each part of the body gets its own reaction. A pat on the head is a purr, the belly
+   giggles, the nose sneezes, the tail makes it turn around, a foot gets a hop. Many quick taps make it dizzy. */
+const REACT_BY_PART = { head: 'purr', neck: 'purr', mane: 'purr', ears: 'shakehead', frill: 'shakehead', horns: 'shakehead', plates: 'shakehead',
+  face: 'sneeze', trunk: 'sneeze', beak: 'sneeze', belly: 'giggle', back: 'giggle', arms: 'giggle', flippers: 'giggle',
+  tail: 'lookback', spikes: 'lookback', club: 'lookback', armor: 'shakehead', legs: 'stomp', paws: 'stomp', feet: 'stomp' };
+const REACT_LINE = { giggle: 'tickle', sneeze: 'sneeze', lookback: 'tail', stomp: 'foot', dizzy: 'dizzy', purr: 'pat' };
+let pokes = [], lastSneeze = 0, lastReactTalk = 0;
+function reactTo(x, y){
+  const now = performance.now();
+  pokes = pokes.filter(t => now - t < 1800); pokes.push(now);
+  let part = Pet.partAt(x, y);
+  if (!part) part = Pet.isHead(x, y) ? 'head' : 'belly';
+  let act = REACT_BY_PART[part] || 'giggle';
+  if (pokes.length >= 5){ act = 'dizzy'; pokes = []; }
+  if (act === 'sneeze'){ if (now - lastSneeze < 6000) act = 'purr'; else lastSneeze = now; }
+  const c = Pet.center();
+  Pet.act(act, act === 'stomp' ? { side: x < c.x ? -1 : 1 } : undefined);
+  const heart = n => { if (World.on) World.E.burstScreen('heart', x, y, n); else FX.emit('heart', x, y - 10, n, { angle: -Math.PI / 2, speed: 140, size: 12 }); };
+  if (act === 'purr'){ sfx.purr(Pet.sp); heart(3); }
+  else if (act === 'giggle'){ sfx.laugh(); heart(2); }
+  else if (act === 'sneeze'){ sfx.ahh(); if (!World.on) setTimeout(() => { sfx.achoo(); const m = Pet.mouth(); FX.emit('drop', m.x, m.y, 8, { speed: 160, g: 500, size: 5 }); }, 820); }
+  else if (act === 'lookback'){ sfx.voice(Pet.sp); }
+  else if (act === 'stomp'){ sfx.boing(); }
+  else if (act === 'shakehead'){ sfx.whoosh(); }
+  else if (act === 'dizzy' && !World.on) sfx.dizzy();
   addNeed('fun', 3);
-  if (performance.now() - lastPatTalk > 7000){ lastPatTalk = performance.now(); say('pat', null, 2); }
+  const line = REACT_LINE[act];
+  if (line && (act === 'dizzy' || now - lastReactTalk > 6500)){ lastReactTalk = now; setTimeout(() => say(line, null, act === 'dizzy' ? 4 : 2), act === 'sneeze' ? 1300 : act === 'dizzy' ? 1100 : 250); }
 }
 stageEl.addEventListener('pointerdown', e => petDown(e, false));
 stageEl.addEventListener('pointermove', petMove);
@@ -3255,12 +3661,15 @@ function markCountBadge(){
   }
 }
 function clearCountBadge(){ for (const b of trayEl.querySelectorAll('.badge')) b.remove(); for (const b of trayEl.querySelectorAll('.glow')) b.classList.remove('glow'); }
-function feed(f){
+let eating = false;
+function feed(f, from){
   const sp = Pet.sp;
   const m = Pet.mouth();
   lastTouch = performance.now();
+  if (World.on && eating) return;
   if (!DIET[sp].includes(f)){
-    sfx.nope(); Pet.flash('shake', 520);
+    sfx.nope();
+    if (World.on){ eating = true; World.E.feed(f, false, from).then(() => { eating = false; }); } else Pet.flash('shake', 520);
     say('wrongFood', { food: FOODS[f], foodAcc: { he: FOODS[f].he, ru: FOODS[f].ruAcc, en: FOODS[f].en }, diet: DIET_TEXT[sp] }, 7);
     for (const g of DIET[sp]) glowTray(g, true);
     setTimeout(() => { if (!countGame) for (const g of DIET[sp]) glowTray(g, false); }, 3500);
@@ -3270,9 +3679,15 @@ function feed(f){
     Pet.flash('shake', 520); say('full', null, 6);
     return;
   }
-  Pet.chew(900); sfx.chomp(); sfx.yum();
-  FX.emit('crumb', m.x, m.y, 8, { color: f === 'meat' ? '#d9573f' : f === 'fish' ? '#9fdcff' : f === 'fruit' ? '#ff4b5c' : '#5cbf55', speed: 120, g: 500, size: 7 });
-  FX.emit('heart', m.x, m.y - 30, 2, { angle: -Math.PI / 2, speed: 90, size: 12 });
+  if (World.on){
+    // the food goes into the mouth and is eaten bite by bite; sometimes it's a favorite and the eyes turn to hearts
+    eating = true;
+    World.E.feed(f, Math.random() < 0.3 ? 'love' : true, from).then(() => { eating = false; });
+  } else {
+    Pet.chew(900); sfx.chomp(); sfx.yum();
+    FX.emit('crumb', m.x, m.y, 8, { color: f === 'meat' ? '#d9573f' : f === 'fish' ? '#9fdcff' : f === 'fruit' ? '#ff4b5c' : '#5cbf55', speed: 120, g: 500, size: 7 });
+    FX.emit('heart', m.x, m.y - 30, 2, { angle: -Math.PI / 2, speed: 90, size: 12 });
+  }
   addNeed('food', 22); addNeed('fun', 2);
   stats.feeds++; saveStats();
   if (countGame){
@@ -3339,7 +3754,8 @@ function rubStep(tool, step, x, y){
   lastTouch = performance.now();
   if (tool === 'sponge'){
     bath.foam += step / 900;
-    if (Math.random() < 0.55) FX.emit('foam', x + rand(-14, 14), y + rand(-14, 14), 1, { size: rand(9, 17), life: 30 });
+    if (World.on){ if (Math.random() < 0.6) World.E.foamAt(x + rand(-10, 10), y + rand(-10, 10)); }
+    else if (Math.random() < 0.55) FX.emit('foam', x + rand(-14, 14), y + rand(-14, 14), 1, { size: rand(9, 17), life: 30 });
     if (performance.now() - bath.lastSqueak > 140){ bath.lastSqueak = performance.now(); sfx.squeak(); }
     const part = Pet.partAt(x, y);
     if (part && part !== bath.lastPart && performance.now() - bath.lastPartAt > 2600){
@@ -3354,11 +3770,11 @@ function rubStep(tool, step, x, y){
       if (!bath.rinseWarned){ bath.rinseWarned = true; say('rinseFirst', null, 5); }
       return;
     }
-    FX.popFoam(2);
+    if (World.on) World.E.popFoam(2); else FX.popFoam(2);
     if (Math.random() < 0.3) sfx.bubble();
     bath.rinse += step / 800;
     if (bath.rinse > 0.25 && bath.stage === 1 && !bath.rinseTalked){ bath.rinseTalked = true; say('rinse', null, 4); }
-    if (bath.rinse >= 1 && bath.stage < 2){ bath.stage = 2; FX.clear('foam'); glowTray('shower', false); glowTray('towel'); }
+    if (bath.rinse >= 1 && bath.stage < 2){ bath.stage = 2; FX.clear('foam'); if (World.on) World.E.clearFoam(); glowTray('shower', false); glowTray('towel'); }
   } else if (tool === 'towel'){
     if (Math.random() < 0.4) FX.emit('sparkle', x, y, 1, { speed: 60, size: 10 });
     if (bath.stage < 2) return;
@@ -3377,14 +3793,15 @@ function finishBath(){
   stats.baths++; saveStats();
   const c = Pet.center();
   FX.emit('sparkle', c.x, c.y, 16, { speed: 240, size: 13 });
-  sfx.sparkle(); Pet.expr('happy', 1800); Pet.flash('hop', 600);
+  sfx.sparkle(); Pet.expr('happy', 1800);
+  if (World.on){ World.E.clearFoam(); Pet.act('shakedry'); sfx.whoosh(); } else Pet.flash('hop', 600);
   say('dry', null, 8, null, () => { if (!hasFact(sp, 'body')) unlockFact(sp, 'body'); else if (Math.random() < 0.4) sayFact(sp, 'body', 5); });
 }
 function brushStep(amount, x, y){
   lastTouch = performance.now();
   if (!bath.brushTalked){ bath.brushTalked = true; say('brush', null, 5); }
   bath.brush += amount;
-  if (Math.random() < 0.5){ const m = Pet.mouth(); FX.emit('bubble', m.x + rand(-20, 20), m.y + rand(-6, 10), 1, { size: rand(5, 9), life: 1 }); }
+  if (Math.random() < 0.5){ if (World.on) World.E.burstAt('bubble', 'mouth', 1); else { const m = Pet.mouth(); FX.emit('bubble', m.x + rand(-20, 20), m.y + rand(-6, 10), 1, { size: rand(5, 9), life: 1 }); } }
   if (Math.random() < 0.2) sfx.squeak();
   if (bath.brush >= 1){
     bath.brush = 0; bath.brushTalked = false;
@@ -3507,6 +3924,14 @@ async function story(){
 /* ---------- home: the ball, the wardrobe, and "say it back to me" ---------- */
 function kickBall(d, x, y, tap){
   const h = Pet.headTop();
+  if (World.on){
+    hideGhost();
+    World.E.ball(tap || !Pet.hit(x, y, 40) ? null : { x, y });
+    addNeed('fun', 8); addNeed('energy', -1);
+    lastTouch = performance.now();
+    if (Math.random() < 0.3) setTimeout(() => say('pat', null, 2), 900);
+    return;
+  }
   const go = () => {
     hideGhost();
     Pet.flash('hop', 600); sfx.boing(); Pet.expr('happy', 1200);
@@ -3525,6 +3950,7 @@ function outfitPreview(id){
   return `<svg viewBox="-60 -66 120 80">${OUTFITS[id]}</svg>`;
 }
 function openWardrobe(){
+  sheetTitle.textContent = 'הארון';
   outfitsEl.textContent = '';
   const cur = petData(Pet.sp).outfit || 'none';
   for (const id of ['none', ...OUTFIT_ORDER]){
@@ -3658,25 +4084,41 @@ const GAME_ICON = {
     <g fill="#9edc8a"><circle cx="24" cy="38" r="5"/><circle cx="36" cy="54" r="6"/><circle cx="26" cy="62" r="3.5"/></g>
     <path d="M58 46 H94 Q92 72 76 72 Q60 72 58 46 Z" fill="#e8c27a" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><path d="M60 52 H92" stroke="#c98a4b" stroke-width="3"/>
     <circle cx="76" cy="40" r="11" fill="#a6b5d0" stroke="${INK}" stroke-width="3.5"/><circle cx="72" cy="38" r="2" fill="${INK}"/><circle cx="80" cy="38" r="2" fill="${INK}"/></svg>`,
+  catch: `<svg viewBox="0 0 100 80"><path d="M20 70 Q50 80 80 70" fill="none" stroke="#7cc85a" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="50" cy="40" r="17" fill="#ff4b5c" stroke="${INK}" stroke-width="4"/><path d="M50 23 Q52 14 58 12" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+    <path d="M58 16 Q68 10 70 20 Q62 22 58 16 Z" fill="#7cc85a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M42 34 Q44 30 48 30" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M24 14 V30 M78 18 V32 M30 6 V16" stroke="#9fd0ff" stroke-width="4" stroke-linecap="round"/></svg>`,
+  jump: `<svg viewBox="0 0 100 80"><path d="M6 72 H94" stroke="#7cc85a" stroke-width="6" stroke-linecap="round"/><ellipse cx="62" cy="64" rx="16" ry="9" fill="#a8b1bb" stroke="${INK}" stroke-width="4"/>
+    <path d="M12 52 Q30 18 54 30" fill="none" stroke="#ffd35c" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>
+    <path d="M70 12 l5 10 11 1.5 -8 7.5 2 11 -10 -5.5 -10 5.5 2 -11 -8 -7.5 11 -1.5 Z" fill="#ffd23a" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>
+    <circle cx="18" cy="56" r="10" fill="#7cc85a" stroke="${INK}" stroke-width="4"/><circle cx="21" cy="53" r="2.4" fill="${INK}"/></svg>`,
+  bubbles: `<svg viewBox="0 0 100 80"><g fill="rgba(160,215,255,.45)" stroke="${INK}" stroke-width="3.5"><circle cx="34" cy="44" r="20"/><circle cx="70" cy="30" r="14"/><circle cx="72" cy="62" r="10"/></g>
+    <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M24 36 Q27 30 33 29"/><path d="M63 24 Q65 21 69 20"/></g>
+    <text x="34" y="54" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="26" fill="#ff5d8f" stroke="${INK}" stroke-width="1.5">3</text></svg>`,
   size: `<svg viewBox="0 0 120 80"><rect x="10" y="10" width="44" height="62" rx="12" fill="#9a8cf0" stroke="${INK}" stroke-width="4"/>
     <rect x="70" y="42" width="24" height="30" rx="8" fill="#ffd35c" stroke="${INK}" stroke-width="4"/>
     <path d="M104 14 V70 M98 20 L104 12 L110 20 M98 64 L104 72 L110 64" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 };
 const GAMES = [
+  { id: 'catch', label: 'תופסים אוכל', three: true },
+  { id: 'jump', label: 'קופצים וכוכבים', three: true },
+  { id: 'bubbles', label: 'סופרים בועות', three: true },
   { id: 'dig', label: 'חופרים מאובן' },
   { id: 'eats', label: 'מי אוכל מה?' },
   { id: 'shadow', label: 'של מי הצל?' },
   { id: 'egg', label: 'ביצה או נולד?' },
   { id: 'size', label: 'מי יותר גדול?', wide: true }
 ];
-let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
+let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size', 'catch', 'jump', 'bubbles']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
 function renderGames(){
   const g = $('games-grid');
   g.textContent = '';
   for (const gm of GAMES){
+    if (gm.three && !World.on) continue;
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'game-tile' + (gm.wide ? ' wide' : ''); b.dir = 'rtl';
-    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '');
+    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '') + (gm.three ? '<span class="new3d">חדש</span>' : '');
+    if (gm.three) b.classList.add('three');
     b.addEventListener('click', () => { initAudio(); sfx.tap(); startGame(gm.id); });
     g.append(b);
   }
@@ -3702,6 +4144,8 @@ function tapOnce(btns){
   });
 }
 function startGame(id){
+  Music.play('game');
+  if (GAME3D_IDS.includes(id)){ start3d(id); return; }
   stopSpeech(); stopMic();
   gameOn = id; gameToken++;
   inPlay = false;
@@ -3717,7 +4161,8 @@ function startGame(id){
 function closeGame(){
   gameOn = null; gameToken++;
   gameEl.hidden = true;
-  document.body.classList.remove('in-game');
+  document.body.classList.remove('in-game', 'in-game3d');
+  if (World.on) World.E.stopGame();
   gameBody.textContent = '';
   stopSpeech();
   inPlay = true;
@@ -3741,8 +4186,79 @@ async function finishGame(tok, id){
   if (next){
     owned.push(next); store.set('ymd-owned', owned);
     setTimeout(() => { Pet.wear(next); FX.emit('sparkle', Pet.headTop().x, Pet.headTop().y, 14, { speed: 200 }); sfx.sparkle(); say('newHat', null, 9); }, 300);
+  } else setTimeout(() => { if (inPlay) earnSticker(); }, 500);
+}
+
+/* ---------- the 3D action games: the friend itself plays, out in the meadow ---------- */
+const GAME3D_IDS = ['catch', 'jump', 'bubbles'];
+const NB = {
+  he: ['בועה אחת', 'שתי בועות', 'שלוש בועות', 'ארבע בועות', 'חמש בועות'],
+  ru: ['один пузырь', 'два пузыря', 'три пузыря', 'четыре пузыря', 'пять пузырей'],
+  en: ['one bubble', 'two bubbles', 'three bubbles', 'four bubbles', 'five bubbles']
+};
+function countLang(){ const on = LANGS.filter(l => langsOn[l]); return on.length ? pick(on) : 'he'; }
+function sayCount(n, lang){ if (n >= 1 && n <= 10) sayFrom({ he: [COUNT.he[n - 1]], ru: [COUNT.ru[n - 1]], en: [COUNT.en[n - 1]] }, null, 9, lang); }
+function start3d(id){
+  if (!World.on){ return; }
+  stopSpeech(); stopMic();
+  gameOn = id; gameToken++;
+  const tok = gameToken;
+  inPlay = false;
+  closeWardrobe();
+  gameEl.hidden = false;
+  gameEl.className = 'game g3d g-' + id;
+  gameBody.textContent = '';
+  document.body.classList.add('in-game', 'in-game3d');
+  bubbleAnchor = () => ({ x: innerWidth / 2, y: 0 });
+  const sp = Pet.sp;
+  const lang = countLang();
+  const young = profile.age <= 3;
+  const done = () => finishGame(tok, id);
+  if (id === 'catch'){
+    const goal = young ? 4 : 6;
+    setDots(goal, 0);
+    let lastYuck = 0;
+    World.E.startGame('catch', { foods: FOOD_ORDER, diet: DIET[sp], goal,
+      onScore: n => { if (!alive(tok)) return; setDots(goal, n); sayCount(n, lang); addNeed('food', 6); },
+      onYuck: () => { if (!alive(tok)) return; const now = performance.now(); if (now - lastYuck > 5000){ lastYuck = now; say('catchYuck', { diet: DIET_TEXT[sp] }, 5); } },
+      onDone: done });
+    say('catchHello', { diet: DIET_TEXT[sp] }, 9);
+  } else if (id === 'jump'){
+    const goal = young ? 5 : 8;
+    setDots(goal, 0);
+    World.E.startGame('jump', { goal, speed: young ? 1.25 : 1.5,
+      onScore: n => { if (!alive(tok)) return; setDots(goal, n); sayCount(n, lang); },
+      onDone: done });
+    say('jumpHello', null, 9);
+  } else if (id === 'bubbles'){
+    const rounds = 3, top = profile.age >= 5 ? 5 : young ? 3 : 4;
+    let round = 0, target = 0, taking = false;
+    setDots(rounds, 0);
+    const ask = () => {
+      if (!alive(tok)) return;
+      target = 2 + Math.floor(Math.random() * (top - 1));
+      taking = true;
+      World.E.game && World.E.game.resetCount && World.E.game.resetCount();
+      say('bubblesAsk', { nb: { he: NB.he[target - 1], ru: NB.ru[target - 1], en: NB.en[target - 1] } }, 9);
+    };
+    World.E.startGame('bubbles', { max: 7,
+      onPop: n => {
+        if (!alive(tok) || !taking) return;
+        if (n < target){ sayCount(n, lang); return; }
+        if (n === target){
+          taking = false; round++;
+          setDots(rounds, round);
+          say('countDone', { n: { he: NUM_WORD.he[target - 1], ru: NUM_WORD.ru[target - 1], en: NUM_WORD.en[target - 1] } }, 9, lang);
+          sfx.yes(); Pet.act('dance', { dur: 2 });
+          if (round >= rounds) setTimeout(done, 1600); else setTimeout(ask, 2600);
+        }
+      } });
+    sayP('bubblesHello', null, 9).then(ask);
   }
 }
+// taps on the 3D picture go to the game
+World.canvas.addEventListener('pointerdown', e => { if (gameOn && World.on && document.body.classList.contains('in-game3d')){ initAudio(); World.E.gamePointer('down', e.clientX, e.clientY); } });
+World.canvas.addEventListener('pointermove', e => { if (gameOn && World.on && document.body.classList.contains('in-game3d') && (e.buttons || e.pointerType === 'touch')) World.E.gamePointer('move', e.clientX, e.clientY); });
 
 /* Who eats what: one food, two friends; tap the one who eats it. */
 async function gameEats(tok){
@@ -3848,7 +4364,7 @@ async function gameEgg(tok){
   setDots(rounds, 0);
   // always at least one friend that is born, so the answer is not always "egg"
   let order = shuffle(SPECIES_ORDER).slice(0, rounds);
-  if (order.every(s => FROM_EGG[s])) order[rounds - 1] = pick(['elephant', 'lion']);
+  if (order.every(s => FROM_EGG[s])) order[rounds - 1] = pick(['elephant', 'lion', 'kangaroo']);
   if (order.every(s => !FROM_EGG[s])) order[0] = pick(['trex', 'penguin']);
   for (let r = 0; r < rounds; r++){
     if (!alive(tok)) return;
@@ -3940,7 +4456,7 @@ async function gameSize(tok){
 async function gameDig(tok){
   const n = profile.age >= 5 ? 3 : 2;
   setDots(n, 0);
-  const order = shuffle(['trex', 'trike', 'stego', 'brachio']);
+  const order = shuffle(['trex', 'trike', 'stego', 'brachio', 'anky']);
   for (let r = 0; r < n; r++){
     if (!alive(tok)) return;
     const sp = order[r];
@@ -4029,6 +4545,14 @@ function renderAlbum(){
   const tabs = $('album-tabs'), cards = $('cards');
   if (!albumSp) albumSp = current || 'trex';
   tabs.textContent = '';
+  {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'album-tab sticker-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(albumSp === 'stickers'));
+    b.setAttribute('aria-label', 'מדבקות');
+    b.innerHTML = `<span class="sticker">${stickerSvg(STICKERS.find(s => s.id === 'star'))}</span><span class="count">${stickers.length}/${STICKERS.length}</span>`;
+    b.addEventListener('click', () => { initAudio(); sfx.tap(); albumSp = 'stickers'; renderAlbum(); });
+    tabs.append(b);
+  }
   for (const sp of SPECIES_ORDER){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'album-tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(sp === albumSp));
@@ -4040,6 +4564,7 @@ function renderAlbum(){
     tabs.append(b);
   }
   cards.textContent = '';
+  if (albumSp === 'stickers'){ renderStickerPage(cards); return; }
   const fresh = new Set(todayFacts.map(([s, k]) => s + ':' + k));
   for (const k of FACT_KINDS){
     const has = hasFact(albumSp, k);
@@ -4054,6 +4579,140 @@ function renderAlbum(){
     });
     cards.append(b);
   }
+}
+
+/* ---------- rewards: stickers, the daily surprise gift, growing up ---------- */
+const GIFT_SVG = `<svg viewBox="0 0 100 100"><rect x="16" y="44" width="68" height="46" rx="8" fill="#ff7aa8" stroke="${INK}" stroke-width="4"/>
+  <rect x="10" y="32" width="80" height="16" rx="6" fill="#ff9ec4" stroke="${INK}" stroke-width="4"/>
+  <path d="M50 32 V90" stroke="#ffd23a" stroke-width="10"/><path d="M50 32 V90" stroke="${INK}" stroke-width="2" opacity=".25"/>
+  <path d="M50 32 C36 14 22 22 34 32 Z M50 32 C64 14 78 22 66 32 Z" fill="#ffd23a" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/></svg>`;
+
+let giftPending = false, giftEl = null, giftBusy = false;
+const revealEl = $('reveal');
+
+/* A new sticker: picks one not collected yet, saves it, and shows it big. Resolves when the reveal closes. */
+function earnSticker(){
+  const missing = STICKERS.filter(s => !stickers.includes(s.id));
+  if (!missing.length) return Promise.resolve(null);
+  const st = pick(missing);
+  stickers.push(st.id); saveStickers();
+  return showReveal(st).then(() => st);
+}
+function showReveal(st){
+  return new Promise(res => {
+    revealEl.textContent = '';
+    const card = document.createElement('div'); card.className = 'reveal-card'; card.dir = 'rtl';
+    card.innerHTML = `<span class="reveal-kicker">מדבקה חדשה!</span><span class="sticker big">${stickerSvg(st)}</span><span class="reveal-name">${st.he}</span><span class="reveal-count">${stickers.length} מתוך ${STICKERS.length} מדבקות</span>`;
+    revealEl.append(card);
+    revealEl.hidden = false;
+    sfx.hatch();
+    FX.emit('confetti', innerWidth / 2, innerHeight * 0.35, 46, { speed: 360, g: 420, size: 11 });
+    const done = () => { if (revealEl.hidden) return; revealEl.hidden = true; revealEl.onclick = null; clearTimeout(timer); res(); };
+    const timer = setTimeout(done, 5200);
+    setTimeout(() => { revealEl.onclick = () => { initAudio(); sfx.tap(); done(); }; }, 600);
+    sayP(stickers.length === STICKERS.length ? 'allStickers' : 'newSticker', { st: { he: st.he, ru: st.ru, en: st.en } }, 9);
+  });
+}
+
+/* The surprise gift: once a day, a present waits in the home. Tap it to open. */
+function giftCheck(){
+  if (store.get('ymd-gift', '') !== dayKey() && STICKERS.some(s => !stickers.includes(s.id))) giftPending = true;
+}
+function placeGift(){
+  const show = giftPending && inPlay && room === 'home' && !bedtime && !sleeping && !gameOn;
+  if (!show){ if (giftEl) giftEl.hidden = true; return; }
+  if (!giftEl){
+    giftEl = document.createElement('button');
+    giftEl.type = 'button'; giftEl.className = 'gift'; giftEl.setAttribute('aria-label', 'מתנה');
+    giftEl.append(itemPic('gift', GIFT_SVG, 120));
+    giftEl.addEventListener('click', openGift);
+    document.body.append(giftEl);
+  }
+  if (giftEl.hidden || !giftEl.dataset.shown){
+    giftEl.hidden = false; giftEl.dataset.shown = '1';
+    giftEl.classList.remove('opening'); void giftEl.offsetWidth; giftEl.classList.add('arrive');
+    setTimeout(() => {
+      if (!giftPending || giftEl.hidden) return;
+      const r = giftEl.getBoundingClientRect();
+      Pet.look(r.left + r.width / 2, r.top + r.height / 2); lookUntil = performance.now() + 2500;
+      say('giftHere', null, 6);
+    }, 900);
+  }
+}
+async function openGift(){
+  if (giftBusy || !giftPending) return;
+  giftBusy = true;
+  initAudio();
+  const r = giftEl.getBoundingClientRect();
+  giftEl.classList.remove('arrive'); giftEl.classList.add('opening');
+  sfx.whoosh(); buzz(30);
+  Pet.act('surprise');
+  await wait(650);
+  sfx.sparkle();
+  FX.emit('confetti', r.left + r.width / 2, r.top + r.height / 2, 34, { speed: 320, g: 400, size: 10 });
+  FX.emit('sparkle', r.left + r.width / 2, r.top + r.height / 2, 12, { speed: 220 });
+  giftEl.hidden = true; giftEl.dataset.shown = '';
+  giftPending = false; store.set('ymd-gift', dayKey());
+  addNeed('fun', 10);
+  await earnSticker();
+  Pet.act('dance', { dur: 2.4 });
+  giftBusy = false;
+}
+
+/* The album page of stickers */
+function renderStickerPage(cards){
+  cards.textContent = '';
+  const grid = document.createElement('div'); grid.className = 'sticker-grid';
+  for (const st of STICKERS){
+    const has = stickers.includes(st.id);
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'sticker-cell' + (has ? '' : ' locked');
+    b.setAttribute('aria-label', has ? st.he : 'מדבקה שעוד לא נאספה');
+    b.innerHTML = has ? `<span class="sticker">${stickerSvg(st)}</span>` : '<span class="sticker-q">?</span>';
+    b.addEventListener('click', () => { initAudio(); if (has){ sfx.pop(); sayFrom({ he: [st.he + '!'], ru: [st.ru + '!'], en: [st.en + '!'] }, null, 6); } else { sfx.nope(); say('stickerLocked', null, 6); } });
+    grid.append(b);
+  }
+  cards.append(grid);
+}
+
+/* ---------- painting the home: colors that open up as stickers are collected ---------- */
+const THEMES = [
+  { sw: ['#ffe2c2', '#ff9a8f'], need: 0 }, { sw: ['#dff5e8', '#6fc4a0'], need: 3 }, { sw: ['#dcefff', '#6aaeee'], need: 6 },
+  { sw: ['#ece4ff', '#b29af0'], need: 9 }, { sw: ['#fff4c8', '#ff9a5c'], need: 12 }
+];
+const PAINT_SVG = `<svg viewBox="0 0 64 64"><rect x="10" y="10" width="40" height="16" rx="7" fill="#ff9ec4" stroke="${INK}" stroke-width="3.5"/>
+  <path d="M50 18 H56 V32 H32 V40" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/><rect x="27" y="40" width="10" height="18" rx="4" fill="#4fb8ff" stroke="${INK}" stroke-width="3.5"/></svg>`;
+let homeTheme = (() => { const v = store.get('ymd-theme', 0); return Number.isInteger(v) && v >= 0 && v < THEMES.length ? v : 0; })();
+function applyTheme(){
+  for (let i = 1; i < THEMES.length; i++) document.body.classList.toggle('theme-' + i, homeTheme === i);
+  if (World.on) try { World.E.setTheme('home', homeTheme); } catch (e) {}
+}
+const sheetTitle = $('sheet-title');
+function openPaint(){
+  closeWardrobe();
+  sheetTitle.textContent = 'צבע לחדר';
+  outfitsEl.textContent = '';
+  THEMES.forEach((th, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'outfit-btn theme-btn';
+    const open = stickers.length >= th.need;
+    if (!open) b.classList.add('locked');
+    b.setAttribute('aria-pressed', String(homeTheme === i));
+    b.setAttribute('aria-label', open ? 'צבע ' + (i + 1) : 'נפתח ב־' + th.need + ' מדבקות');
+    b.innerHTML = `<span class="swatch" style="--a:${th.sw[0]};--b:${th.sw[1]}"></span>` + (open ? '' : `<span class="need">★${th.need}</span>`);
+    b.addEventListener('click', () => {
+      initAudio();
+      if (!open){ sfx.nope(); const n = th.need; say('themeLocked', { nst: { he: n + ' מדבקות', ru: n + (n === 3 ? ' наклейки' : ' наклеек'), en: n + ' stickers' } }, 6); return; }
+      if (homeTheme === i) return;
+      homeTheme = i; store.set('ymd-theme', i); applyTheme();
+      sfx.sparkle(); Pet.act('surprise'); say('themeNew', null, 5);
+      openPaint();
+    });
+    outfitsEl.append(b);
+  });
+  const was = wardrobeEl.hidden;
+  wardrobeEl.hidden = false;
+  if (was) World.layout(true);
 }
 
 /* ---------- the flow: start, choosing a friend, hatching, a sitting, bedtime, goodnight ---------- */
@@ -4109,6 +4768,7 @@ function openChoose(fromStart){
   }
   chooseEl.hidden = false;
   chooseEl.scrollTop = 0;
+  Music.play('theme');
   bubbleAnchor = () => ({ x: innerWidth / 2, y: 0 });
   say('choose', null, 9);
 }
@@ -4159,6 +4819,7 @@ async function runIntro(sp){
   stopSpeech();
   startEl.hidden = true; chooseEl.hidden = true; nightEl.hidden = true;
   introEl.hidden = false;
+  Music.play('hatch');
   $('tap-hint').style.display = '';
   const egg = FROM_EGG[sp];
   let taps = 0, done = false;
@@ -4239,13 +4900,16 @@ function beginSession(justHatched){
   setRoom('home', true);
   renderNeeds();
   keepAwake();
+  giftCheck();
   if (!justHatched){
     if (grew){
-      Pet.flash('hop', 600); sfx.hatch();
+      sfx.hatch();
+      if (World.on) setTimeout(() => World.E.celebrate(), 1300); else Pet.flash('hop', 600);
       const h = Pet.headTop(); FX.emit('sparkle', h.x, h.y + 40, 16, { speed: 240 });
-      say('grew', null, 9);
+      say('grew', null, 9, null, () => { if (inPlay) earnSticker(); });
     } else say('welcomeBack', null, 9);
   }
+  setTimeout(placeGift, 2600);
   nextNeedTalk = performance.now() + 70000;
   if (isAndroid && !runningAsApp && document.fullscreenEnabled && !document.fullscreenElement){
     try { const p = document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
@@ -4253,6 +4917,7 @@ function beginSession(justHatched){
 }
 function showStart(){
   inPlay = false;
+  Music.play('theme');
   hudEl.hidden = true; trayEl.hidden = true; navEl.hidden = true; clockEl.hidden = true;
   gamesEl.hidden = true; albumEl.hidden = true;
   startEl.hidden = false;
@@ -4276,6 +4941,7 @@ function showNight(){
   if (!bedtime) return;
   inPlay = false;
   stopLullaby();
+  Music.stop();
   releaseAwake();
   const sp = current;
   $('night-pet').textContent = '';
@@ -4323,7 +4989,7 @@ friendsBtn.addEventListener('click', () => { initAudio(); sfx.tap(); openChoose(
 const gateEl = $('gate'), gateForm = $('gate-form'), gateQ = $('gate-q'), gateInput = $('gate-answer'), gateErr = $('gate-error');
 const parentsEl = $('parents');
 const nameInputs = { he: $('name-he'), ru: $('name-ru'), en: $('name-en') };
-const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs'), three: $('opt-three') };
+const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs'), three: $('opt-three'), music: $('opt-music') };
 const langChips = Array.from(document.querySelectorAll('.lang-chip'));
 const lenChips = Array.from(document.querySelectorAll('[data-len]'));
 const ageChips = Array.from(document.querySelectorAll('[data-age]'));
@@ -4419,7 +5085,7 @@ $('new-session').addEventListener('click', () => {
 $('end-session').addEventListener('click', () => { closeParents(); startBedtime(); });
 $('reset-pet').addEventListener('click', () => {
   if (!current) return;
-  if (!confirm(`לגדל את ה${PET_NAMES[current].he} מחדש, מביצה? האלבום והכובעים נשמרים.`)) return;
+  if (!confirm(`לגדל את ה${PET_NAMES[current].he} מחדש, ${FROM_EGG[current] ? 'מביצה' : 'מתינוק'}? האלבום והכובעים נשמרים.`)) return;
   pets[current] = { born: false, days: [], outfit: null }; savePets();
   closeParents();
   if (gameOn){ gameOn = null; gameToken++; gameEl.hidden = true; document.body.classList.remove('in-game'); }
@@ -4442,6 +5108,7 @@ for (const k of Object.keys(optInputs)) optInputs[k].addEventListener('change', 
   opts[k] = optInputs[k].checked; store.set('ymd-opts', opts);
   if (k === 'mic' && room === 'home' && inPlay) ROOM_SETUP.home();
   if (k === 'count' && !opts.count){ countGame = null; clearCountBadge(); }
+  if (k === 'music'){ Music.setOn(opts.music); if (opts.music && Music.name && !Music.timer) Music.play(Music.name); }
   if (k === 'three'){
     if (!opts.three){ World.stop('off'); return; }
     if (!World.restart()){ opts.three = false; optInputs.three.checked = false; store.set('ymd-opts', opts); }
@@ -4571,6 +5238,29 @@ addEventListener('pointermove', e => {
   if (!inPlay || drag || sleeping || !Pet.el) return;
   if (e.pointerType === 'mouse' || e.buttons || e.pointerType === 'touch'){ Pet.look(e.clientX, e.clientY); lookUntil = performance.now() + 1600; }
 }, { passive: true });
+/* What the friend does on its own when nobody is touching it: strolls around, dances, yawns, looks around,
+   stretches, waves, and once in a while a butterfly comes to visit. */
+let lastButterfly = 0;
+function idle(now){
+  if (World.on && World.E.busyActing()) return;
+  const walkRoom = room === 'home' || room === 'kitchen';
+  if (room === 'play' || room === 'album') return;
+  const choices = World.on
+    ? [['wander', walkRoom ? 3 : 0], ['dance', 1.4], ['yawn', room === 'bed' ? 2 : 0.8], ['lookaround', 1.6], ['stretch', 0.8], ['wave', 1], ['excited', 1.2],
+       ['butterfly', room === 'home' && now - lastButterfly > 150000 ? 1.4 : 0]]
+    : [['tilt', 2], ['excited', 1.5], ['hop', 1.2], ['look', 1.2], ['dance', 0.8], ['yawn', 0.6]];
+  let sum = choices.reduce((a, c) => a + c[1], 0), x = Math.random() * sum, pick = choices[0][0];
+  for (const [n, w] of choices){ x -= w; if (x <= 0){ pick = n; break; } }
+  if (pick === 'wander') World.E.wander();
+  else if (pick === 'butterfly'){ lastButterfly = now; World.E.butterfly(); setTimeout(() => { if (inPlay && room === 'home' && !speechBusy()) say('butterfly', null, 3); }, 5300); }
+  else if (pick === 'dance'){ Pet.act('dance'); sfx.danceTune(); if (Math.random() < 0.4) say('dance', null, 2); const h = Pet.headTop(); for (let i = 0; i < 4; i++) setTimeout(() => FX.emit('note', h.x + rand(-60, 60), h.y + 10, 1, { size: 22 }), i * 700); }
+  else if (pick === 'yawn'){ Pet.act('yawn'); sfx.yawn(); }
+  else if (pick === 'excited') Pet.flash('excited', 1600);
+  else if (pick === 'tilt'){ Pet.el.classList.add('tilt'); setTimeout(() => Pet.el && Pet.el.classList.remove('tilt'), 1500); }
+  else if (pick === 'hop') Pet.flash('hop', 600);
+  else if (pick === 'look'){ Pet.look(Pet.center().x + rand(-200, 200), Pet.center().y - 100); lookUntil = now + 1500; }
+  else Pet.act(pick);
+}
 function frame(now){
   const dt = Math.min(0.1, (now - lastT) / 1000);
   lastT = now;
@@ -4587,13 +5277,9 @@ function frame(now){
   if (inPlay && Pet.el){
     if (now > nextBlink){ nextBlink = now + rand(2200, 5200); Pet.blink(); }
     if (now > lookUntil && lookUntil){ lookUntil = 0; Pet.lookHome(); }
-    if (now > nextIdle && !sleeping && !drag && !speechBusy()){
-      nextIdle = now + rand(12000, 22000);
-      const r = Math.random();
-      if (r < 0.35){ Pet.el.classList.add('tilt'); setTimeout(() => Pet.el && Pet.el.classList.remove('tilt'), 1500); }
-      else if (r < 0.6){ Pet.flash('excited', 1600); }
-      else if (r < 0.8){ Pet.flash('hop', 600); }
-      else { Pet.look(Pet.center().x + rand(-200, 200), Pet.center().y - 100); lookUntil = now + 1500; }
+    if (now > nextIdle && !sleeping && !drag && !speechBusy() && now - lastTouch > 6000 && !gameOn && wardrobeEl.hidden){
+      nextIdle = now + rand(9000, 17000);
+      idle(now);
     }
   }
   World.sync();
@@ -4632,6 +5318,7 @@ renderNoVoice();
 setMuted(muted);
 sizeFx();
 World.start();
+applyTheme();
 renderNavIcons();
 renderNeeds();
 showStart();

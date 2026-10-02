@@ -36,10 +36,12 @@ function wallAndFloor(g, wallTex, floorTex, o = {}){
     // a painted panel along the lower wall, with a rail on top
     const wm = matte(o.wains, { roughness: 0.75 });
     const panel = new THREE.Mesh(new THREE.PlaneGeometry(22, o.wainsH), wm); panel.position.set(0, o.wainsH / 2, WALL_Z + 0.02); panel.receiveShadow = true; g.add(panel);
-    box(g, 22, 0.08, 0.1, matte(o.rail, { roughness: 0.5 }), V(0, o.wainsH, WALL_Z + 0.05), { r: 0.03, shadow: false });
+    const rail = box(g, 22, 0.08, 0.1, matte(o.rail, { roughness: 0.5 }), V(0, o.wainsH, WALL_Z + 0.05), { r: 0.03, shadow: false });
+    const panels = [];
     for (let x = -10; x <= 10; x += 1.1){
-      box(g, 0.86, o.wainsH - 0.42, 0.03, matte(shade(o.wains, 0.12).getStyle(), { roughness: 0.7 }), V(x, o.wainsH / 2 + 0.06, WALL_Z + 0.035), { r: 0.012, shadow: false });
+      panels.push(box(g, 0.86, o.wainsH - 0.42, 0.03, matte(shade(o.wains, 0.12).getStyle(), { roughness: 0.7 }), V(x, o.wainsH / 2 + 0.06, WALL_Z + 0.035), { r: 0.012, shadow: false }));
     }
+    return { wall, floor, panel, rail, panels };
   }
   return { wall, floor };
 }
@@ -111,9 +113,17 @@ function frame(g, pos, w, h, tex, color = '#ffc83d'){
 }
 
 /* ---------------- home ---------------- */
+/* The home can be painted: wallpaper, the panel along the wall, and the rug. */
+export const HOME_THEMES = [
+  { wall: ['#ffe2c2', '#ffc99a', '#ffd9b4'], wains: '#f7c391', rail: '#e9a96e', rug: ['#ff9a8f', '#fff2df', '#ffd35c'] },
+  { wall: ['#dff5e8', '#b8e6cb', '#cdeedb'], wains: '#a8dcc0', rail: '#7cc3a0', rug: ['#6fc4a0', '#fff7e8', '#ffd35c'] },
+  { wall: ['#dcefff', '#b5d9fa', '#cbe4fd'], wains: '#a9cdef', rail: '#7fb1e0', rug: ['#6aaeee', '#fff6e6', '#ffd35c'] },
+  { wall: ['#ece4ff', '#d3c4ff', '#e0d6ff'], wains: '#c9b8f5', rail: '#a993ea', rug: ['#b29af0', '#fff4ff', '#ffd35c'] },
+  { wall: ['#fff4c8', '#ffe28a', '#ffecb0'], wains: '#ffd970', rail: '#f2bf3c', rug: ['#ff9a5c', '#fff8e6', '#7cc85a'] }
+];
 function home(){
   const g = new THREE.Group();
-  wallAndFloor(g, T.wallpaperDots('#ffe2c2', '#ffc99a', '#ffd9b4'), T.wood('#e3a46c', '#c98a50'), { wains: '#f7c391', wainsH: 1.15, rail: '#e9a96e', base: '#d98e55' });
+  const wf = wallAndFloor(g, T.wallpaperDots('#ffe2c2', '#ffc99a', '#ffd9b4'), T.wood('#e3a46c', '#c98a50'), { wains: '#f7c391', wainsH: 1.15, rail: '#e9a96e', base: '#d98e55' });
   windowOn(g, -0.75, 2.75, 1.25, 1.1, false, '#ff9a9a');
   frame(g, V(0.82, 2.85, WALL_Z + 0.03), 0.6, 0.6, T.paintingPaw());
   frame(g, V(2.7, 2.4, WALL_Z + 0.03), 0.8, 0.6, T.windowView(false), '#e9b96e');
@@ -122,6 +132,15 @@ function home(){
   // rug
   const rug = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 0.02, 72), texMat(T.rugRings('#ff9a8f', '#fff2df', '#ffd35c'), { roughness: 0.95 }));
   rug.scale.set(1.25, 1, 0.75); rug.position.set(0, 0.012, 0.15); rug.receiveShadow = true; g.add(rug);
+  const setTheme = i => {
+    const th = HOME_THEMES[i] || HOME_THEMES[0];
+    wf.wall.material.map = T.wallpaperDots(...th.wall); wf.wall.material.needsUpdate = true;
+    rug.material.map = T.rugRings(...th.rug); rug.material.needsUpdate = true;
+    if (wf.panel) wf.panel.material = matte(th.wains, { roughness: 0.75 });
+    if (wf.rail) wf.rail.material = matte(th.rail, { roughness: 0.5 });
+    for (const pb of wf.panels || []) pb.material = matte(shade(th.wains, 0.12).getStyle(), { roughness: 0.7 });
+    return th.wall[0];
+  };
   // toy blocks and a ball
   const letters = [['א', '#ff5d8f'], ['ב', '#4fb8ff'], ['ג', '#7cc85a']];
   letters.forEach(([ch, c], i) => {
@@ -137,7 +156,7 @@ function home(){
   box(g, 2.0, 0.75, 0.25, sofaMat, V(-3.0, 0.75, -2.08), { r: 0.12 });
   for (const sx of [-1, 1]) box(g, 0.25, 0.6, 0.8, sofaMat, V(-3.0 + sx * 1.0, 0.45, -1.75), { r: 0.12 });
   box(g, 0.5, 0.35, 0.18, skin('#ffd35c', { sheen: 0.6, roughness: 0.8 }), V(-3.4, 0.68, -1.9), { r: 0.1, rot: { z: 0.2 } });
-  return { group: g, wall: '#ffe2c2' };
+  return { group: g, wall: '#ffe2c2', setTheme };
 }
 
 /* ---------------- kitchen ---------------- */

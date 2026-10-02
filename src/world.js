@@ -24,9 +24,14 @@ const World = {
         // build the rooms and their shaders in the background while the start screen is up
         setTimeout(() => { try { this.E.warm(['home', 'kitchen', 'bath', 'bed', 'play', 'studio']); } catch (e) {} }, 1200);
       }
+      // sounds that the engine starts at the right moment (a bite, a sneeze, a bounce)
+      const CUES = { sneeze: () => sfx.achoo(), dizzy: () => sfx.dizzy(), chomp1: () => sfx.chomp1(), yum: () => sfx.tada(), boing: () => sfx.boing(), bounce: () => sfx.bounce(), giggle: () => sfx.laugh(),
+        nope: () => sfx.nope(), jump: () => sfx.stretch(), star: () => sfx.sparkle(), bump: () => sfx.bounce(), pop: () => sfx.pop(), step: () => sfx.step(Pet.sp) };
+      this.E.cue = n => { try { if (CUES[n]) CUES[n](); } catch (e) {} };
       this.E.setStateEl(this.stateEl);
       this.E.setStageEl(stageEl);
       this.on = true; this.why = ''; this.slowChecks = 0; this.started = performance.now();
+      try { this.E.setTheme('home', homeTheme); } catch (e) {}
       this.E.paused = false;
       this.canvas.hidden = false;
       document.body.classList.add('three');
@@ -80,7 +85,7 @@ const World = {
   // draw only while the 3D scene can be seen
   sync(){
     if (!this.on) return;
-    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen);
+    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen) || (!!gameOn && document.body.classList.contains('in-game3d') && !modalOpen);
     this.E.paused = !seen;
   },
   // hatching: the egg (or the basket) in a soft studio, drawn where the tap area is
@@ -94,12 +99,19 @@ const World = {
   },
   introFit(){ if (this.on && this.E.egg) this.E.setFit(eggWrap.getBoundingClientRect(), 1.25); },
   introEnd(){ if (!this.on) return; this.E.clearEgg(); this.E.setFit(null); },
+  lastRoom: '',
   room(name){
     if (!this.on) return;
+    const prev = this.lastRoom; this.lastRoom = name;
     this.E.setRoom(name);
     this.E.setLayout(name === 'play' ? 'small' : 'normal');
     this.layout();
     if (!reduceMotion){ this.canvas.classList.remove('swap'); void this.canvas.offsetWidth; this.canvas.classList.add('swap'); }
+    // in the home and the kitchen, the friend walks in from the side (and sometimes waves hello)
+    if (prev !== name && this.E.walkable() && !reduceMotion){
+      const side = ROOMS.indexOf(name) > ROOMS.indexOf(prev) ? 1 : -1;
+      this.E.enter(side).then(() => { if (this.on && Math.random() < 0.5) this.E.act('wave'); });
+    }
   },
   // too slow to be fun: after it has settled, a few checks in a row below about 20 frames a second switch to flat
   watch(){
@@ -129,7 +141,8 @@ function pumpPics(){
       let url = '';
       try { url = job.make(); } catch (e) { url = ''; }
       if (World.E) World.E.busyUntil = performance.now() + 400;
-      if (url) job.el.innerHTML = `<img class="${job.cls}" src="${url}" alt="" draggable="false">`;
+      // built with DOM calls, not an HTML string: no markup pattern in the page for the browser's look-ahead to fetch
+      if (url){ const img = new Image(); img.className = job.cls; img.alt = ''; img.draggable = false; img.src = url; job.el.replaceChildren(img); }
     }
     if (picQueue.length) requestAnimationFrame(step); else picBusy = false;
   });

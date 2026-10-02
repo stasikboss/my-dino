@@ -13,13 +13,15 @@ const PET_NAMES = {
   brachio: { he: 'ברכיוזאורוס', ru: 'брахиозавр', en: 'Brachiosaurus', enA: 'a Brachiosaurus', enThe: 'the Brachiosaurus', short: 'ברכיוזאורוס' },
   elephant: { he: 'פיל', ru: 'слон', en: 'elephant', enA: 'an elephant', enThe: 'the elephant', short: 'פיל' },
   lion: { he: 'אריה', ru: 'лев', en: 'lion', enA: 'a lion', enThe: 'the lion', short: 'אריה' },
-  penguin: { he: 'פינגווין', ru: 'пингвин', en: 'penguin', enA: 'a penguin', enThe: 'the penguin', short: 'פינגווין' }
+  penguin: { he: 'פינגווין', ru: 'пингвин', en: 'penguin', enA: 'a penguin', enThe: 'the penguin', short: 'פינגווין' },
+  anky: { he: 'אנקילוזאורוס', ru: 'анкилозавр', en: 'Ankylosaurus', enA: 'an Ankylosaurus', enThe: 'the Ankylosaurus', short: 'אנקילוזאורוס' },
+  kangaroo: { he: 'קנגורו', ru: 'кенгуру', en: 'kangaroo', enA: 'a kangaroo', enThe: 'the kangaroo', short: 'קנגורו' }
 };
-const IS_DINO = { trex: true, trike: true, stego: true, brachio: true, elephant: false, lion: false, penguin: false };
-const FROM_EGG = { trex: true, trike: true, stego: true, brachio: true, elephant: false, lion: false, penguin: true };
+const IS_DINO = { trex: true, trike: true, stego: true, brachio: true, anky: true, elephant: false, lion: false, penguin: false, kangaroo: false };
+const FROM_EGG = { trex: true, trike: true, stego: true, brachio: true, anky: true, elephant: false, lion: false, penguin: true, kangaroo: false };
 // Rough length in meters, for "who is bigger"; pairs that are too close (or bigger in one way, smaller in another) are skipped.
-const REAL_SIZE = { brachio: 22, trex: 12, trike: 9, stego: 9, elephant: 6.5, lion: 2.5, penguin: 1.1 };
-const SIZE_SKIP = [['trike', 'stego'], ['elephant', 'stego']];
+const REAL_SIZE = { brachio: 22, trex: 12, trike: 9, stego: 9, anky: 7, elephant: 6.5, lion: 2.5, kangaroo: 2, penguin: 1.1 };
+const SIZE_SKIP = [['trike', 'stego'], ['elephant', 'stego'], ['anky', 'trike'], ['anky', 'stego'], ['anky', 'elephant'], ['kangaroo', 'lion']];
 
 const FOODS = {
   meat: { he: 'בשר', ru: 'мясо', ruAcc: 'мясо', en: 'meat' },
@@ -31,7 +33,7 @@ const FOODS = {
 };
 const DIET = {
   trex: ['meat'], trike: ['fern'], stego: ['fern'], brachio: ['leaves'],
-  elephant: ['grass', 'leaves', 'fruit'], lion: ['meat'], penguin: ['fish']
+  elephant: ['grass', 'leaves', 'fruit'], lion: ['meat'], penguin: ['fish'], anky: ['fern'], kangaroo: ['grass', 'leaves']
 };
 const DIET_TEXT = {
   trex: { he: 'בשר', ru: 'мясо', en: 'meat' },
@@ -40,7 +42,9 @@ const DIET_TEXT = {
   brachio: { he: 'עלים מעצים גבוהים', ru: 'листья с высоких деревьев', en: 'leaves from tall trees' },
   elephant: { he: 'עשב, עלים ופירות', ru: 'траву, листья и фрукты', en: 'grass, leaves and fruit' },
   lion: { he: 'בשר', ru: 'мясо', en: 'meat' },
-  penguin: { he: 'דגים', ru: 'рыбу', en: 'fish' }
+  penguin: { he: 'דגים', ru: 'рыбу', en: 'fish' },
+  anky: { he: 'צמחים נמוכים, כמו שרכים', ru: 'низкие растения, например папоротник', en: 'low plants, like ferns' },
+  kangaroo: { he: 'עשב ועלים', ru: 'траву и листья', en: 'grass and leaves' }
 };
 const FEATURE = {
   trex: { he: 'ראש גדול וידיים קטנות', ru: 'большая голова и маленькие лапки', en: 'a big head and tiny arms' },
@@ -49,7 +53,9 @@ const FEATURE = {
   brachio: { he: 'צוואר ארוך ארוך', ru: 'очень длинная шея', en: 'a very long neck' },
   elephant: { he: 'חדק ואוזניים גדולות', ru: 'хобот и большие уши', en: 'a trunk and big ears' },
   lion: { he: 'רעמה גדולה', ru: 'большая грива', en: 'a big mane' },
-  penguin: { he: 'כנפיים קטנות ובטן לבנה', ru: 'маленькие крылья и белый животик', en: 'little flippers and a white belly' }
+  penguin: { he: 'כנפיים קטנות ובטן לבנה', ru: 'маленькие крылья и белый животик', en: 'little flippers and a white belly' },
+  anky: { he: 'שריון על הגב, ופטיש של עצם בזנב', ru: 'броня на спине и костяная булава на хвосте', en: 'armor on its back and a bony club on its tail' },
+  kangaroo: { he: 'רגליים חזקות לקפיצה וזנב ארוך', ru: 'сильные ноги для прыжков и длинный хвост', en: 'strong legs for hopping and a long tail' }
 };
 
 /* Body parts the bath names while the sponge is on them. Points are in stage units. */
@@ -60,7 +66,9 @@ const PARTS = {
   brachio: [[104, 112, 'neck'], [88, 52, 'head'], [160, 158, 'back'], [108, 204, 'legs'], [214, 200, 'tail']],
   elephant: [[104, 138, 'trunk'], [44, 100, 'ears'], [196, 100, 'ears'], [120, 66, 'head'], [120, 180, 'belly'], [120, 210, 'legs']],
   lion: [[120, 38, 'mane'], [60, 96, 'mane'], [180, 96, 'mane'], [120, 104, 'face'], [120, 190, 'belly'], [120, 218, 'paws'], [196, 168, 'tail']],
-  penguin: [[60, 168, 'flippers'], [180, 168, 'flippers'], [120, 168, 'belly'], [120, 58, 'head'], [120, 222, 'feet'], [120, 110, 'beak']]
+  penguin: [[60, 168, 'flippers'], [180, 168, 'flippers'], [120, 168, 'belly'], [120, 58, 'head'], [120, 222, 'feet'], [120, 110, 'beak']],
+  anky: [[142, 152, 'armor'], [66, 168, 'head'], [228, 180, 'club'], [140, 202, 'belly'], [101, 210, 'legs']],
+  kangaroo: [[94, 24, 'ears'], [146, 24, 'ears'], [120, 72, 'head'], [120, 170, 'belly'], [102, 148, 'arms'], [152, 190, 'legs'], [90, 216, 'feet'], [200, 214, 'tail']]
 };
 const PART_NAMES = {
   head: { he: 'הראש', ru: 'голову', en: 'head' },
@@ -81,7 +89,9 @@ const PART_NAMES = {
   paws: { he: 'הכפות', ru: 'лапы', en: 'paws' },
   flippers: { he: 'הכנפיים', ru: 'крылышки', en: 'flippers' },
   feet: { he: 'הרגליים', ru: 'лапки', en: 'feet' },
-  beak: { he: 'המקור', ru: 'клюв', en: 'beak' }
+  beak: { he: 'המקור', ru: 'клюв', en: 'beak' },
+  armor: { he: 'השריון', ru: 'броню', en: 'armor' },
+  club: { he: 'הפטיש בזנב', ru: 'булаву на хвосте', en: 'tail club' }
 };
 
 /* The album: six cards per friend. Each card opens through something done in the game. */
@@ -158,15 +168,31 @@ const FACTS = {
     baby: { he: 'פינגווינים בוקעים מביצה. אבא פינגווין קיסרי מחמם את הביצה על הרגליים!', ru: 'Пингвины вылупляются из яиц. Папа императорский пингвин греет яйцо на лапах!', en: 'Penguins hatch from eggs. An emperor penguin dad keeps the egg warm on his feet!' },
     size: { he: 'הפינגווין הקיסרי, הכי גדול, בגובה של ילד בן חמש בערך.', ru: 'Императорский пингвин, самый большой, ростом примерно с пятилетнего ребёнка.', en: 'The emperor penguin, the biggest one, is about as tall as a five-year-old.' },
     fun: { he: 'פינגווינים הם ציפורים, וציפורים הן הדינוזאורים של היום!', ru: 'Пингвины — это птицы, а птицы — это динозавры наших дней!', en: 'Penguins are birds, and birds are the dinosaurs of today!' }
+  },
+  anky: {
+    eats: { he: 'אנקילוזאורוס אכל צמחים נמוכים, כמו שרכים.', ru: 'Анкилозавр ел низкие растения, например папоротники.', en: 'Ankylosaurus ate low plants, like ferns.' },
+    body: { he: 'הגב שלו היה מכוסה בשריון של עצם, ואפילו לעפעפיים היה שריון!', ru: 'Его спина была покрыта костяной бронёй, и даже веки были в броне!', en: 'Its back was covered in bony armor, and even its eyelids had armor!' },
+    home: { he: 'אנקילוזאורוס חי באמריקה, באותה תקופה כמו טירנוזאורוס וטריצרטופס.', ru: 'Анкилозавр жил в Америке, в одно время с тираннозавром и трицератопсом.', en: 'Ankylosaurus lived in America, at the same time as T.\u00a0rex and Triceratops.' },
+    baby: { he: 'אנקילוזאורוס בקע מביצה, כמו כל הדינוזאורים.', ru: 'Анкилозавр вылупился из яйца, как все динозавры.', en: 'Ankylosaurus hatched from an egg, like all dinosaurs.' },
+    size: { he: 'אנקילוזאורוס היה כבד כמו פיל!', ru: 'Анкилозавр весил как слон!', en: 'An Ankylosaurus was as heavy as an elephant!' },
+    fun: { he: 'בסוף הזנב היה לו גוש עצם כבד, כמו פטיש. מדענים חושבים שהוא הניף אותו כדי לשמור על עצמו.', ru: 'На конце хвоста у него была тяжёлая костяная булава, как молоток. Учёные думают, что он размахивал ею, чтобы защищаться.', en: 'At the end of its tail was a heavy bony club, like a hammer. Scientists think it swung it to protect itself.' }
+  },
+  kangaroo: {
+    eats: { he: 'קנגורו אוכלים צמחים: בעיקר עשב, וגם עלים.', ru: 'Кенгуру едят растения: в основном траву, а ещё листья.', en: 'Kangaroos eat plants: mostly grass, and leaves too.' },
+    body: { he: 'יש לי רגליים אחוריות חזקות לקפיצה, וזנב ארוך וחזק. כשאני הולך לאט, אני נשען על הזנב כמו על רגל חמישית!', ru: 'У меня сильные задние ноги для прыжков и длинный сильный хвост. Когда я иду медленно, я опираюсь на хвост, как на пятую ногу!', en: 'I have strong back legs for hopping, and a long, strong tail. When I walk slowly, I lean on my tail like a fifth leg!' },
+    home: { he: 'קנגורו חיים באוסטרליה, בקבוצות.', ru: 'Кенгуру живут в Австралии, группами.', en: 'Kangaroos live in Australia, in groups called mobs.' },
+    baby: { he: 'קנגורו לא בוקעים מביצה. התינוק נולד קטן קטן, בגודל של ענב, וגדל בכיס של אמא.', ru: 'Кенгуру не вылупляются из яиц. Малыш рождается крошечным, размером с виноградинку, и растёт в сумке у мамы.', en: "Kangaroos don't hatch from eggs. The baby is born tiny, the size of a grape, and grows in mom's pouch. It's called a joey." },
+    size: { he: 'הקנגורו האדום, הכי גדול, יכול להיות גבוה כמו אדם מבוגר!', ru: 'Рыжий кенгуру, самый большой, бывает ростом со взрослого человека!', en: 'The red kangaroo, the biggest one, can be as tall as a grown-up!' },
+    fun: { he: 'בקפיצה אחת גדולה, קנגורו יכול לקפוץ רחוק כמו שתי מכוניות!', ru: 'Одним большим прыжком кенгуру может прыгнуть на длину двух машин!', en: 'In one big hop, a kangaroo can jump as far as two cars are long!' }
   }
 };
 // Parent questions for the goodnight screen, one per card (Hebrew; for the grown-up to ask out loud).
 const ASK = {
   eats: (p) => [`מה אוכל ${PET_NAMES[p].he}?`, DIET_TEXT[p].he],
   body: (p) => [`מה מיוחד בגוף של ${PET_NAMES[p].he}?`, FEATURE[p].he],
-  home: (p) => [`איפה גר ${PET_NAMES[p].he}?`, { trex: 'באמריקה, לפני המון זמן', trike: 'באמריקה, לפני המון זמן', stego: 'באמריקה, לפני המון המון זמן', brachio: 'באמריקה, לפני המון המון זמן', elephant: 'באפריקה, במשפחות גדולות', lion: 'באפריקה, בלהקה', penguin: 'בעיקר במקומות קרים, וגם בחמים' }[p]],
+  home: (p) => [`איפה גר ${PET_NAMES[p].he}?`, { trex: 'באמריקה, לפני המון זמן', trike: 'באמריקה, לפני המון זמן', stego: 'באמריקה, לפני המון המון זמן', brachio: 'באמריקה, לפני המון המון זמן', elephant: 'באפריקה, במשפחות גדולות', lion: 'באפריקה, בלהקה', penguin: 'בעיקר במקומות קרים, וגם בחמים', anky: 'באמריקה, לפני המון זמן', kangaroo: 'באוסטרליה' }[p]],
   baby: (p) => [`${PET_NAMES[p].he} בוקע מביצה או נולד?`, FROM_EGG[p] ? 'בוקע מביצה' : 'נולד'],
-  size: (p) => [`כמה גדול ${PET_NAMES[p].he}?`, { trex: 'ארוך כמו אוטובוס', trike: 'כבד כמו ארבע מכוניות', stego: 'גדול כמו אוטובוס', brachio: 'ארוך כמעט כמו שני אוטובוסים', elephant: 'החיה הכי גדולה ביבשה היום', lion: 'החתול השני הכי גדול, אחרי הטיגריס', penguin: 'הקיסרי, בגובה של ילד בן חמש' }[p]],
+  size: (p) => [`כמה גדול ${PET_NAMES[p].he}?`, { trex: 'ארוך כמו אוטובוס', trike: 'כבד כמו ארבע מכוניות', stego: 'גדול כמו אוטובוס', brachio: 'ארוך כמעט כמו שני אוטובוסים', elephant: 'החיה הכי גדולה ביבשה היום', lion: 'החתול השני הכי גדול, אחרי הטיגריס', penguin: 'הקיסרי, בגובה של ילד בן חמש', anky: 'כבד כמו פיל', kangaroo: 'הקנגורו האדום, גבוה כמו אדם מבוגר' }[p]],
   fun: (p) => [`ספר לי משהו מצחיק על ${PET_NAMES[p].he}`, FACTS[p].fun.he]
 };
 const OFFLINE_IDEAS = [
@@ -243,6 +269,30 @@ const LINES = {
     en: ['Bath time! Grab the sponge.']
   },
   scrub: { he: ['מקרצפים את {part}!'], ru: ['Моем {part}!'], en: ['Scrubbing my {part}!'] },
+  sneeze: { he: ['אפצ\'י! סליחה! זה דגדג לי באף.', 'אפצ\'י! האף שלי מדגדג!'], ru: ['Апчхи! Ой, щекотно в носу!', 'Апчхи! Извини!'], en: ['Achoo! That tickled my nose!', 'Achoo! Excuse me!'] },
+  tickle: { he: ['חחח! הבטן שלי מדגדגת!', 'חי חי חי! עוד פעם!'], ru: ['Ха-ха! Животик щекотно!', 'Хи-хи-хи! Ещё раз!'], en: ['Ha ha! My belly tickles!', 'Hee hee hee! Again!'] },
+  tail: { he: ['היי, זה הזנב שלי!', 'מי נגע לי בזנב?'], ru: ['Эй, это мой хвост!', 'Кто трогает мой хвост?'], en: ["Hey, that's my tail!", 'Who touched my tail?'] },
+  foot: { he: ['הופ! קפיצה!', 'הרגליים שלי חזקות!'], ru: ['Оп! Прыжок!', 'У меня сильные ноги!'], en: ['Hop! A jump!', 'I have strong legs!'] },
+  dizzy: { he: ['וואו, הכול מסתובב!', 'אוי, הראש שלי מסתובב!'], ru: ['Ух ты, всё кружится!', 'Ой, голова кружится!'], en: ['Whoa, everything is spinning!', "Oh, I'm so dizzy!"] },
+  dance: { he: { m: ['בוא נרקוד!', 'אני אוהב לרקוד!'], f: ['בואי נרקוד!', 'אני אוהב לרקוד!'] }, ru: ['Давай танцевать!', 'Я люблю танцевать!'], en: ["Let's dance!", 'I love to dance!'] },
+  catchHello: {
+    he: { m: ['{name}, תפוס את מה שאני אוכל! אני אוכל {diet}.'], f: ['{name}, תפסי את מה שאני אוכל! אני אוכל {diet}.'] },
+    ru: ['{name}, лови то, что я ем! Я ем {diet}.'], en: ['{name}, catch what I eat! I eat {diet}.']
+  },
+  catchYuck: { he: ['אוי, את זה אני לא אוכל!', 'לא את זה! אני אוכל {diet}.'], ru: ['Ой, это я не ем!', 'Не это! Я ем {diet}.'], en: ["Oops, I don't eat that!", 'Not that one! I eat {diet}.'] },
+  jumpHello: {
+    he: { m: ['{name}, לחץ על המסך ואני אקפוץ! בוא נאסוף כוכבים.'], f: ['{name}, לחצי על המסך ואני אקפוץ! בואי נאסוף כוכבים.'] },
+    ru: ['{name}, нажми на экран, и я прыгну! Давай соберём звёзды.'], en: ["{name}, tap the screen and I'll jump! Let's collect stars."]
+  },
+  bubblesHello: { he: { m: ['בועות! בוא נספור אותן.'], f: ['בועות! בואי נספור אותן.'] }, ru: ['Пузыри! Давай их считать.'], en: ["Bubbles! Let's count them."] },
+  bubblesAsk: { he: { m: ['פוצץ {nb}!'], f: ['פוצצי {nb}!'] }, ru: ['Лопни {nb}!'], en: ['Pop {nb}!'] },
+  giftHere: { he: { m: ['יש פה מתנה! בוא נפתח אותה!'], f: ['יש פה מתנה! בואי נפתח אותה!'] }, ru: ['Тут подарок! Давай откроем!'], en: ["There's a present! Let's open it!"] },
+  newSticker: { he: ['מדבקה חדשה: {st}! הדבקנו אותה באלבום.'], ru: ['Новая наклейка: {st}! Мы наклеили её в альбом.'], en: ["A new sticker: {st}! It's in the album now."] },
+  allStickers: { he: ['אספנו את כל המדבקות! איזה יופי!'], ru: ['Мы собрали все наклейки! Ура!'], en: ['We collected all the stickers! Hooray!'] },
+  stickerLocked: { he: ['את המדבקה הזאת עוד לא מצאנו. אולי במתנה של מחר!'], ru: ['Эту наклейку мы ещё не нашли. Может, в завтрашнем подарке!'], en: ["We haven't found this sticker yet. Maybe in tomorrow's present!"] },
+  themeLocked: { he: ['הצבע הזה ייפתח כשנאסוף {nst}!'], ru: ['Этот цвет откроется, когда мы соберём {nst}!'], en: ["This color opens when we collect {nst}!"] },
+  themeNew: { he: ['איזה צבע יפה! החדר כמו חדש.'], ru: ['Какой красивый цвет! Комната как новая.'], en: ['What a pretty color! The room looks brand new.'] },
+  butterfly: { he: ['פרפר! הוא נחת לי על האף!'], ru: ['Бабочка! Она села мне на нос!'], en: ['A butterfly! It landed on my nose!'] },
   rinse: { he: ['שוטפים את הקצף! שששש...'], ru: ['Смываем пену! Шшш...'], en: ['Rinse off the bubbles! Shhh...'] },
   rinseFirst: {
     he: { m: ['קודם ספוג וקצף, ואחר כך מקלחת!'], f: ['קודם ספוג וקצף, ואחר כך מקלחת!'] },

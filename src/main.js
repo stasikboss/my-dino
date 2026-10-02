@@ -51,6 +51,7 @@ function openChoose(fromStart){
   }
   chooseEl.hidden = false;
   chooseEl.scrollTop = 0;
+  Music.play('theme');
   bubbleAnchor = () => ({ x: innerWidth / 2, y: 0 });
   say('choose', null, 9);
 }
@@ -101,6 +102,7 @@ async function runIntro(sp){
   stopSpeech();
   startEl.hidden = true; chooseEl.hidden = true; nightEl.hidden = true;
   introEl.hidden = false;
+  Music.play('hatch');
   $('tap-hint').style.display = '';
   const egg = FROM_EGG[sp];
   let taps = 0, done = false;
@@ -181,13 +183,16 @@ function beginSession(justHatched){
   setRoom('home', true);
   renderNeeds();
   keepAwake();
+  giftCheck();
   if (!justHatched){
     if (grew){
-      Pet.flash('hop', 600); sfx.hatch();
+      sfx.hatch();
+      if (World.on) setTimeout(() => World.E.celebrate(), 1300); else Pet.flash('hop', 600);
       const h = Pet.headTop(); FX.emit('sparkle', h.x, h.y + 40, 16, { speed: 240 });
-      say('grew', null, 9);
+      say('grew', null, 9, null, () => { if (inPlay) earnSticker(); });
     } else say('welcomeBack', null, 9);
   }
+  setTimeout(placeGift, 2600);
   nextNeedTalk = performance.now() + 70000;
   if (isAndroid && !runningAsApp && document.fullscreenEnabled && !document.fullscreenElement){
     try { const p = document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
@@ -195,6 +200,7 @@ function beginSession(justHatched){
 }
 function showStart(){
   inPlay = false;
+  Music.play('theme');
   hudEl.hidden = true; trayEl.hidden = true; navEl.hidden = true; clockEl.hidden = true;
   gamesEl.hidden = true; albumEl.hidden = true;
   startEl.hidden = false;
@@ -218,6 +224,7 @@ function showNight(){
   if (!bedtime) return;
   inPlay = false;
   stopLullaby();
+  Music.stop();
   releaseAwake();
   const sp = current;
   $('night-pet').textContent = '';
@@ -265,7 +272,7 @@ friendsBtn.addEventListener('click', () => { initAudio(); sfx.tap(); openChoose(
 const gateEl = $('gate'), gateForm = $('gate-form'), gateQ = $('gate-q'), gateInput = $('gate-answer'), gateErr = $('gate-error');
 const parentsEl = $('parents');
 const nameInputs = { he: $('name-he'), ru: $('name-ru'), en: $('name-en') };
-const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs'), three: $('opt-three') };
+const optInputs = { mic: $('opt-mic'), count: $('opt-count'), needs: $('opt-needs'), three: $('opt-three'), music: $('opt-music') };
 const langChips = Array.from(document.querySelectorAll('.lang-chip'));
 const lenChips = Array.from(document.querySelectorAll('[data-len]'));
 const ageChips = Array.from(document.querySelectorAll('[data-age]'));
@@ -361,7 +368,7 @@ $('new-session').addEventListener('click', () => {
 $('end-session').addEventListener('click', () => { closeParents(); startBedtime(); });
 $('reset-pet').addEventListener('click', () => {
   if (!current) return;
-  if (!confirm(`לגדל את ה${PET_NAMES[current].he} מחדש, מביצה? האלבום והכובעים נשמרים.`)) return;
+  if (!confirm(`לגדל את ה${PET_NAMES[current].he} מחדש, ${FROM_EGG[current] ? 'מביצה' : 'מתינוק'}? האלבום והכובעים נשמרים.`)) return;
   pets[current] = { born: false, days: [], outfit: null }; savePets();
   closeParents();
   if (gameOn){ gameOn = null; gameToken++; gameEl.hidden = true; document.body.classList.remove('in-game'); }
@@ -384,6 +391,7 @@ for (const k of Object.keys(optInputs)) optInputs[k].addEventListener('change', 
   opts[k] = optInputs[k].checked; store.set('ymd-opts', opts);
   if (k === 'mic' && room === 'home' && inPlay) ROOM_SETUP.home();
   if (k === 'count' && !opts.count){ countGame = null; clearCountBadge(); }
+  if (k === 'music'){ Music.setOn(opts.music); if (opts.music && Music.name && !Music.timer) Music.play(Music.name); }
   if (k === 'three'){
     if (!opts.three){ World.stop('off'); return; }
     if (!World.restart()){ opts.three = false; optInputs.three.checked = false; store.set('ymd-opts', opts); }
@@ -513,6 +521,29 @@ addEventListener('pointermove', e => {
   if (!inPlay || drag || sleeping || !Pet.el) return;
   if (e.pointerType === 'mouse' || e.buttons || e.pointerType === 'touch'){ Pet.look(e.clientX, e.clientY); lookUntil = performance.now() + 1600; }
 }, { passive: true });
+/* What the friend does on its own when nobody is touching it: strolls around, dances, yawns, looks around,
+   stretches, waves, and once in a while a butterfly comes to visit. */
+let lastButterfly = 0;
+function idle(now){
+  if (World.on && World.E.busyActing()) return;
+  const walkRoom = room === 'home' || room === 'kitchen';
+  if (room === 'play' || room === 'album') return;
+  const choices = World.on
+    ? [['wander', walkRoom ? 3 : 0], ['dance', 1.4], ['yawn', room === 'bed' ? 2 : 0.8], ['lookaround', 1.6], ['stretch', 0.8], ['wave', 1], ['excited', 1.2],
+       ['butterfly', room === 'home' && now - lastButterfly > 150000 ? 1.4 : 0]]
+    : [['tilt', 2], ['excited', 1.5], ['hop', 1.2], ['look', 1.2], ['dance', 0.8], ['yawn', 0.6]];
+  let sum = choices.reduce((a, c) => a + c[1], 0), x = Math.random() * sum, pick = choices[0][0];
+  for (const [n, w] of choices){ x -= w; if (x <= 0){ pick = n; break; } }
+  if (pick === 'wander') World.E.wander();
+  else if (pick === 'butterfly'){ lastButterfly = now; World.E.butterfly(); setTimeout(() => { if (inPlay && room === 'home' && !speechBusy()) say('butterfly', null, 3); }, 5300); }
+  else if (pick === 'dance'){ Pet.act('dance'); sfx.danceTune(); if (Math.random() < 0.4) say('dance', null, 2); const h = Pet.headTop(); for (let i = 0; i < 4; i++) setTimeout(() => FX.emit('note', h.x + rand(-60, 60), h.y + 10, 1, { size: 22 }), i * 700); }
+  else if (pick === 'yawn'){ Pet.act('yawn'); sfx.yawn(); }
+  else if (pick === 'excited') Pet.flash('excited', 1600);
+  else if (pick === 'tilt'){ Pet.el.classList.add('tilt'); setTimeout(() => Pet.el && Pet.el.classList.remove('tilt'), 1500); }
+  else if (pick === 'hop') Pet.flash('hop', 600);
+  else if (pick === 'look'){ Pet.look(Pet.center().x + rand(-200, 200), Pet.center().y - 100); lookUntil = now + 1500; }
+  else Pet.act(pick);
+}
 function frame(now){
   const dt = Math.min(0.1, (now - lastT) / 1000);
   lastT = now;
@@ -529,13 +560,9 @@ function frame(now){
   if (inPlay && Pet.el){
     if (now > nextBlink){ nextBlink = now + rand(2200, 5200); Pet.blink(); }
     if (now > lookUntil && lookUntil){ lookUntil = 0; Pet.lookHome(); }
-    if (now > nextIdle && !sleeping && !drag && !speechBusy()){
-      nextIdle = now + rand(12000, 22000);
-      const r = Math.random();
-      if (r < 0.35){ Pet.el.classList.add('tilt'); setTimeout(() => Pet.el && Pet.el.classList.remove('tilt'), 1500); }
-      else if (r < 0.6){ Pet.flash('excited', 1600); }
-      else if (r < 0.8){ Pet.flash('hop', 600); }
-      else { Pet.look(Pet.center().x + rand(-200, 200), Pet.center().y - 100); lookUntil = now + 1500; }
+    if (now > nextIdle && !sleeping && !drag && !speechBusy() && now - lastTouch > 6000 && !gameOn && wardrobeEl.hidden){
+      nextIdle = now + rand(9000, 17000);
+      idle(now);
     }
   }
   World.sync();
@@ -574,6 +601,7 @@ renderNoVoice();
 setMuted(muted);
 sizeFx();
 World.start();
+applyTheme();
 renderNavIcons();
 renderNeeds();
 showStart();

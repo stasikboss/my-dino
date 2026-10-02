@@ -44,7 +44,7 @@ let profile = (() => {
 const ageCfg = () => AGE[profile.age] || AGE[4];
 const nameIn = lang => String(profile[lang] || '').trim();
 function saveProfile(){ store.set('ymd-profile', profile); }
-let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true), three: cleanBool(o.three, true) }; })();
+let opts = (() => { const r = store.get('ymd-opts', {}); const o = isObj(r) ? r : {}; return { mic: cleanBool(o.mic, true), count: cleanBool(o.count, true), needs: cleanBool(o.needs, true), three: cleanBool(o.three, true), music: cleanBool(o.music, true) }; })();
 
 /* ---------- the pets, the album, the hats ---------- */
 let current = store.get('ymd-current', null);
@@ -113,7 +113,7 @@ function lockReason(){
 }
 
 /* ---------- sound effects, made on the fly (no audio files) ---------- */
-let AC = null, master = null, noiseBuf = null, silentEl = null, lastUnlock = 0;
+let AC = null, master = null, noiseBuf = null, silentEl = null, lastUnlock = 0, fxBus = null, musicBus = null;
 const mic = { busy: false };
 let sleeping = false;
 let muted = store.get('ymd-muted', false) === true;
@@ -128,13 +128,26 @@ function initAudio(){
       AC = new Ctx();
       const comp = AC.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
       master = AC.createGain(); master.gain.value = muted ? 0 : VOL;
-      master.connect(comp); comp.connect(AC.destination);
+      // the compressor keeps the loud moments in check, so everything can sit a little louder after it
+      const makeup = AC.createGain(); makeup.gain.value = 2;
+      master.connect(comp); comp.connect(makeup); makeup.connect(AC.destination);
       const len = Math.floor(AC.sampleRate * 1.2);
       noiseBuf = AC.createBuffer(1, len, AC.sampleRate);
       const d = noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      // two buses: effects and music; both get a touch of a soft room reverb
+      fxBus = AC.createGain(); fxBus.connect(master);
+      musicBus = AC.createGain(); musicBus.gain.value = opts.music ? 1 : 0; musicBus.connect(master);
+      try {
+        const conv = AC.createConvolver(); conv.buffer = impulse(1.5, 2.8);
+        const s1 = AC.createGain(); s1.gain.value = 0.16; fxBus.connect(s1); s1.connect(conv);
+        const s2 = AC.createGain(); s2.gain.value = 0.28; musicBus.connect(s2); s2.connect(conv);
+        conv.connect(master);
+      } catch (e) {}
     }
     if (AC.state !== 'running'){ const p = AC.resume(); if (p && p.catch) p.catch(() => {}); }
   } catch (e) { AC = null; }
+  // music asked for before the first touch starts now
+  try { if (AC && Music.name && !Music.timer) Music.play(Music.name); } catch (e) {}
   // older iPhones: a silent looping <audio> lets Web Audio play with the ring/silent switch on
   if (isIOS && !('audioSession' in navigator)){
     try {
@@ -146,6 +159,11 @@ function initAudio(){
 ['touchend', 'pointerup', 'click', 'keydown'].forEach(type => document.addEventListener(type, () => {
   if (!AC || AC.state !== 'running' || (silentEl && silentEl.paused)) initAudio();
 }, { capture: true, passive: true }));
+function impulse(sec, decay){
+  const n = Math.floor(AC.sampleRate * sec), b = AC.createBuffer(2, n, AC.sampleRate);
+  for (let c = 0; c < 2; c++){ const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay); }
+  return b;
+}
 const audioOn = () => !!(AC && master && !muted && (AC.state === 'running' || performance.now() - lastUnlock < 1000));
 function envelope(g, t0, peak, dur, attack = 0.008){
   g.gain.setValueAtTime(0.0001, t0);
@@ -159,7 +177,7 @@ function noise(dur, type, f0, f1, q, vol, when = 0){
   const fl = AC.createBiquadFilter(); fl.type = type; fl.Q.value = q;
   fl.frequency.setValueAtTime(f0, t0); fl.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
   const g = AC.createGain(); envelope(g, t0, vol, dur, 0.01);
-  src.connect(fl); fl.connect(g); g.connect(master);
+  src.connect(fl); fl.connect(g); g.connect(fxBus || master);
   src.start(t0, Math.random() * 0.4); src.stop(t0 + dur + 0.05);
 }
 function tone(freq, dur, type, vol, when = 0, glideTo = 0, vib = 0){
@@ -170,8 +188,26 @@ function tone(freq, dur, type, vol, when = 0, glideTo = 0, vib = 0){
   if (glideTo) o.frequency.exponentialRampToValueAtTime(glideTo, t0 + dur);
   if (vib){ const l = AC.createOscillator(), lg = AC.createGain(); l.frequency.value = vib; lg.gain.value = freq * 0.05; l.connect(lg); lg.connect(o.frequency); l.start(t0); l.stop(t0 + dur + 0.05); }
   const g = AC.createGain(); envelope(g, t0, vol, dur);
-  o.connect(g); g.connect(master);
+  o.connect(g); g.connect(fxBus || master);
   o.start(t0); o.stop(t0 + dur + 0.05);
+}
+/* A little voice: a buzzy tone shaped by two vowel resonances, with a pitch that rises and falls. */
+function voc(f0, dur, when, o = {}){
+  if (!audioOn()) return;
+  const t0 = AC.currentTime + when;
+  const osc = AC.createOscillator(); osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(f0, t0);
+  if (o.peak) osc.frequency.linearRampToValueAtTime(o.peak, t0 + dur * 0.35);
+  osc.frequency.exponentialRampToValueAtTime(o.end || f0 * 0.85, t0 + dur);
+  const l = AC.createOscillator(), lg = AC.createGain(); l.frequency.value = o.vib || 6; lg.gain.value = f0 * 0.035; l.connect(lg); lg.connect(osc.frequency);
+  const out = AC.createGain(); envelope(out, t0, o.vol || 0.5, dur, 0.025);
+  for (const [F, Q, k] of [[o.F1 || 700, 5, 1], [o.F2 || 1200, 7, 0.6]]){
+    const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = F; bp.Q.value = Q;
+    const gk = AC.createGain(); gk.gain.value = k;
+    osc.connect(bp); bp.connect(gk); gk.connect(out);
+  }
+  out.connect(fxBus || master);
+  osc.start(t0); osc.stop(t0 + dur + 0.05); l.start(t0); l.stop(t0 + dur + 0.05);
 }
 const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
 const sfx = {
@@ -198,16 +234,39 @@ const sfx = {
   yawn(){ tone(320, 1.1, 'sine', 0.08, 0, 180, 5); },
   snore(){ noise(1.1, 'lowpass', 300, 160, 2, 0.07); },
   stretch(){ tone(260, 0.5, 'triangle', 0.1, 0, 520); },
+  // reactions to touch
+  purr(sp){
+    if (sp === 'lion'){ for (let i = 0; i < 12; i++) noise(0.05, 'lowpass', 240, 170, 5, 0.16, i * 0.065); }
+    else if (sp === 'penguin'){ [0, 0.12, 0.24].forEach((t, i) => tone(900 + i * 80, 0.1, 'sine', 0.06, t, 1100 + i * 80)); }
+    else { const f = sp === 'trex' || sp === 'elephant' ? 300 : 420; tone(f, 0.45, 'sine', 0.1, 0, f * 1.45, 5); tone(f * 1.5, 0.35, 'sine', 0.04, 0.12, f * 2); }
+  },
+  ahh(){ tone(480, 0.22, 'sine', 0.07, 0, 600); tone(560, 0.26, 'sine', 0.08, 0.32, 720); },
+  achoo(){ noise(0.34, 'bandpass', 4200, 1100, 0.9, 0.34); tone(740, 0.18, 'triangle', 0.08, 0, 300); },
+  laugh(){ [0, 1, 2, 3, 4, 5].forEach(i => tone(780 - i * 40 + (i % 2) * 120, 0.08, 'triangle', 0.09, i * 0.095, 0, 22)); },
+  dizzy(){ for (let i = 0; i < 6; i++) tone(950 - i * 90, 0.13, 'sine', 0.06, i * 0.08, 760 - i * 80); tone(200, 0.4, 'triangle', 0.1, 0.5, 420); },
+  chomp1(){ noise(0.09, 'bandpass', rand(1100, 1400), 600, 1.1, 0.9); tone(rand(150, 190), 0.09, 'sine', 0.14, 0, 90); },
+  bounce(){ tone(rand(170, 230), 0.12, 'sine', 0.16, 0, 110); },
+  // a bouncy little tune for dancing (about four seconds)
+  danceTune(){
+    const mel = [72, 76, 79, 76, 74, 77, 81, 77, 72, 76, 79, 84, 83, 79, 76, 72];
+    mel.forEach((n, i) => { tone(NOTE(n), 0.16, 'triangle', 0.07, i * 0.25); if (i % 2 === 0) tone(NOTE(n - 24), 0.2, 'sine', 0.08, i * 0.25); });
+    for (let i = 0; i < 16; i++) noise(0.04, 'highpass', 6000, 6000, 1, i % 4 === 0 ? 0.08 : 0.03, i * 0.25);
+  },
+  tada(){ [0, 7, 12].forEach((s2, i) => tone(NOTE(72 + s2), 0.22, 'triangle', 0.1, i * 0.07)); },
   voice(sp){
-    // each friend's own little sound when tapped: cute, never scary
-    if (sp === 'trex'){ noise(0.42, 'lowpass', 900, 260, 3, 0.3); tone(170, 0.42, 'sawtooth', 0.06, 0, 120); }
-    else if (sp === 'lion'){ noise(0.38, 'bandpass', 500, 260, 2.5, 0.34); tone(220, 0.38, 'sawtooth', 0.05, 0, 150); }
-    else if (sp === 'elephant'){ tone(392, 0.5, 'sawtooth', 0.09, 0, 660, 6); tone(390, 0.5, 'square', 0.03, 0, 650); }
-    else if (sp === 'penguin'){ [0, 0.14].forEach(t => tone(780, 0.11, 'square', 0.05, t, 600)); }
-    else if (sp === 'trike'){ tone(260, 0.3, 'triangle', 0.16, 0, 200); noise(0.2, 'lowpass', 600, 300, 2, 0.15); }
-    else if (sp === 'stego'){ tone(300, 0.22, 'triangle', 0.15, 0, 380); tone(380, 0.2, 'triangle', 0.12, 0.2, 300); }
-    else { tone(180, 0.6, 'triangle', 0.16, 0, 140, 3); }
-  }
+    // each friend's own little voice when tapped: cute, never scary
+    if (sp === 'trex'){ voc(150, 0.5, 0, { peak: 210, end: 120, F1: 750, F2: 1150, vol: 0.55 }); noise(0.4, 'lowpass', 700, 240, 3, 0.16); }
+    else if (sp === 'lion'){ voc(170, 0.45, 0, { peak: 230, end: 130, F1: 800, F2: 1250, vol: 0.5 }); noise(0.36, 'bandpass', 480, 260, 2.5, 0.18); }
+    else if (sp === 'elephant'){ tone(392, 0.5, 'sawtooth', 0.07, 0, 660, 6); voc(400, 0.5, 0, { peak: 620, end: 560, F1: 900, F2: 1600, vol: 0.4 }); }
+    else if (sp === 'penguin'){ [0, 0.13, 0.26].forEach((t, i) => voc(620 + i * 40, 0.1, t, { peak: 820, end: 560, F1: 900, F2: 2400, vol: 0.45, vib: 10 })); }
+    else if (sp === 'trike'){ voc(190, 0.24, 0, { peak: 240, end: 170, F1: 520, F2: 900, vol: 0.5 }); voc(170, 0.3, 0.26, { peak: 210, end: 140, F1: 480, F2: 860, vol: 0.45 }); }
+    else if (sp === 'stego'){ voc(300, 0.18, 0, { peak: 360, end: 280, F1: 560, F2: 1800, vol: 0.45 }); voc(320, 0.2, 0.2, { peak: 400, end: 300, F1: 560, F2: 1800, vol: 0.45 }); }
+    else if (sp === 'anky'){ voc(165, 0.2, 0, { peak: 205, end: 150, F1: 500, F2: 950, vol: 0.5 }); voc(150, 0.32, 0.24, { peak: 190, end: 120, F1: 470, F2: 900, vol: 0.48 }); noise(0.3, 'lowpass', 600, 260, 2, 0.08, 0.24); }
+    else if (sp === 'kangaroo'){ [0, 0.11, 0.22].forEach(t => { noise(0.04, 'bandpass', 2000, 1400, 2.5, 0.7, t); tone(1500, 0.03, 'sine', 0.06, t, 1100); }); voc(360, 0.18, 0.36, { peak: 460, end: 340, F1: 700, F2: 1700, vol: 0.42 }); }
+    else { voc(120, 0.7, 0, { peak: 150, end: 100, F1: 380, F2: 820, vol: 0.55, vib: 4 }); }
+  },
+  // a soft step; bigger friends step heavier
+  step(sp){ const heavy = sp === 'trex' || sp === 'elephant' || sp === 'brachio' || sp === 'trike' || sp === 'anky'; noise(0.07, 'lowpass', heavy ? 260 : 520, heavy ? 140 : 300, 1.5, heavy ? 0.09 : 0.05); }
 };
 // A music box lullaby (Brahms' Wiegenlied, 1868), played softly while the pet sleeps.
 const LULLABY = [[64, 1], [64, 1], [67, 3], [64, 1], [64, 1], [67, 3], [64, 1], [67, 1], [72, 2], [71, 2], [69, 2], [69, 2], [67, 2],
@@ -222,6 +281,90 @@ function playLullaby(){
   lullabyTimer = setTimeout(() => { if (sleeping) playLullaby(); }, (t + 1.5) * 1000);
 }
 function stopLullaby(){ clearTimeout(lullabyTimer); lullabyTimer = 0; }
+/* ---------- background music ----------
+   A soft tune for each place, made on the spot with simple instruments (a kalimba, plucks, a music box, a bass,
+   a shaker). Four chords to a loop, eighth notes; the melody uses notes that fit each chord, and every fourth time
+   round it rests so the tune breathes. It plays quietly under everything, dips while the friend speaks, and stops
+   while the friend sleeps (the lullaby plays then) or the microphone listens. */
+const C_MAJ = [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]];       // I vi IV V
+const C_PLAIN = [[0, 4, 7], [5, 9, 12], [0, 4, 7], [7, 11, 14]];     // I IV I V
+const SONGS = {
+  theme: { bpm: 104, root: 60, prog: C_MAJ, lead: 'kalimba', arp: [0, 2, 1, 2, 0, 2, 1, 2], arpVoice: 'pluck', bass: true, shaker: true, vol: 1,
+    mel: [[[0, 16, 1], [1, 19, 1], [2, 24, 2], [4, 19, 1], [5, 16, 1], [6, 19, 2], [8, 21, 2], [10, 19, 1], [11, 16, 1], [12, 12, 3], [16, 21, 2], [18, 24, 1], [19, 21, 1], [20, 17, 2], [22, 16, 2], [24, 19, 2], [26, 14, 1], [27, 16, 1], [28, 19, 3]],
+          [[0, 24, 2], [2, 19, 2], [4, 16, 1], [5, 19, 1], [6, 24, 2], [8, 21, 3], [11, 24, 1], [12, 21, 2], [16, 17, 1], [17, 21, 1], [18, 24, 3], [22, 21, 2], [24, 23, 2], [26, 19, 2], [28, 14, 2], [30, 19, 2]]] },
+  home: { bpm: 96, root: 60, prog: C_MAJ, lead: 'kalimba', arp: [0, 1, 2, 1, 0, 1, 2, 1], arpVoice: 'kalimba', bass: true, vol: 0.9,
+    mel: [[[0, 16, 2], [2, 19, 2], [4, 24, 3], [8, 21, 2], [10, 16, 2], [12, 19, 3], [16, 17, 2], [18, 21, 2], [20, 24, 3], [24, 23, 2], [26, 19, 2], [28, 14, 3]],
+          [[0, 19, 3], [3, 16, 1], [4, 12, 3], [8, 16, 3], [11, 21, 1], [12, 19, 3], [16, 21, 3], [19, 17, 1], [20, 12, 3], [24, 14, 2], [26, 19, 2], [28, 23, 3]]] },
+  kitchen: { bpm: 112, root: 65, prog: C_MAJ, lead: 'pluck', arp: [0, -1, 1, 2, 0, -1, 2, 1], arpVoice: 'pluck', bass: true, shaker: true, vol: 0.85,
+    mel: [[[0, 12, 1], [1, 16, 1], [2, 19, 1], [3, 24, 1], [4, 19, 2], [8, 21, 1], [9, 16, 1], [10, 21, 1], [11, 24, 1], [12, 21, 2], [16, 17, 1], [17, 21, 1], [18, 24, 1], [19, 29, 1], [20, 24, 2], [24, 19, 1], [25, 23, 1], [26, 26, 1], [27, 23, 1], [28, 19, 3]],
+          [[0, 24, 2], [2, 24, 1], [3, 19, 1], [4, 16, 2], [8, 21, 2], [10, 21, 1], [11, 16, 1], [12, 12, 2], [16, 24, 2], [18, 21, 1], [19, 17, 1], [20, 21, 2], [24, 19, 2], [26, 23, 1], [27, 26, 1], [28, 31, 2]]] },
+  bath: { bpm: 88, root: 67, prog: C_MAJ, lead: 'musicbox', arp: [0, 1, 2, 3, 2, 1, 0, 1], arpVoice: 'kalimba', bass: false, bubbles: true, vol: 0.8,
+    mel: [[[0, 19, 3], [4, 16, 3], [8, 21, 3], [12, 16, 3], [16, 17, 3], [20, 21, 3], [24, 19, 4], [28, 14, 3]], [[0, 24, 4], [4, 19, 2], [6, 16, 2], [8, 12, 6], [16, 21, 4], [20, 17, 2], [22, 21, 2], [24, 19, 6]]] },
+  bed: { bpm: 72, root: 65, prog: C_PLAIN, lead: 'musicbox', arp: [0, 1, 2, 1, 0, 1, 2, 1], arpVoice: 'musicbox', bass: false, vol: 0.7,
+    mel: [[[0, 16, 3], [4, 19, 3], [8, 21, 3], [12, 17, 3], [16, 16, 3], [20, 12, 3], [24, 14, 4], [28, 11, 3]], [[0, 24, 4], [4, 19, 4], [8, 17, 4], [12, 21, 4], [16, 19, 4], [20, 16, 4], [24, 14, 6]]] },
+  game: { bpm: 126, root: 62, prog: C_MAJ, lead: 'pluck', arp: [0, 2, 1, 2, 0, 2, 1, 2], arpVoice: 'pluck', bass: true, shaker: true, kick: true, vol: 0.9,
+    mel: [[[0, 12, 1], [1, 16, 1], [2, 19, 1], [4, 24, 2], [6, 19, 2], [8, 21, 1], [9, 19, 1], [10, 16, 2], [12, 21, 2], [14, 24, 2], [16, 21, 1], [17, 24, 1], [18, 29, 2], [20, 24, 2], [22, 21, 2], [24, 23, 1], [25, 26, 1], [26, 31, 2], [28, 26, 2], [30, 23, 2]],
+          [[0, 24, 2], [2, 19, 1], [3, 16, 1], [4, 19, 2], [6, 24, 2], [8, 28, 2], [10, 24, 1], [11, 21, 1], [12, 16, 2], [16, 17, 2], [18, 21, 1], [19, 24, 1], [20, 29, 2], [24, 26, 1], [25, 23, 1], [26, 19, 2], [28, 23, 4]]] },
+  hatch: { bpm: 76, root: 57, prog: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]], lead: 'musicbox', arp: [0, 1, 2, 3, 2, 1, 0, 1], arpVoice: 'kalimba', bass: false, vol: 0.75,
+    mel: [[[0, 15, 4], [8, 12, 4], [16, 15, 4], [24, 17, 6]], [[0, 19, 4], [8, 15, 4], [16, 22, 4], [24, 17, 6]]] }
+};
+function mVoice(kind, midi, t, vol, out, len){
+  const f = NOTE(midi);
+  const g = AC.createGain(); g.connect(out);
+  const osc = (type, freq, k, decay) => { const o = AC.createOscillator(); o.type = type; o.frequency.value = freq; const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol * k, t + 0.006); e.gain.exponentialRampToValueAtTime(0.0001, t + decay); o.connect(e); e.connect(g); o.start(t); o.stop(t + decay + 0.05); };
+  if (kind === 'kalimba'){ osc('sine', f, 1, 0.9); osc('sine', f * 5.4, 0.12, 0.12); }
+  else if (kind === 'pluck'){ osc('triangle', f, 0.9, 0.28); osc('sine', f * 2, 0.25, 0.15); }
+  else if (kind === 'musicbox'){ osc('sine', f, 0.9, 1.4); osc('sine', f * 3, 0.18, 0.5); osc('sine', f * 4.02, 0.06, 0.25); }
+  else if (kind === 'bass'){ const o = AC.createOscillator(); o.type = 'triangle'; o.frequency.value = f; const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500; const e = AC.createGain(); const d = Math.max(0.2, len); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(vol, t + 0.02); e.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(lp); lp.connect(e); e.connect(g); o.start(t); o.stop(t + d + 0.05); }
+}
+const Music = {
+  song: null, name: '', step: 0, loop: 0, nextT: 0, timer: 0, out: null, held: false,
+  play(name){
+    if (!SONGS[name]) name = '';
+    if (name === this.name && this.timer) return;
+    this.stop(true);
+    this.name = name;
+    if (!name || !AC || !musicBus) return;
+    this.song = SONGS[name];
+    this.out = AC.createGain(); this.out.gain.value = 0.0001; this.out.connect(musicBus);
+    this.out.gain.exponentialRampToValueAtTime(0.075 * (this.song.vol || 1), AC.currentTime + 1.2);
+    this.step = 0; this.loop = 0; this.nextT = AC.currentTime + 0.15;
+    this.timer = setInterval(() => this.tick(), 90);
+  },
+  // fade out what's playing (soft: keep the name, so returning to the same place resumes)
+  stop(keepName){
+    clearInterval(this.timer); this.timer = 0;
+    if (this.out && AC){ const o = this.out; try { o.gain.cancelScheduledValues(AC.currentTime); o.gain.setTargetAtTime(0.0001, AC.currentTime, 0.25); } catch (e) {} setTimeout(() => { try { o.disconnect(); } catch (e) {} }, 1600); }
+    this.out = null; this.song = null;
+    if (!keepName) this.name = '';
+  },
+  tick(){
+    if (!this.song || !AC) return;
+    if (AC.state !== 'running' || muted || !opts.music || mic.busy || sleeping || document.hidden){ this.nextT = AC.currentTime + 0.1; return; }
+    const S = this.song, stepDur = 60 / S.bpm / 2;
+    if (this.nextT < AC.currentTime - 0.2) this.nextT = AC.currentTime + 0.05;
+    while (this.nextT < AC.currentTime + 0.35){ this.note(this.step, this.nextT, stepDur); this.nextT += stepDur; this.step = (this.step + 1) % 32; if (this.step === 0) this.loop++; }
+  },
+  note(st, t, sd){
+    const S = this.song, out = this.out, bar = Math.floor(st / 8), inBar = st % 8;
+    const chord = S.prog[bar];
+    // arpeggio
+    const ai = S.arp[inBar];
+    if (ai >= 0){ const n = S.root + chord[ai % 3] + 12 * (ai === 3 ? 1 : 0); mVoice(S.arpVoice, n, t, 0.33, out); }
+    // bass on beats one and three
+    if (S.bass && (inBar === 0 || inBar === 4)) mVoice('bass', S.root + chord[0] - 12, t, 0.75, out, sd * 3.5);
+    // melody: A, A, B, rest
+    const which = this.loop % 4;
+    if (which !== 3){
+      const mel = S.mel[which === 2 ? 1 : 0];
+      for (const [ms, off] of mel) if (ms === st){ let n = S.root + off; while (n > 86) n -= 12; mVoice(S.lead, n, t, 0.6, out); }
+    }
+    if (S.shaker && inBar % 2 === 1){ const src = AC.createBufferSource(); src.buffer = noiseBuf; const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000; const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.18, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.05); src.connect(hp); hp.connect(e); e.connect(out); src.start(t, Math.random()); src.stop(t + 0.08); }
+    if (S.kick && inBar % 4 === 0){ const o = AC.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.14); const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.7, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.18); o.connect(e); e.connect(out); o.start(t); o.stop(t + 0.2); }
+    if (S.bubbles && Math.random() < 0.12){ const o = AC.createOscillator(); o.type = 'sine'; const f0 = 500 + Math.random() * 500; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 2.2, t + 0.07); const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.12, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.08); o.connect(e); e.connect(out); o.start(t); o.stop(t + 0.1); }
+  },
+  setOn(on){ if (musicBus && AC) musicBus.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.2); }
+};
 function buzz(ms){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
 
 /* ---------- the voice ----------

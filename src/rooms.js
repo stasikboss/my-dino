@@ -126,9 +126,10 @@ function setRoom(r, quiet){
   const prev = room;
   if (prev !== r){ stopSpeech(); stopMic(); }
   room = r;
-  if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el) Pet.flash('hop', 600); }
+  if (prev !== r && !reduceMotion){ roomEl.classList.remove('swap'); void roomEl.offsetWidth; roomEl.classList.add('swap'); if (Pet.el && !(World.on && (r === 'home' || r === 'kitchen'))) Pet.flash('hop', 600); }
   bubbleAnchor = r === 'album' ? () => ({ x: innerWidth / 2, y: 0 }) : null;
   roomEl.dataset.room = r;
+  Music.play({ home: 'home', kitchen: 'kitchen', bath: 'bath', bed: 'bed', play: 'game', album: 'theme' }[r]);
   World.room(r);
   stageEl.classList.toggle('in-tub', r === 'bath');
   stageEl.classList.toggle('small', r === 'play');
@@ -142,6 +143,7 @@ function setRoom(r, quiet){
   closeWardrobe();
   renderNav();
   ROOM_SETUP[r]();
+  placeGift();
   setTimeout(placeBubble, 520);
   if (!quiet && prev !== r) roomHello(r);
 }
@@ -160,6 +162,7 @@ const ROOM_SETUP = {
     setTray([
       hasMic ? trayButton('mic', TOOL_ART.mic, 'חזור אחריי', { tap: b => talkBack(b) }) : null,
       trayButton('hanger', TOOL_ART.hanger, 'ארון בגדים', { tap: () => openWardrobe() }),
+      trayButton('paint', PAINT_SVG, 'צבע לחדר', { tap: () => openPaint() }),
       trayButton('ball', TOOL_ART.ball, 'כדור', { drag: { end: (d, x, y, tap) => { kickBall(d, x, y, tap); return true; } } }),
       trayButton('friends', `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="20" ry="24" fill="#fff5e2" stroke="${INK}" stroke-width="3.5"/><g fill="#7cc85a"><circle cx="24" cy="30" r="5"/><circle cx="40" cy="38" r="6"/><circle cx="28" cy="48" r="4"/></g><path d="M22 14 l4 6 l6 -8 l6 8 l4 -6" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`, 'חבר אחר', { tap: () => openChoose(false) })
     ]);
@@ -167,8 +170,9 @@ const ROOM_SETUP = {
   kitchen(){
     setTray(FOOD_ORDER.map(f => trayButton(f, FOOD_ART[f], FOODS[f].he, { drag: {
       end: (d, x, y, tap) => {
-        if (tap){ const m = Pet.mouth(); flyGhostTo(d, m.x, m.y, () => { hideGhost(); feed(f); }); return true; }
-        if (Pet.nearMouth(x, y) || Pet.hit(x, y)){ hideGhost(); feed(f); return true; }
+        if (World.on && eating) return false;
+        if (tap){ if (World.on){ hideGhost(); feed(f); return true; } const m = Pet.mouth(); flyGhostTo(d, m.x, m.y, () => { hideGhost(); feed(f); }); return true; }
+        if (Pet.nearMouth(x, y) || Pet.hit(x, y)){ hideGhost(); feed(f, { x, y }); return true; }
         return false;
       }
     } })));
@@ -223,16 +227,36 @@ function petUp(e){
   const d = stageEl._down; stageEl._down = null;
   if (!d || drag || sleeping) return;
   if (performance.now() - d.t > 500) return;
-  const x = e.clientX, y = e.clientY;
-  if (Pet.isHead(x, y)){
-    Pet.expr('happy', 1100); Pet.flash('squish', 360); sfx.voice(Pet.sp);
-    FX.emit('heart', x, y - 10, 4, { angle: -Math.PI / 2, speed: 150, size: 13 });
-  } else {
-    Pet.flash('wiggle', 700); Pet.expr('happy', 900); sfx.giggle();
-    FX.emit('heart', x, y, 3, { angle: -Math.PI / 2, speed: 130, size: 11 });
-  }
+  reactTo(e.clientX, e.clientY);
+}
+/* A tap on the friend: each part of the body gets its own reaction. A pat on the head is a purr, the belly
+   giggles, the nose sneezes, the tail makes it turn around, a foot gets a hop. Many quick taps make it dizzy. */
+const REACT_BY_PART = { head: 'purr', neck: 'purr', mane: 'purr', ears: 'shakehead', frill: 'shakehead', horns: 'shakehead', plates: 'shakehead',
+  face: 'sneeze', trunk: 'sneeze', beak: 'sneeze', belly: 'giggle', back: 'giggle', arms: 'giggle', flippers: 'giggle',
+  tail: 'lookback', spikes: 'lookback', club: 'lookback', armor: 'shakehead', legs: 'stomp', paws: 'stomp', feet: 'stomp' };
+const REACT_LINE = { giggle: 'tickle', sneeze: 'sneeze', lookback: 'tail', stomp: 'foot', dizzy: 'dizzy', purr: 'pat' };
+let pokes = [], lastSneeze = 0, lastReactTalk = 0;
+function reactTo(x, y){
+  const now = performance.now();
+  pokes = pokes.filter(t => now - t < 1800); pokes.push(now);
+  let part = Pet.partAt(x, y);
+  if (!part) part = Pet.isHead(x, y) ? 'head' : 'belly';
+  let act = REACT_BY_PART[part] || 'giggle';
+  if (pokes.length >= 5){ act = 'dizzy'; pokes = []; }
+  if (act === 'sneeze'){ if (now - lastSneeze < 6000) act = 'purr'; else lastSneeze = now; }
+  const c = Pet.center();
+  Pet.act(act, act === 'stomp' ? { side: x < c.x ? -1 : 1 } : undefined);
+  const heart = n => { if (World.on) World.E.burstScreen('heart', x, y, n); else FX.emit('heart', x, y - 10, n, { angle: -Math.PI / 2, speed: 140, size: 12 }); };
+  if (act === 'purr'){ sfx.purr(Pet.sp); heart(3); }
+  else if (act === 'giggle'){ sfx.laugh(); heart(2); }
+  else if (act === 'sneeze'){ sfx.ahh(); if (!World.on) setTimeout(() => { sfx.achoo(); const m = Pet.mouth(); FX.emit('drop', m.x, m.y, 8, { speed: 160, g: 500, size: 5 }); }, 820); }
+  else if (act === 'lookback'){ sfx.voice(Pet.sp); }
+  else if (act === 'stomp'){ sfx.boing(); }
+  else if (act === 'shakehead'){ sfx.whoosh(); }
+  else if (act === 'dizzy' && !World.on) sfx.dizzy();
   addNeed('fun', 3);
-  if (performance.now() - lastPatTalk > 7000){ lastPatTalk = performance.now(); say('pat', null, 2); }
+  const line = REACT_LINE[act];
+  if (line && (act === 'dizzy' || now - lastReactTalk > 6500)){ lastReactTalk = now; setTimeout(() => say(line, null, act === 'dizzy' ? 4 : 2), act === 'sneeze' ? 1300 : act === 'dizzy' ? 1100 : 250); }
 }
 stageEl.addEventListener('pointerdown', e => petDown(e, false));
 stageEl.addEventListener('pointermove', petMove);
@@ -263,12 +287,15 @@ function markCountBadge(){
   }
 }
 function clearCountBadge(){ for (const b of trayEl.querySelectorAll('.badge')) b.remove(); for (const b of trayEl.querySelectorAll('.glow')) b.classList.remove('glow'); }
-function feed(f){
+let eating = false;
+function feed(f, from){
   const sp = Pet.sp;
   const m = Pet.mouth();
   lastTouch = performance.now();
+  if (World.on && eating) return;
   if (!DIET[sp].includes(f)){
-    sfx.nope(); Pet.flash('shake', 520);
+    sfx.nope();
+    if (World.on){ eating = true; World.E.feed(f, false, from).then(() => { eating = false; }); } else Pet.flash('shake', 520);
     say('wrongFood', { food: FOODS[f], foodAcc: { he: FOODS[f].he, ru: FOODS[f].ruAcc, en: FOODS[f].en }, diet: DIET_TEXT[sp] }, 7);
     for (const g of DIET[sp]) glowTray(g, true);
     setTimeout(() => { if (!countGame) for (const g of DIET[sp]) glowTray(g, false); }, 3500);
@@ -278,9 +305,15 @@ function feed(f){
     Pet.flash('shake', 520); say('full', null, 6);
     return;
   }
-  Pet.chew(900); sfx.chomp(); sfx.yum();
-  FX.emit('crumb', m.x, m.y, 8, { color: f === 'meat' ? '#d9573f' : f === 'fish' ? '#9fdcff' : f === 'fruit' ? '#ff4b5c' : '#5cbf55', speed: 120, g: 500, size: 7 });
-  FX.emit('heart', m.x, m.y - 30, 2, { angle: -Math.PI / 2, speed: 90, size: 12 });
+  if (World.on){
+    // the food goes into the mouth and is eaten bite by bite; sometimes it's a favorite and the eyes turn to hearts
+    eating = true;
+    World.E.feed(f, Math.random() < 0.3 ? 'love' : true, from).then(() => { eating = false; });
+  } else {
+    Pet.chew(900); sfx.chomp(); sfx.yum();
+    FX.emit('crumb', m.x, m.y, 8, { color: f === 'meat' ? '#d9573f' : f === 'fish' ? '#9fdcff' : f === 'fruit' ? '#ff4b5c' : '#5cbf55', speed: 120, g: 500, size: 7 });
+    FX.emit('heart', m.x, m.y - 30, 2, { angle: -Math.PI / 2, speed: 90, size: 12 });
+  }
   addNeed('food', 22); addNeed('fun', 2);
   stats.feeds++; saveStats();
   if (countGame){
@@ -347,7 +380,8 @@ function rubStep(tool, step, x, y){
   lastTouch = performance.now();
   if (tool === 'sponge'){
     bath.foam += step / 900;
-    if (Math.random() < 0.55) FX.emit('foam', x + rand(-14, 14), y + rand(-14, 14), 1, { size: rand(9, 17), life: 30 });
+    if (World.on){ if (Math.random() < 0.6) World.E.foamAt(x + rand(-10, 10), y + rand(-10, 10)); }
+    else if (Math.random() < 0.55) FX.emit('foam', x + rand(-14, 14), y + rand(-14, 14), 1, { size: rand(9, 17), life: 30 });
     if (performance.now() - bath.lastSqueak > 140){ bath.lastSqueak = performance.now(); sfx.squeak(); }
     const part = Pet.partAt(x, y);
     if (part && part !== bath.lastPart && performance.now() - bath.lastPartAt > 2600){
@@ -362,11 +396,11 @@ function rubStep(tool, step, x, y){
       if (!bath.rinseWarned){ bath.rinseWarned = true; say('rinseFirst', null, 5); }
       return;
     }
-    FX.popFoam(2);
+    if (World.on) World.E.popFoam(2); else FX.popFoam(2);
     if (Math.random() < 0.3) sfx.bubble();
     bath.rinse += step / 800;
     if (bath.rinse > 0.25 && bath.stage === 1 && !bath.rinseTalked){ bath.rinseTalked = true; say('rinse', null, 4); }
-    if (bath.rinse >= 1 && bath.stage < 2){ bath.stage = 2; FX.clear('foam'); glowTray('shower', false); glowTray('towel'); }
+    if (bath.rinse >= 1 && bath.stage < 2){ bath.stage = 2; FX.clear('foam'); if (World.on) World.E.clearFoam(); glowTray('shower', false); glowTray('towel'); }
   } else if (tool === 'towel'){
     if (Math.random() < 0.4) FX.emit('sparkle', x, y, 1, { speed: 60, size: 10 });
     if (bath.stage < 2) return;
@@ -385,14 +419,15 @@ function finishBath(){
   stats.baths++; saveStats();
   const c = Pet.center();
   FX.emit('sparkle', c.x, c.y, 16, { speed: 240, size: 13 });
-  sfx.sparkle(); Pet.expr('happy', 1800); Pet.flash('hop', 600);
+  sfx.sparkle(); Pet.expr('happy', 1800);
+  if (World.on){ World.E.clearFoam(); Pet.act('shakedry'); sfx.whoosh(); } else Pet.flash('hop', 600);
   say('dry', null, 8, null, () => { if (!hasFact(sp, 'body')) unlockFact(sp, 'body'); else if (Math.random() < 0.4) sayFact(sp, 'body', 5); });
 }
 function brushStep(amount, x, y){
   lastTouch = performance.now();
   if (!bath.brushTalked){ bath.brushTalked = true; say('brush', null, 5); }
   bath.brush += amount;
-  if (Math.random() < 0.5){ const m = Pet.mouth(); FX.emit('bubble', m.x + rand(-20, 20), m.y + rand(-6, 10), 1, { size: rand(5, 9), life: 1 }); }
+  if (Math.random() < 0.5){ if (World.on) World.E.burstAt('bubble', 'mouth', 1); else { const m = Pet.mouth(); FX.emit('bubble', m.x + rand(-20, 20), m.y + rand(-6, 10), 1, { size: rand(5, 9), life: 1 }); } }
   if (Math.random() < 0.2) sfx.squeak();
   if (bath.brush >= 1){
     bath.brush = 0; bath.brushTalked = false;
@@ -515,6 +550,14 @@ async function story(){
 /* ---------- home: the ball, the wardrobe, and "say it back to me" ---------- */
 function kickBall(d, x, y, tap){
   const h = Pet.headTop();
+  if (World.on){
+    hideGhost();
+    World.E.ball(tap || !Pet.hit(x, y, 40) ? null : { x, y });
+    addNeed('fun', 8); addNeed('energy', -1);
+    lastTouch = performance.now();
+    if (Math.random() < 0.3) setTimeout(() => say('pat', null, 2), 900);
+    return;
+  }
   const go = () => {
     hideGhost();
     Pet.flash('hop', 600); sfx.boing(); Pet.expr('happy', 1200);
@@ -533,6 +576,7 @@ function outfitPreview(id){
   return `<svg viewBox="-60 -66 120 80">${OUTFITS[id]}</svg>`;
 }
 function openWardrobe(){
+  sheetTitle.textContent = 'הארון';
   outfitsEl.textContent = '';
   const cur = petData(Pet.sp).outfit || 'none';
   for (const id of ['none', ...OUTFIT_ORDER]){

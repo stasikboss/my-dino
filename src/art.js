@@ -1,4 +1,4 @@
-/* ---------- artwork: seven original characters drawn as SVG on a 240x240 stage, hats, foods and tools ----------
+/* ---------- artwork: nine original characters drawn as SVG on a 240x240 stage, hats, foods and tools ----------
    Every character shares one rig so the game can animate them the same way:
    .p-tail (wags), .p-body (breathes), .p-head (tilts, nods), .eye (blinks, looks, closes, smiles), .mouth (talks, eats).
    Coordinates are in stage units; the ground is at y=226. */
@@ -218,6 +218,45 @@ const SPECIES = {
     }
   },
 
+  anky: {
+    line: '#28407e',
+    iris: '#3a5aa8', gloss: [[54, 152, 14, 6], [124, 150, 18, 7]], ao: [96, 196, 26, 9],
+    c: { body: '#5f91f0', dark: '#4677d6', far: '#4677d6', belly: '#e1eaff', armor: '#ffd06e', armor2: '#f2b347', beak: '#3d5fa8' },
+    mouth: [64, 186], headPivot: [92, 186], hat: [68, 142, 1.15], eyes: [[52, 166], [84, 166], 10],
+    body(c){
+      const knob = (x, y, r, f) => `<path d="M${x - r} ${y + r * 0.35} Q${x - r * 0.9} ${y - r * 0.9} ${x} ${y - r * 1.15} Q${x + r * 0.9} ${y - r * 0.9} ${x + r} ${y + r * 0.35} Z" fill="${f}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`;
+      // the bony club at the end of the tail: two round lobes
+      const tail = `<g class="p-tail" style="transform-origin:196px 190px"><path d="M194 176 C210 172 220 172 228 176 C228 186 214 192 196 200 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+          <ellipse cx="229" cy="180" rx="13" ry="11" fill="${c.armor2}" stroke="${INK}" stroke-width="${SW}"/><ellipse cx="225" cy="176" rx="7" ry="5" fill="${c.armor}" opacity=".9"/></g>`;
+      // side spikes along the lower edge of the shell, pointing out
+      const spikes = [[76, 184, -70], [98, 202, -100], [124, 206, -95], [150, 206, -85], [176, 202, -80], [198, 188, -60]].map(s =>
+        `<path transform="rotate(${s[2] + 90} ${s[0]} ${s[1]})" d="M${s[0] - 6} ${s[1]} L${s[0]} ${s[1] + 14} L${s[0] + 6} ${s[1]} Z" fill="${c.armor2}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`).join('');
+      // rows of armor knobs on the back
+      const rows = [[[108, 146, 8], [130, 138, 9], [154, 138, 9], [176, 146, 8]], [[94, 166, 7], [118, 160, 8], [142, 156, 8], [166, 160, 8], [188, 168, 7]], [[104, 184, 6], [128, 180, 7], [152, 180, 7], [176, 184, 6]]];
+      const knobs = rows.map((row, i) => row.map((k, j) => knob(k[0], k[1], k[2], (i + j) % 2 ? c.armor : c.armor2)).join('')).join('');
+      return `${tail}
+        <path d="${legPath(116, 140, 198)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="${legPath(160, 184, 198)}" fill="${c.far}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        ${spikes}
+        <path d="M70 192 C66 150 104 128 142 128 C184 128 212 152 208 190 C204 210 172 212 140 212 C108 212 74 210 70 192 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M80 198 C92 190 114 188 140 188 C166 188 188 190 200 198 C190 208 166 210 140 210 C112 210 90 208 80 198 Z" fill="${c.belly}" opacity=".85"/>
+        ${knobs}
+        <path d="${legPath(88, 114, 194)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="${legPath(170, 196, 194)}" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        ${toes(88, 114, 224)}${toes(170, 196, 224)}`;
+    },
+    head(c){
+      return `<path d="M96 168 C110 172 116 188 108 200 L84 196 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/>
+        <path d="M84 146 L96 132 L98 150 Z M50 146 L36 134 L40 152 Z" fill="${c.armor2}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M28 172 C26 148 46 138 68 138 C92 138 110 150 108 174 C106 194 88 200 66 200 C44 200 30 192 28 172 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
+        <g fill="${c.armor}" stroke="${INK}" stroke-width="2.5"><ellipse cx="58" cy="146" rx="6" ry="4"/><ellipse cx="76" cy="144" rx="6" ry="4"/><ellipse cx="94" cy="152" rx="5" ry="3.5"/></g>
+        ${eyeSvg(52, 166, 10)}${eyeSvg(84, 166, 10)}
+        ${cheeks(38, 98, 182, 7, 5)}
+        <path d="M54 194 Q64 200 74 194 Q64 206 54 194 Z" fill="${c.beak}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+        ${mouthSvg(64, 184, 22)}`;
+    }
+  },
+
   elephant: {
     line: '#46527a',
     iris: '#5a6f96', gloss: [[100, 54, 17, 8], [96, 150, 12, 6]], ao: [120, 138, 46, 11],
@@ -301,9 +340,35 @@ const SPECIES = {
             <path d="M107 100 Q120 94 133 100 L120 110 Z" fill="${c.beak}" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/></g>
         </g>`;
     }
+  },
+
+  kangaroo: {
+    line: '#7a3a14',
+    iris: '#6b3d1e', gloss: [[104, 48, 13, 6], [100, 140, 10, 16]], ao: [120, 120, 30, 8],
+    c: { body: '#de9057', dark: '#bf6f3c', belly: '#f9dfc4', ear: '#ffb3a7', nose: '#5a3426' },
+    mouth: [120, 100], headPivot: [120, 112], hat: [120, 40, 1.05], eyes: [[104, 66], [136, 66], 10],
+    body(c){
+      return `<g class="p-tail" style="transform-origin:150px 204px"><path d="M140 196 C170 196 200 206 232 222 C206 226 172 224 146 218 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/></g>
+        <g fill="${c.dark}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"><path d="M70 222 Q72 210 92 210 Q108 210 110 222 Z"/><path d="M130 222 Q132 210 148 210 Q168 210 170 222 Z"/></g>
+        <path d="M120 104 C144 104 158 128 162 158 C166 194 150 216 120 216 C90 216 74 194 78 158 C82 128 96 104 120 104 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
+        <g fill="${c.body}" stroke="${INK}" stroke-width="${SW}"><ellipse cx="88" cy="190" rx="22" ry="27"/><ellipse cx="152" cy="190" rx="22" ry="27"/></g>
+        <ellipse cx="120" cy="168" rx="25" ry="40" fill="${c.belly}"/>
+        <g class="p-arm-l">${thick('M104 132 Q96 144 102 156', 9, c.body)}<ellipse cx="103" cy="158" rx="6" ry="5" fill="${c.dark}" stroke="${INK}" stroke-width="2.5"/></g>
+        <g class="p-arm-r">${thick('M136 132 Q144 144 138 156', 9, c.body)}<ellipse cx="137" cy="158" rx="6" ry="5" fill="${c.dark}" stroke="${INK}" stroke-width="2.5"/></g>`;
+    },
+    head(c){
+      return `<g class="p-ear-l" style="transform-origin:98px 50px"><path d="M100 52 C84 34 82 8 88 2 C100 6 108 28 108 48 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M100 44 C90 32 89 16 92 10 C99 16 103 30 103 42 Z" fill="${c.ear}"/></g>
+        <g class="p-ear-r" style="transform-origin:142px 50px"><path d="M140 52 C156 34 158 8 152 2 C140 6 132 28 132 48 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M140 44 C150 32 151 16 148 10 C141 16 137 30 137 42 Z" fill="${c.ear}"/></g>
+        <path d="M84 72 C84 50 100 40 120 40 C140 40 156 50 156 72 C156 92 142 112 120 112 C98 112 84 92 84 72 Z" fill="${c.body}" stroke="${INK}" stroke-width="${SW}"/>
+        <ellipse cx="120" cy="94" rx="20" ry="15" fill="${c.belly}"/>
+        <path d="M112 84 Q120 80 128 84 Q126 91 120 92 Q114 91 112 84 Z" fill="${c.nose}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+        ${eyeSvg(104, 66, 10)}${eyeSvg(136, 66, 10)}
+        ${cheeks(92, 148, 86, 7, 5)}
+        ${mouthSvg(120, 99, 16)}`;
+    }
   }
 };
-const SPECIES_ORDER = ['trex', 'trike', 'stego', 'brachio', 'elephant', 'lion', 'penguin'];
+const SPECIES_ORDER = ['trex', 'trike', 'stego', 'brachio', 'anky', 'elephant', 'lion', 'penguin', 'kangaroo'];
 
 /* Hats and glasses, drawn around (0,0) = top of the head, about 60 units wide. */
 const OUTFITS = {

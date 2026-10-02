@@ -9,6 +9,8 @@ import { ROOM_BUILDERS } from './rooms.js';
 import { radialTex, V, blob, skin, glossy, rng, release } from './util.js';
 import * as T from './textures.js';
 import { buildItem } from './items.js';
+import * as Life from './life.js';
+import { GAMES3D } from './games3d.js';
 
 const HEAD_PARTS = new Set(['head', 'face', 'horns', 'frill', 'mane', 'ears', 'trunk', 'beak']);
 const PRESENCE = 1.75;               // every friend is scaled so its height (or 85% of its width) is this many units
@@ -30,7 +32,8 @@ const E = {
   look: null, lookW: new THREE.Vector3(), clock: { last: 0, getDelta(){ const n = performance.now(), d = this.last ? (n - this.last) / 1000 : 0; this.last = n; return d; } }, t: 0,
   anim: { open: 0, happy: 0, sleep: 0, talk: 0, jump: 0, squash: 0, wiggle: 0, shake: 0, nod: 0, tilt: 0, excited: 0, prev: new Set(), blink: 0 },
   dpr: 1, dprMax: 2, frameAvg: 16, frameN: 0, dark: 0, darkTarget: 0, blanket: 0, blanketTarget: 0, curtain: 1, curtainTarget: 1,
-  hidden: false, egg: null, onFrame: null, boundsCache: null, boundsAt: 0, paused: false, busyUntil: 0
+  hidden: false, egg: null, onFrame: null, boundsCache: null, boundsAt: 0, paused: false, busyUntil: 0,
+  actions: [], effects: [], parts: [], walk: Life.newWalk(), lookOverride: null, cue: () => {}, game: null
 };
 window.DinoEngine = E;
 
@@ -84,6 +87,7 @@ E.setRoom = name => {
   if (E.roomName === name) return;
   if (E.room) E.room.group.visible = false;
   E.room = buildRoom(name); E.room.group.visible = true; E.roomName = name;
+  E.calm();
   const l = ROOM_LIGHT[name] || ROOM_LIGHT.home;
   E.L.key.intensity = l.key; E.L.hemi.intensity = l.hemi; E.L.hemi.color.setHex(l.sky); E.L.hemi.groundColor.setHex(l.ground);
   E.renderer.toneMappingExposure = l.exposure;
@@ -126,6 +130,7 @@ E.setPet = (sp, o = {}) => {
   dress(r, o.outfit);
   E.petHolder.add(r.root);
   E.friend = r;
+  E.calm();
   E.boundsCache = null;
   E.frame();
 };
@@ -152,6 +157,110 @@ function applyStage(r, stage){
   r.stage = stage;
 }
 
+/* ---------- life: actions, walking, eating, playing ---------- */
+// stops whatever the friend was doing (a new room, a new friend)
+E.calm = () => { E.actions = []; Life.clearEffects(E); Life.clearFoam(E); const W = E.walk; if (W.resolve){ const f = W.resolve; W.resolve = null; f(); } E.walk = Life.newWalk(); };
+E.act = (name, o = {}) => {
+  const r = E.friend; if (!r || !Life.ACTION_NAMES.includes(name)) return;
+  if (name !== 'eat') E.actions = E.actions.filter(a => a.name !== name);
+  const a = { name, t: 0, side: o.side || 1, dur: o.dur || 0 };
+  if (name === 'lookback' && r.tail && !o.side){ const tp = new THREE.Vector3(), hp = new THREE.Vector3(); r.tail.getWorldPosition(tp); r.head.getWorldPosition(hp); a.side = tp.x >= hp.x ? 1 : -1; }
+  E.actions.push(a);
+};
+E.busyActing = () => E.actions.length > 0 || !!E.walk.target || E.effects.length > 0;
+E.burstAt = (kind, where, n = 8, o = {}) => {
+  let p = Life.anchorPos(E, where === 'nose' ? 'mouth' : where);
+  if (where === 'mouth' || where === 'nose'){ const r = E.friend; const nrm = new THREE.Vector3(0, 0, 1).transformDirection(r.mouthAnchor.matrixWorld); p.addScaledVector(nrm, 0.08); }
+  Life.burst(E, kind, p, n, o);
+};
+E.burstScreen = (kind, x, y, n = 8, o = {}) => { const at = E.screenToWorld(x, y, Life.anchorPos(E, 'center').z + 0.3); if (at) Life.burst(E, kind, at, n, o); };
+E.stars = sec => Life.stars(E, sec);
+// foam from the sponge, at the point under the finger; the shower pops it off
+E.foamAt = (x, y) => { const h = E.hit(x, y); if (h) Life.foamAt(E, h); return !!h; };
+E.popFoam = n => Life.popFoam(E, n);
+E.clearFoam = () => Life.clearFoam(E);
+E.screenToWorld = (x, y, zPlane = 0.3) => {
+  ray.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1), E.camera);
+  const p = new THREE.Vector3();
+  return ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), -zPlane), p) ? p : null;
+};
+// eat a food (ok: true, 'love' for a favorite, false: turns away); from: the screen point where the food was let go
+E.feed = (food, ok, from) => {
+  if (!E.friend) return Promise.resolve();
+  const at = from ? E.screenToWorld(from.x, from.y, Life.anchorPos(E, 'mouth').z + 0.25) : null;
+  return Life.feed(E, food, ok, at);
+};
+E.ball = from => { const at = from ? E.screenToWorld(from.x, from.y, Life.anchorPos(E, 'head').z + 0.6) : null; Life.ball(E, at); };
+E.butterfly = () => Life.butterfly(E);
+// paints the home in one of its color themes (and remembers the wall color for the background)
+E.setTheme = (name, i) => {
+  if (!ROOM_BUILDERS[name]) return;
+  const room = buildRoom(name);
+  if (room.setTheme){ room.wall = room.setTheme(i); if (E.room === room) E.scene.background = new THREE.Color(room.wall); }
+};
+// growing up: a pop from a little smaller to the new size, with sparkles and a big stretch
+E.celebrate = () => {
+  const r = E.friend; if (!r) return;
+  const k0 = r.inner.scale.x;
+  Life.burst(E, 'spark', Life.anchorPos(E, 'head'), 16);
+  E.act('stretch');
+  E.effects.push({ age: 0, update(dt){
+    this.age += dt;
+    const u = Math.min(1, this.age / 1.3);
+    const m = u < 0.35 ? 0.84 + 0.26 * (u / 0.35) : 1.1 - 0.1 * Math.min(1, (u - 0.35) / 0.65) + Math.sin((u - 0.35) * 18) * 0.03 * (1 - u);
+    if (E.friend !== r){ return false; }
+    r.inner.scale.setScalar(k0 * m);
+    if (u >= 1){ r.inner.scale.setScalar(k0); return false; }
+    return true;
+  } });
+};
+// walking happens on the floor of the home and the kitchen
+E.walkable = () => E.roomName === 'home' || E.roomName === 'kitchen';
+// how far to each side the friend can walk and still be fully seen
+E.walkRange = () => {
+  const r = E.friend; if (!r || !E.pxPerUnit) return 0;
+  const halfW = innerWidth / 2 / E.pxPerUnit;
+  return Math.max(0, halfW - (r.width || 1.4) * r.inner.scale.x * 0.55 - 0.05);
+};
+E.walkTo = (x, z = 0, speed = 1) => new Promise(res => {
+  const W = E.walk;
+  if (!E.friend || !E.walkable()){ res(); return; }
+  if (W.resolve){ const f = W.resolve; W.resolve = null; f(); }
+  W.target = { x, z }; W.speed = speed; W.resolve = res;
+});
+// walks in from the side of the screen (entering a room)
+E.enter = side => {
+  const r = E.friend; if (!r || !E.walkable()) return Promise.resolve();
+  const halfW = innerWidth / 2 / (E.pxPerUnit || 200);
+  E.walk.x = side * Math.min(1.8, halfW * 0.8); E.walk.z = -0.1;
+  E.walk.yaw = side > 0 ? -Math.PI / 2 - (r.turn || 0) : Math.PI / 2 - (r.turn || 0);
+  return E.walkTo(0, 0, 1.3);
+};
+// a little stroll: over to one side, a look around, and back to the middle
+E.wander = async () => {
+  if (!E.friend || !E.walkable() || E.walk.target) return;
+  const range = E.walkRange();
+  if (range < 0.15) { E.act('lookaround'); return; }
+  const side = Math.random() < 0.5 ? -1 : 1;
+  await E.walkTo(side * range * (0.6 + Math.random() * 0.4), -0.25 - Math.random() * 0.2, 0.8);
+  if (!E.walkable()) return;
+  E.act('lookaround');
+  await new Promise(r => setTimeout(r, 2600));
+  if (!E.walkable()) return;
+  await E.walkTo(0, 0, 0.9);
+};
+
+/* ---------- action games in 3D (see games3d.js) ---------- */
+E.startGame = (name, o = {}) => {
+  if (!E.friend || !GAMES3D[name]) return false;
+  E.stopGame();
+  E.setRoom('play'); E.setLayout('game'); E.calm();
+  E.game = GAMES3D[name](E, o);
+  return true;
+};
+E.stopGame = () => { if (!E.game) return; try { E.game.stop(); } catch (e) {} E.game = null; E.calm(); };
+E.gamePointer = (type, x, y) => { if (E.game) E.game.pointer(type, x, y); };
+
 /* ---------- framing: the friend stands between the top bar and the buttons at the bottom ---------- */
 E.setLayout = l => { if (E.layout !== l){ E.layout = l; E.frame(); } };
 // frame things standing on the floor (from the floor up to worldH) so they fill a rectangle on screen
@@ -161,8 +270,9 @@ E.frame = () => {
   const W = innerWidth, H = innerHeight;
   const top = E.safe.top, bottom = E.safe.bottom;
   const avail = Math.max(120, H - top - bottom);
-  const small = E.layout === 'small';
-  const share = small ? 0.3 : 0.74;
+  const game = E.layout === 'game';
+  const small = E.layout === 'small' || game;
+  const share = game ? 0.26 : small ? 0.3 : 0.74;
   // pixels per world unit at the friend
   let k = Math.min(avail * share / PRESENCE, W * (small ? 0.4 : 0.92) / (PRESENCE * 1.15));
   if (E.roomName === 'bath' && !small) k = Math.min(k, W * 0.98 / 2.6);
@@ -181,7 +291,7 @@ E.frame = () => {
   const feetY = (E.roomName === 'bed' && !small) ? 0.5 : 0;
   const p = new THREE.Vector3(0, feetY, 0).project(E.camera);
   const sy = (1 - p.y) / 2 * H;
-  const target = fit ? fit.bottom - fit.h * 0.03 : H - bottom - (small ? 10 : Math.max(14, avail * 0.05));
+  const target = fit ? fit.bottom - fit.h * 0.03 : game ? H - Math.max(36, H * 0.07) : H - bottom - (small ? 10 : Math.max(14, avail * 0.05));
   const off = sy - target;
   E.camera.setViewOffset(W, H, 0, off, W, H);
   E.camera.updateProjectionMatrix();
@@ -191,69 +301,7 @@ E.frame = () => {
 /* ---------- state from the game ---------- */
 function has(c){ return E.stateEl ? E.stateEl.classList.contains(c) : false; }
 const ease = (a, b, k) => a + (b - a) * k;
-const ONE_SHOT = { hop: 0.55, squish: 0.35, wiggle: 0.7, shake: 0.5, nod: 0.64 };
-function animate(dt){
-  const r = E.friend; if (!r) return;
-  const A = E.anim, t = E.t;
-  const now = new Set(E.stateEl ? Array.from(E.stateEl.classList) : []);
-  for (const k of Object.keys(ONE_SHOT)) if (now.has(k) && !A.prev.has(k)) A[k + 'T'] = 0.0001;
-  A.prev = now;
-  const sleep = now.has('sleep'), happy = now.has('happy'), wide = now.has('wide');
-  const blink = now.has('blink');
-  A.sleep = ease(A.sleep, sleep ? 1 : 0, Math.min(1, dt * 4));
-  A.happy = ease(A.happy, happy ? 1 : 0, Math.min(1, dt * 14));
-  const openT = sleep ? 0 : blink ? 0 : 1;
-  A.open = ease(A.open, openT, Math.min(1, dt * (blink ? 40 : 18)));
-  A.talk = ease(A.talk, now.has('talk') ? 1 : 0, Math.min(1, dt * 22));
-  A.tilt = ease(A.tilt, now.has('tilt') ? 1 : now.has('listen') ? -1 : 0, Math.min(1, dt * 6));
-  A.excited = ease(A.excited, now.has('excited') ? 1 : 0, Math.min(1, dt * 6));
-  for (const e of r.eyes){ e.set(A.open, A.happy, A.sleep); e.g.scale.setScalar(1 + (wide ? 0.12 : 0)); }
-  r.mouth.set(Math.min(1, A.talk * (happy && !now.has('talk') ? 0 : 1)));
-  // one-shot motions
-  let jumpY = 0, sq = 0, wig = 0, shake = 0, nod = 0;
-  for (const k of Object.keys(ONE_SHOT)){
-    const kk = k + 'T';
-    if (!A[kk]) continue;
-    A[kk] += dt;
-    const u = A[kk] / ONE_SHOT[k];
-    if (u >= 1){ A[kk] = 0; continue; }
-    if (k === 'hop'){ jumpY = Math.sin(Math.min(1, u / 0.7) * Math.PI) * 0.32; if (u > 0.7) sq = Math.sin((u - 0.7) / 0.3 * Math.PI) * 0.08; }
-    if (k === 'squish') sq = Math.sin(u * Math.PI) * 0.1;
-    if (k === 'wiggle') wig = Math.sin(u * Math.PI * 10) * 0.08 * (1 - u);
-    if (k === 'shake') shake = Math.sin(u * Math.PI * 6) * 0.3 * (1 - u);
-    if (k === 'nod') nod = Math.sin(u * Math.PI * 4) * 0.14;
-  }
-  const breath = Math.sin(t * (sleep ? 1.4 : 2.1)) * (sleep ? 0.022 : 0.014);
-  r.jump.position.y = jumpY;
-  r.body.scale.set(1 + sq * 0.6, 1 - sq + breath, 1 + sq * 0.6);
-  r.body.rotation.z = wig + Math.sin(t * 0.7) * 0.012;
-  // the head: idle sway, look at what the finger holds, nod, shake, tilt; droops a little in sleep
-  const baseYaw = r.headYaw || 0;
-  let lookYaw = 0, lookPitch = 0;
-  if (E.look && !sleep){
-    const hp = new THREE.Vector3(); r.head.getWorldPosition(hp);
-    const dir = E.lookW.clone().sub(hp);
-    lookYaw = Math.max(-0.5, Math.min(0.5, Math.atan2(dir.x, dir.z) * 0.45));
-    lookPitch = Math.max(-0.3, Math.min(0.3, -Math.atan2(dir.y, Math.hypot(dir.x, dir.z)) * 0.4));
-  }
-  r._yaw = ease(r._yaw || 0, lookYaw, Math.min(1, dt * 6));
-  r._pitch = ease(r._pitch || 0, lookPitch, Math.min(1, dt * 6));
-  r.head.rotation.y = baseYaw + r._yaw + shake + Math.sin(t * 0.5) * 0.04 * (1 - A.sleep);
-  r.head.rotation.x = r._pitch + nod + A.sleep * 0.22 + Math.sin(t * 0.9) * 0.015;
-  r.head.rotation.z = A.tilt * 0.18 + Math.sin(t * 0.6) * 0.02;
-  // eyes follow too
-  for (const e of r.eyes){
-    const ty = E.look ? r._yaw * 1.2 : Math.sin(t * 0.33) * 0.08;
-    const tx = E.look ? r._pitch * 1.2 : 0;
-    e.look.rotation.y = ease(e.look.rotation.y, ty, Math.min(1, dt * 10));
-    e.look.rotation.x = ease(e.look.rotation.x, tx, Math.min(1, dt * 10));
-  }
-  if (r.tail){ const sp = 1.9 + A.excited * 6; r.tail.rotation.y = Math.sin(t * sp) * (0.12 + A.excited * 0.12) * (1 - A.sleep * 0.8); }
-  if (r.extra.earL){ const f = Math.sin(t * 2.2) * 0.06 + (Math.sin(t * 0.7) > 0.93 ? Math.sin(t * 30) * 0.12 : 0); r.extra.earL.rotation.y = -0.55 - f; r.extra.earR.rotation.y = 0.55 + f; if (r.sp === 'lion'){ r.extra.earL.rotation.set(0, 0, f); r.extra.earR.rotation.set(0, 0, -f); } }
-  if (r.trunk) r.trunk.rotation.x = Math.sin(t * 1.3) * 0.08 - A.talk * 0.12;
-  if (r.extra.finL){ const f = A.excited * Math.sin(t * 22) * 0.35 + Math.sin(t * 1.5) * 0.04; r.extra.finL.rotation.z = -f - 0.05; r.extra.finR.rotation.z = f + 0.05; }
-  if (r.extra.armL){ const f = Math.sin(t * 3) * 0.08 + A.excited * Math.sin(t * 18) * 0.4; r.extra.armL.rotation.x = f; r.extra.armR.rotation.x = -f; }
-}
+function animate(dt){ Life.animate(E, dt); }
 
 /* ---------- placing the friend in the room ---------- */
 function place(dt){
@@ -267,6 +315,7 @@ function place(dt){
   // in the tub, short friends sit up higher, so the face (and the mouth, for brushing) stays above the bubbles
   if (E.roomName === 'bath') y = Math.max(y, 1.04 - restMouthY(r));
   if (E.roomName === 'bed') y -= E.blanket * 0.12;
+  if (E.walkable() || E.game){ x += E.walk.x; z += E.walk.z; y += E.walk.y || 0; }
   E.petHolder.position.set(x, y, z);
   // the soft shadow under the friend
   const w = (r.width || 1.4) * (r.inner.scale.x);
@@ -334,8 +383,10 @@ E.loop = () => {
       E.safe = { top: ease(E.safe.top, st.top, k), bottom: ease(E.safe.bottom, st.bottom, k) };
       E.frame();
     }
+    if (E.game) E.game.update(dt);
     place(dt);
     animate(dt);
+    Life.updateEffects(E, dt);
     roomFx(dt);
     if (E.egg) E.egg.update(dt);
     if (E.onFrame) E.onFrame(dt);
@@ -401,7 +452,7 @@ E.hit = (x, y) => {
     let o = h.object, part = null, head = false;
     while (o){ if (!part && o.userData.part) part = o.userData.part; if (o === r.head) head = true; o = o.parent; }
     if (!h.object.visible) continue;
-    return { part: part || 'belly', head: head || HEAD_PARTS.has(part), point: h.point };
+    return { part: part || 'belly', head: head || HEAD_PARTS.has(part), point: h.point, object: h.object };
   }
   return null;
 };
@@ -534,7 +585,7 @@ E.hatch = () => new Promise(res => {
   st.done = res;
 });
 E.clearEgg = () => { if (E.egg){ E.scene.remove(E.egg.g); release(E.egg.g); E.egg = null; } };
-const SPECIES_COLORS = { trex: ['#fff5e2', '#7cc85a'], trike: ['#fff5e2', '#f2a33a'], stego: ['#fff5e2', '#45b0a5'], brachio: ['#fff5e2', '#9787ef'], penguin: ['#f4f8ff', '#9fb4d8'] };
+const SPECIES_COLORS = { trex: ['#fff5e2', '#7cc85a'], trike: ['#fff5e2', '#f2a33a'], stego: ['#fff5e2', '#45b0a5'], brachio: ['#fff5e2', '#9787ef'], anky: ['#fff5e2', '#5b8def'], penguin: ['#f4f8ff', '#9fb4d8'] };
 
 /* ---------- still pictures for buttons and cards ---------- */
 let snapR = null, snapScene = null, snapCam = null, snapL = null;

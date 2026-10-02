@@ -749,3 +749,52 @@ img.pet.hop{animation:hop .55s cubic-bezier(.3,.9,.5,1)}
 .fossil.alive .f-sleep{opacity:0;transition:opacity .9s}
 @media (orientation:landscape) and (max-height:560px){.tray-btn img{width:48px;height:48px}.nav-btn img{width:36px;height:36px}}
 @media (min-width:700px) and (min-height:820px){.nav-btn img{width:60px;height:60px}}
+
+/* 3D games: the meadow and the friend are the game; only the top bar sits over them */
+.game.g3d{background:transparent;pointer-events:none}
+.game.g3d .game-top{pointer-events:auto}
+.game.g3d .game-body{display:none}
+body.in-game3d .hud,body.in-game3d .tray,body.in-game3d .nav,body.in-game3d .games,body.in-game3d .album,body.in-game3d .clock{display:none!important}
+body.in-game3d .bubble{pointer-events:none}
+body.in-game3d .world{touch-action:none}
+.game-tile.three{background:linear-gradient(#fff9e8,#ffeec8)}
+.game-tile .new3d{position:absolute;top:8px;inset-inline-start:10px;font:700 12px/1 var(--font-display);color:#fff;background:linear-gradient(#ff8a72,#ff5d5d);padding:4px 8px;border-radius:999px;box-shadow:0 2px 0 #c6303d}
+.gi-catch{--gc:#ffe0e0}.gi-jump{--gc:#e2f4d0}.gi-bubbles{--gc:#dff1ff}
+.games{overflow-y:auto;align-content:start;padding-top:6px;padding-bottom:10px;-webkit-overflow-scrolling:touch}
+
+/* the daily surprise gift */
+.gift{position:fixed;z-index:6;right:max(14px,env(safe-area-inset-right));bottom:calc(var(--nav-h) + var(--safe-b) + var(--tray-h) + 14px);width:clamp(84px,22vw,120px);height:clamp(84px,22vw,120px);border:0;padding:0;background:none;cursor:pointer;filter:drop-shadow(0 10px 10px rgba(90,40,10,.25))}
+.gift img,.gift svg{width:100%;height:100%;display:block;pointer-events:none}
+.gift.arrive{animation:gift-in .7s cubic-bezier(.2,1.4,.4,1) backwards,gift-wobble 1.6s ease-in-out .8s infinite}
+.gift.opening{animation:gift-open .65s ease-in forwards}
+@keyframes gift-in{0%{transform:translateY(-60vh) rotate(-20deg);opacity:0}70%{transform:translateY(8px) rotate(4deg);opacity:1}100%{transform:none}}
+@keyframes gift-wobble{0%,70%,100%{transform:none}76%{transform:rotate(-9deg) scale(1.04)}84%{transform:rotate(8deg) scale(1.04)}92%{transform:rotate(-5deg)}}
+@keyframes gift-open{0%{transform:none}30%{transform:rotate(-12deg) scale(1.1)}55%{transform:rotate(12deg) scale(1.15)}80%{transform:scale(1.35);opacity:1}100%{transform:scale(1.6);opacity:0}}
+/* a new sticker, shown big */
+.reveal{position:fixed;inset:0;z-index:11;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(255,240,200,.55),rgba(40,20,60,.55));-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);cursor:pointer}
+.reveal-card{display:grid;justify-items:center;gap:8px;padding:22px 26px 20px;border-radius:32px;background:linear-gradient(#fffdf8,#fff1dc);box-shadow:0 8px 0 #e6c9a0,0 24px 50px rgba(60,20,10,.35);animation:pop-card .5s cubic-bezier(.2,1.5,.4,1) backwards}
+@keyframes pop-card{0%{transform:scale(.4) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
+.reveal-kicker{font:700 clamp(22px,6vw,30px)/1 var(--font-display);color:#ff6a3d}
+.reveal-name{font:700 clamp(20px,5.4vw,26px)/1.1 var(--font-display);color:var(--text)}
+.reveal-count{font:600 15px/1 var(--font-display);color:var(--text-soft)}
+.sticker{display:block;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 6px rgba(80,40,20,.25))}
+.sticker svg{display:block;width:100%;height:100%}
+.sticker.big{width:min(56vw,230px);height:min(56vw,230px);animation:sticker-spin .9s cubic-bezier(.2,1.2,.4,1) .15s backwards}
+@keyframes sticker-spin{0%{transform:scale(.2) rotate(-200deg)}100%{transform:none}}
+/* the album page of stickers */
+.sticker-grid{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(26vw,110px),1fr));gap:12px;padding:4px 2px 14px}
+.sticker-cell{aspect-ratio:1;border:0;border-radius:24px;background:linear-gradient(#fffefb,#fff4e4);box-shadow:var(--lift-sm),inset 0 2px 0 #fff;display:grid;place-items:center;padding:12%;cursor:pointer}
+.sticker-cell .sticker{width:100%;height:100%}
+.sticker-cell.locked{background:linear-gradient(#f5ede2,#ece0cf);box-shadow:0 3px 0 #e2d2bb,inset 0 2px 6px rgba(120,80,40,.1)}
+.sticker-q{font:700 34px/1 var(--font-display);color:#cbb79b}
+.album-tab.sticker-tab .sticker{width:70%;height:70%;margin:auto}
+.album-tab.sticker-tab{display:grid;place-items:center}
+/* painting the home */
+.theme-btn .swatch{width:78%;aspect-ratio:1;border-radius:50%;background:conic-gradient(var(--a) 0 50%,var(--b) 50% 100%);box-shadow:inset 0 0 0 4px #fff,0 3px 8px rgba(80,40,20,.25)}
+.theme-btn .need{position:absolute;bottom:6px;font:700 13px/1 var(--font-display);color:#c25b2a;background:#fff3c4;border-radius:999px;padding:3px 7px}
+.theme-btn.locked .swatch{filter:grayscale(.7) opacity(.5)}
+.theme-btn.locked::after{display:none}
+body.theme-1 .room[data-room="home"]{--wall:#e3f6ea;--wall2:#c3eacf;--wains:#a8dcc0;--wains2:#7cc3a0}
+body.theme-2 .room[data-room="home"]{--wall:#e0f0ff;--wall2:#bddcfb;--wains:#a9cdef;--wains2:#7fb1e0}
+body.theme-3 .room[data-room="home"]{--wall:#efe8ff;--wall2:#d8cbff;--wains:#c9b8f5;--wains2:#a993ea}
+body.theme-4 .room[data-room="home"]{--wall:#fff5cc;--wall2:#ffe592;--wains:#ffd970;--wains2:#f2bf3c}

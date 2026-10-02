@@ -1,15 +1,18 @@
 # הדינו שלי
 
-משחק לגידול דינוזאורים וחיות לילדים בגילאי 3 עד 6. בוחרים חבר (טירנוזאורוס, טריצרטופס, סטגוזאורוס, ברכיוזאורוס, פיל, אריה או פינגווין), בוקעים יחד מהביצה, ומטפלים בו: מאכילים, רוחצים, מצחצחים שיניים, הולכים לשירותים ומשכיבים לישון. בדרך לומדים מה כל אחד אוכל, איך הגוף שלו בנוי, איפה הוא גר, איך הוא בא לעולם וכמה הוא גדול.
+משחק לגידול דינוזאורים וחיות לילדים בגילאי 3 עד 6. בוחרים חבר (טירנוזאורוס, טריצרטופס, סטגוזאורוס, ברכיוזאורוס, אנקילוזאורוס, פיל, אריה, פינגווין או קנגורו), בוקעים יחד מהביצה, ומטפלים בו: מאכילים, רוחצים, מצחצחים שיניים, הולכים לשירותים ומשכיבים לישון. בדרך לומדים מה כל אחד אוכל, איך הגוף שלו בנוי, איפה הוא גר, איך הוא בא לעולם וכמה הוא גדול.
 
 **להורדה ולהתקנה:** https://stasikboss.github.io/my-dino/
 
 ## מה יש בפנים
 
-- **ארבעה חדרים:** בית (ליטוף, ארון בגדים, כדור, ״חזור אחריי״), מטבח (אוכל נכון ולא נכון, אתגרי ספירה), אמבטיה (ספוג, מקלחת, מגבת, מברשת שיניים, סיר ושטיפת ידיים עם ספירה עד עשר), חדר שינה (מנורה, סיפור ושיר ערש).
-- **חמישה משחקי למידה:** חופרים מאובן, מי אוכל מה, של מי הצל, ביצה או נולד, ומי יותר גדול. כל משחק נגמר אחרי כמה סיבובים, ומזכה בכובע חדש.
-- **אלבום:** שישה כרטיסי עובדות לכל חבר, 42 בסך הכול. כל כרטיס נפתח דרך משהו שעושים במשחק, ומוקרא בקול.
-- **החבר גדל:** משתנה מתינוק לבוגר לפי ימי הטיפול, לא לפי זמן מסך.
+- **חבר חי:** נכנס לחדר בהליכה, מסתובב, מסתכל על האצבע ועל פרפרים, ומגיב למגע לפי המקום: גרגור על הראש, צחוק בבטן, עיטוש באף, רקיעה ברגל, ואם מקישים עליו הרבה הוא מסתחרר. כשלא נוגעים בו הוא מפהק, רוקד, מתמתח ומשחק לבד.
+- **ארבעה חדרים:** בית (ליטוף, ארון בגדים, כדור, ״חזור אחריי״, צבע לחדר), מטבח (אוכל נכון ולא נכון, אתגרי ספירה), אמבטיה (ספוג וקצף, מקלחת, מגבת, מברשת שיניים, סיר ושטיפת ידיים עם ספירה עד עשר), חדר שינה (מנורה, סיפור ושיר ערש).
+- **שמונה משחקים:** חמישה משחקי למידה (חופרים מאובן, מי אוכל מה, של מי הצל, ביצה או נולד, ומי יותר גדול) ושלושה משחקי תלת־ממד עם החבר עצמו (תופסים אוכל שנופל מהשמיים, קופצים מעל סלעים ואוספים כוכבים, ומפוצצים בועות וסופרים). כל משחק נגמר אחרי כמה סיבובים, ומזכה בכובע חדש או במדבקה.
+- **אלבום:** שישה כרטיסי עובדות לכל חבר, 54 בסך הכול, ועוד דף של 18 מדבקות. כל כרטיס נפתח דרך משהו שעושים במשחק, ומוקרא בקול.
+- **הפתעה יומית:** פעם ביום מחכה בבית מתנה עם מדבקה חדשה. ככל שאוספים יותר מדבקות, נפתחים צבעים חדשים לחדר.
+- **מוזיקה וקולות:** מנגינה רכה לכל חדר, וקול משלו לכל חבר. אפשר לכבות את המוזיקה בהגדרות להורים.
+- **החבר גדל:** משתנה מתינוק לבוגר לפי ימי הטיפול, לא לפי זמן מסך, ומקבל מדבקה כשהוא גדל.
 - **סוף טבעי:** כשהזמן שההורה בחר נגמר, החבר מתעייף. מצחצחים שיניים, מכבים את האור, ובסוף מופיע מסך ״לילה טוב״ עם מה שגילינו, שאלות להורים ורעיון לפעילות בלי מסך.
 - **שלוש שפות:** עברית, רוסית ואנגלית, עם דקדוק נכון לבן או לבת.
 
@@ -26,7 +29,7 @@
 
 ## העובדות
 
-נבדקו מול [Natural History Museum](https://www.nhm.ac.uk/discover/dino-directory.html), [Australian Museum](https://australian.museum/learn/dinosaurs/fact-sheets/tyrannosaurus-rex/), [National Dinosaur Museum](https://nationaldinosaurmuseum.com.au/blog/triceratops-the-amazing-three-horned-dinosaur/), [Live Science](https://www.livescience.com/24184-stegosaurus-facts.html), [National Geographic Kids](https://kids.nationalgeographic.com/animals/african-elephant/), [גן החיות בברלין](https://www.zoo-berlin.de/en/explore-the-zoo/lion), [SEA LIFE](https://www.visitsealife.com/sydney/information/news/fun-facts-about-penguins/) ו־[RSPB](https://www.rspb.org.uk/whats-happening/news/birds-theyre-small-flying-dinosaurs).
+נבדקו מול [Natural History Museum](https://www.nhm.ac.uk/discover/dino-directory.html), [Australian Museum](https://australian.museum/learn/dinosaurs/fact-sheets/tyrannosaurus-rex/), [National Dinosaur Museum](https://nationaldinosaurmuseum.com.au/blog/triceratops-the-amazing-three-horned-dinosaur/), [Live Science](https://www.livescience.com/24184-stegosaurus-facts.html), [National Geographic Kids](https://kids.nationalgeographic.com/animals/african-elephant/), [גן החיות בברלין](https://www.zoo-berlin.de/en/explore-the-zoo/lion), [SEA LIFE](https://www.visitsealife.com/sydney/information/news/fun-facts-about-penguins/), [RSPB](https://www.rspb.org.uk/whats-happening/news/birds-theyre-small-flying-dinosaurs), [National Geographic Kids על אנקילוזאורוס](https://kids.nationalgeographic.com/animals/prehistoric/facts/ankylosaurus) ו[על קנגורו](https://kids.nationalgeographic.com/animals/mammals/kangaroo/), [Natural History Museum על אנקילוזאורוס](https://www.nhm.ac.uk/discover/dino-directory/ankylosaurus.html), [Tourism Australia](https://www.australia.com/en/things-to-do/wildlife/kangaroo-interesting-facts.html) ו־[Science News](https://www.sciencenews.org/blog/wild-things/red-kangaroo%E2%80%99s-tail-acts-fifth-leg).
 
 ## פרטיות
 

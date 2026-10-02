@@ -71,6 +71,7 @@ ${ROOM}
 
 <div class="bubble" id="bubble" role="status" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="reveal" id="reveal" hidden></div>
 
 <!-- start -->
 <div class="screen sky" id="start">
@@ -121,7 +122,7 @@ ${ROOM}
 </div>
 
 <div class="sheet" id="wardrobe" hidden dir="rtl">
-  <div class="sheet-row"><strong style="font:700 22px/1 var(--font-display)">הארון</strong>
+  <div class="sheet-row"><strong id="sheet-title" style="font:700 22px/1 var(--font-display)">הארון</strong>
     <button class="soft-btn" type="button" id="wardrobe-close" aria-label="סגירה"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 14 L34 34 M34 14 L14 34" stroke="#1b2430" stroke-width="6" stroke-linecap="round"/></svg></button></div>
   <div class="outfits" id="outfits"></div>
 </div>
@@ -196,6 +197,7 @@ ${ROOM}
       <label class="check" for="opt-mic"><input type="checkbox" id="opt-mic" checked><span>״חזור אחריי״ במיקרופון<small>החבר חוזר על מה שהילד אומר בקול מצחיק. ההקלטה נשארת רק בזיכרון של המכשיר לכמה שניות ונמחקת. שום דבר לא נשמר ולא נשלח.</small></span></label>
       <label class="check" for="opt-count"><input type="checkbox" id="opt-count" checked><span>אתגרי ספירה במטבח<small>״תאכיל אותי 3 פעמים!״ והחבר סופר יחד</small></span></label>
       <label class="check" for="opt-needs"><input type="checkbox" id="opt-needs" checked><span>הצרכים יורדים לאט<small>רעב, ניקיון, אנרגיה וכיף. יורדים רק בזמן המשחק, אף פעם לא כשהמשחק סגור</small></span></label>
+      <label class="check" for="opt-music"><input type="checkbox" id="opt-music" checked><span>מוזיקת רקע<small>מנגינה שקטה לכל חדר, שמתרככת כשהחבר מדבר ונעצרת כשהוא ישן</small></span></label>
       <label class="check" for="opt-three"><input type="checkbox" id="opt-three" checked><span>גרפיקה תלת־ממדית<small>החבר והחדרים בתלת־ממד. במכשיר ישן או איטי אפשר לכבות, והמשחק עובר לציור שטוח וקל יותר</small></span></label>
     </div>
 

@@ -1,4 +1,4 @@
-/* The seven friends, built from soft rounded shapes. Each builder returns a rig: groups the animator moves (body, head,
+/* The nine friends, built from soft rounded shapes. Each builder returns a rig: groups the animator moves (body, head,
    tail, ears, trunk, flippers, arms), the eyes and mouth, and anchor points (mouth, top of head, hat mount).
    Units: the floor is y = 0, the friend faces +z (toward the camera). */
 import * as THREE from 'three';
@@ -35,7 +35,15 @@ function base(sp){
   const jump = group(root);
   const body = group(jump);
   const torso = group(body);
-  return { sp, root, jump, body, torso, eyes: [], parts: [], extra: {} };
+  return { sp, root, jump, body, torso, eyes: [], parts: [], extra: {}, legs: [] };
+}
+/* A leg that can swing: a group at the hip, with the leg's shapes placed relative to it. `side` is -1 (left) or 1,
+   `front` 1 for front legs (and for the two legs of a T. rex), 0 for back legs. Returns the group and a helper that
+   turns body coordinates into hip coordinates. */
+function leg(r, hip, side, front){
+  const g = group(r.body, hip);
+  r.legs.push({ g, side, front, hip: hip.clone() });
+  return [g, p => p.clone().sub(hip)];
 }
 
 /* ---------------- T. rex ---------------- */
@@ -53,12 +61,13 @@ function trex(){
   }
   spots(t, torso, [[V(-0.85, 0.35, 0.3), 1], [V(0.9, 0.15, 0.25), 0.8], [V(0.7, 0.55, -0.35), 1.1], [V(-0.6, 0.65, -0.4), 0.9]], 0.07, D);
   for (const sx of [-1, 1]){
-    blob(r.body, V(sx * 0.3, 0.38, 0.02), V(0.21, 0.24, 0.23), S, { part: 'legs' });
-    tube(r.body, [V(sx * 0.3, 0.32, 0.05), V(sx * 0.31, 0.08, 0.09)], [0.15, 0.135], S, { part: 'legs' });
-    blob(r.body, V(sx * 0.31, 0.06, 0.15), V(0.17, 0.08, 0.22), S, { part: 'legs' });
+    const [L, o] = leg(r, V(sx * 0.3, 0.42, 0.03), sx, 1);
+    blob(L, o(V(sx * 0.3, 0.38, 0.02)), V(0.21, 0.24, 0.23), S, { part: 'legs' });
+    tube(L, [o(V(sx * 0.3, 0.32, 0.05)), o(V(sx * 0.31, 0.08, 0.09))], [0.15, 0.135], S, { part: 'legs' });
+    blob(L, o(V(sx * 0.31, 0.06, 0.15)), V(0.17, 0.08, 0.22), S, { part: 'legs' });
     for (const k of [-1, 0, 1]){
-      const c = horn(r.body, 0.07, 0.035, glossy(C.claw, { roughness: 0.3 }), { radial: 12 });
-      c.position.set(sx * 0.31 + k * 0.075, 0.05, 0.33); c.rotation.x = Math.PI / 2 - 0.3;
+      const c = horn(L, 0.07, 0.035, glossy(C.claw, { roughness: 0.3 }), { radial: 12 });
+      c.position.copy(o(V(sx * 0.31 + k * 0.075, 0.05, 0.33))); c.rotation.x = Math.PI / 2 - 0.3;
     }
     // tiny arms
     const arm = group(t, V(sx * 0.35, 0.86, 0.24));
@@ -136,11 +145,17 @@ function trike(){
   const torso = blob(t, V(0.08, 0.6, -0.36), V(0.62, 0.47, 0.68), S, { part: 'back' });
   spots(t, torso, [[V(0.7, 0.6, -0.2), 1.1], [V(0.95, 0.2, -0.3), 0.8], [V(-0.6, 0.65, -0.5), 0.9], [V(0.3, 0.9, -0.6), 1]], 0.075, D);
   for (const sx of [-1, 1]){
-    tube(r.body, [V(sx * 0.24, 0.56, 0.0), V(sx * 0.31, 0.08, 0.15)], [0.165, 0.145], S, { part: 'legs' });
-    blob(r.body, V(sx * 0.31, 0.06, 0.2), V(0.17, 0.075, 0.19), S, { part: 'legs' });
-    nails(r.body, sx * 0.31, 0.05, 0.37, 0.16);
-    tube(r.body, [V(sx * 0.3, 0.54, -0.74), V(sx * 0.37, 0.08, -0.74)], [0.16, 0.14], S, { part: 'legs' });
-    blob(r.body, V(sx * 0.37, 0.06, -0.69), V(0.16, 0.07, 0.18), S, { part: 'legs' });
+    {
+      const [L, o] = leg(r, V(sx * 0.24, 0.56, 0.0), sx, 1);
+      tube(L, [o(V(sx * 0.24, 0.56, 0.0)), o(V(sx * 0.31, 0.08, 0.15))], [0.165, 0.145], S, { part: 'legs' });
+      blob(L, o(V(sx * 0.31, 0.06, 0.2)), V(0.17, 0.075, 0.19), S, { part: 'legs' });
+      const n = o(V(sx * 0.31, 0.05, 0.37)); nails(L, n.x, n.y, n.z, 0.16);
+    }
+    {
+      const [L, o] = leg(r, V(sx * 0.3, 0.54, -0.74), sx, 0);
+      tube(L, [o(V(sx * 0.3, 0.54, -0.74)), o(V(sx * 0.37, 0.08, -0.74))], [0.16, 0.14], S, { part: 'legs' });
+      blob(L, o(V(sx * 0.37, 0.06, -0.69)), V(0.16, 0.07, 0.18), S, { part: 'legs' });
+    }
   }
   const tail = group(r.body, V(0.5, 0.58, -0.82));
   tube(tail, [V(0, 0, 0), V(0.22, -0.12, -0.16), V(0.46, -0.3, -0.12), V(0.62, -0.38, 0.04)], [0.2, 0.13, 0.07, 0.03], S, { part: 'tail' });
@@ -215,9 +230,10 @@ function stego(){
     }
   }
   for (const [sx, z] of [[-1, 0.1], [1, 0.1], [-1, -0.82], [1, -0.82]]){
-    tube(r.body, [V(sx * 0.2, 0.54, z - 0.04), V(sx * 0.26, 0.08, z + 0.02)], [0.14, 0.125], S, { part: 'legs' });
-    blob(r.body, V(sx * 0.26, 0.06, z + 0.06), V(0.15, 0.07, 0.17), S, { part: 'legs' });
-    nails(r.body, sx * 0.26, 0.05, z + 0.2, 0.14);
+    const [L, o] = leg(r, V(sx * 0.2, 0.54, z - 0.04), sx, z > 0 ? 1 : 0);
+    tube(L, [o(V(sx * 0.2, 0.54, z - 0.04)), o(V(sx * 0.26, 0.08, z + 0.02))], [0.14, 0.125], S, { part: 'legs' });
+    blob(L, o(V(sx * 0.26, 0.06, z + 0.06)), V(0.15, 0.07, 0.17), S, { part: 'legs' });
+    const n = o(V(sx * 0.26, 0.05, z + 0.2)); nails(L, n.x, n.y, n.z, 0.14);
   }
   const tail = group(r.body, V(0, 0.6, -1.08));
   const tl = tube(tail, [V(0, 0, 0), V(0, 0.04, -0.34), V(0, 0.16, -0.64), V(0, 0.3, -0.86)], [0.24, 0.15, 0.08, 0.04], S, { part: 'tail' });
@@ -258,9 +274,10 @@ function brachio(){
   spots(t, torso, [[V(0.9, 0.5, 0), 1.1], [V(0.85, 0.4, -0.6), 0.8], [V(-0.85, 0.5, -0.3), 1], [V(0.3, 1, -0.4), 0.9]], 0.08, Sp);
   // legs start inside the body, so no knob shows where they join
   for (const [sx, z, top] of [[-1, 0.0, 0.66], [1, 0.0, 0.66], [-1, -0.84, 0.6], [1, -0.84, 0.6]]){
-    tube(r.body, [V(sx * 0.2, top, z), V(sx * 0.25, 0.08, z + 0.04)], [0.15, 0.135], S, { part: 'legs' });
-    blob(r.body, V(sx * 0.25, 0.06, z + 0.08), V(0.16, 0.07, 0.18), S, { part: 'legs' });
-    nails(r.body, sx * 0.25, 0.05, z + 0.23, 0.14);
+    const [L, o] = leg(r, V(sx * 0.2, top, z), sx, z > -0.4 ? 1 : 0);
+    tube(L, [o(V(sx * 0.2, top, z)), o(V(sx * 0.25, 0.08, z + 0.04))], [0.15, 0.135], S, { part: 'legs' });
+    blob(L, o(V(sx * 0.25, 0.06, z + 0.08)), V(0.16, 0.07, 0.18), S, { part: 'legs' });
+    const n = o(V(sx * 0.25, 0.05, z + 0.23)); nails(L, n.x, n.y, n.z, 0.14);
   }
   const tail = group(r.body, V(0, 0.68, -1.1));
   tube(tail, [V(0, 0, 0), V(0.04, -0.1, -0.34), V(0.14, -0.3, -0.62), V(0.3, -0.46, -0.78)], [0.22, 0.14, 0.07, 0.035], S, { part: 'tail' });
@@ -297,8 +314,9 @@ function elephant(){
   const t = r.torso;
   blob(t, V(0, 0.68, -0.24), V(0.56, 0.52, 0.6), S, { part: 'belly' });
   for (const [sx, z] of [[-1, 0.08], [1, 0.08], [-1, -0.56], [1, -0.56]]){
-    tube(r.body, [V(sx * 0.27, 0.5, z), V(sx * 0.28, 0.07, z + 0.02)], [0.175, 0.165], S, { part: 'legs' });
-    nails(r.body, sx * 0.28, 0.05, z + 0.19, 0.18);
+    const [L, o] = leg(r, V(sx * 0.27, 0.5, z), sx, z > 0 ? 1 : 0);
+    tube(L, [o(V(sx * 0.27, 0.5, z)), o(V(sx * 0.28, 0.07, z + 0.02))], [0.175, 0.165], S, { part: 'legs' });
+    const n = o(V(sx * 0.28, 0.05, z + 0.19)); nails(L, n.x, n.y, n.z, 0.18);
   }
   const tail = group(r.body, V(0.1, 0.8, -0.8));
   tube(tail, [V(0, 0, 0), V(0.08, -0.15, -0.06), V(0.14, -0.36, -0.06)], [0.03, 0.026, 0.024], S, { part: 'tail', radial: 12 });
@@ -356,9 +374,10 @@ function lion(){
   blob(t, V(0, 0.56, 0.14), V(0.3, 0.38, 0.28), W, { part: 'belly' });
   for (const sx of [-1, 1]){
     blob(r.body, V(sx * 0.36, 0.26, -0.1), V(0.22, 0.22, 0.3), S, { part: 'legs' });
-    tube(r.body, [V(sx * 0.18, 0.52, 0.18), V(sx * 0.19, 0.1, 0.25)], [0.125, 0.11], S, { part: 'paws' });
-    blob(r.body, V(sx * 0.19, 0.065, 0.31), V(0.14, 0.075, 0.17), S, { part: 'paws' });
-    for (const k of [-1, 0, 1]) blob(r.body, V(sx * 0.19 + k * 0.055, 0.06, 0.465), V(0.03, 0.03, 0.02), skin('#e3a032'), { seg: 12, shadow: false });
+    const [L, o] = leg(r, V(sx * 0.18, 0.52, 0.18), sx, 1);
+    tube(L, [o(V(sx * 0.18, 0.52, 0.18)), o(V(sx * 0.19, 0.1, 0.25))], [0.125, 0.11], S, { part: 'paws' });
+    blob(L, o(V(sx * 0.19, 0.065, 0.31)), V(0.14, 0.075, 0.17), S, { part: 'paws' });
+    for (const k of [-1, 0, 1]) blob(L, o(V(sx * 0.19 + k * 0.055, 0.06, 0.465)), V(0.03, 0.03, 0.02), skin('#e3a032'), { seg: 12, shadow: false });
   }
   const tail = group(r.body, V(0.3, 0.16, -0.38));
   const tl = tube(tail, [V(0, 0, 0), V(0.38, 0.02, 0.22), V(0.5, 0.26, 0.42), V(0.46, 0.5, 0.5)], [0.055, 0.05, 0.045, 0.04], S, { part: 'tail', radial: 14 });
@@ -398,6 +417,7 @@ function lion(){
   const top = skull.surf(V(0, 1, 0));
   r.hat = hatAnchor(head, top.p.clone().add(V(0, 0.08, 0)), top.n); r.hatScale = 1.05;
   r.headTop = r.hat; r.mouthAnchor = r.mouth.g;
+  r.gait = 'scoot';
   return r;
 }
 
@@ -421,7 +441,8 @@ function penguin(){
     const f = blob(fl, V(sx * 0.07, -0.3, 0), V(0.09, 0.36, 0.2), S, { part: 'flippers' });
     f.rotation.z = sx * 0.28;
     r.extra[sx < 0 ? 'finL' : 'finR'] = fl;
-    blob(r.body, V(sx * 0.18, 0.04, 0.24), V(0.16, 0.05, 0.2), glossy(C.feet, { roughness: 0.4 }), { part: 'feet' });
+    const [L, o] = leg(r, V(sx * 0.18, 0.1, 0.16), sx, 1);
+    blob(L, o(V(sx * 0.18, 0.04, 0.24)), V(0.16, 0.05, 0.2), glossy(C.feet, { roughness: 0.4 }), { part: 'feet' });
     const s = belly.surf(V(sx * 0.42, 0.78, 0.8));
     r.eyes.push(makeEye(head, s.p, s.n, 0.125, '#33466e', W, { sink: 0.38 }));
   }
@@ -439,11 +460,143 @@ function penguin(){
   cheeks(head, belly, [V(-0.66, 0.5, 0.6), V(0.66, 0.5, 0.6)], 0.17);
   r.hat = hatAnchor(head, V(0, 1.24, 0), V(0, 1, 0)); r.hatScale = 1.0;
   r.headTop = r.hat; r.mouthAnchor = beak;
+  r.gait = 'waddle';
   return r;
 }
 
-export const BUILDERS = { trex, trike, stego, brachio, elephant, lion, penguin };
-export const SPECIES_ORDER = ['trex', 'trike', 'stego', 'brachio', 'elephant', 'lion', 'penguin'];
+/* ---------------- Ankylosaurus (turned, so the armor and the tail club show) ---------------- */
+function anky(){
+  const r = base('anky');
+  const C = { body: '#5b8def', belly: '#dfe9ff', armor: '#ffcf6b', armor2: '#f2b347', spot: '#4373cf', beak: '#3d5fa8' };
+  const S = skin(C.body), L = skin(C.belly, { sheen: 0.3 }), A = skin(C.armor, { roughness: 0.5 }), A2 = skin(C.armor2, { roughness: 0.5 });
+  const t = r.torso;
+  // a wide, low, rounded body, like a tortoise shell
+  const torso = blob(t, V(0, 0.54, -0.34), V(0.62, 0.4, 0.78), S, { part: 'armor' });
+  blob(t, V(0, 0.4, -0.3), V(0.5, 0.26, 0.64), L, { part: 'belly' });
+  // rows of rounded armor bumps across the back, bigger along the middle
+  for (let row = 0; row < 5; row++){
+    const zz = 0.75 - row * 0.36;
+    for (const [xx, yy] of [[-1, 0.55], [-0.62, 1], [-0.25, 1], [0.25, 1], [0.62, 1], [1, 0.55]]){
+      if (Math.abs(xx) > 0.9 && (row === 0 || row === 4)) continue;
+      const s = torso.surf(V(xx, yy, zz + (Math.abs(xx) > 0.9 ? 0.18 : 0)));
+      const k = 0.08 - Math.abs(xx) * 0.02;
+      const b = blob(t, s.p, V(k * 1.15, k * 1.15, k * 0.55), (row + Math.round(xx * 3)) % 2 ? A : A2, { seg: 24, part: 'armor' });
+      orient(b, s.n);
+      const c = horn(t, k * 0.9, k * 0.75, (row + Math.round(xx * 3)) % 2 ? A : A2, { radial: 14, part: 'armor' });
+      c.position.copy(s.p).addScaledVector(s.n, k * 0.25);
+      c.quaternion.setFromUnitVectors(V(0, 1, 0), s.n);
+    }
+  }
+  // short spikes along both sides
+  for (const sx of [-1, 1]) for (let i = 0; i < 5; i++){
+    const s = torso.surf(V(sx, 0.08, 0.62 - i * 0.32));
+    const h = horn(t, 0.15 - Math.abs(i - 2) * 0.02, 0.055, A2, { radial: 14, part: 'armor' });
+    h.position.copy(s.p).addScaledVector(s.n, -0.02);
+    h.quaternion.setFromUnitVectors(V(0, 1, 0), s.n.clone().add(V(0, 0.25, 0)).normalize());
+  }
+  // four short, sturdy legs
+  for (const [sx, z] of [[-1, 0.12], [1, 0.12], [-1, -0.8], [1, -0.8]]){
+    const [Lg, o] = leg(r, V(sx * 0.34, 0.4, z), sx, z > 0 ? 1 : 0);
+    tube(Lg, [o(V(sx * 0.34, 0.4, z)), o(V(sx * 0.38, 0.08, z + 0.02))], [0.15, 0.14], S, { part: 'legs' });
+    blob(Lg, o(V(sx * 0.38, 0.06, z + 0.06)), V(0.16, 0.07, 0.17), S, { part: 'legs' });
+    const n = o(V(sx * 0.38, 0.05, z + 0.21)); nails(Lg, n.x, n.y, n.z, 0.14);
+  }
+  // the tail, with a heavy bony club at the end
+  const tail = group(r.body, V(0, 0.48, -1.04));
+  const tl = tube(tail, [V(0, 0, 0), V(0.02, -0.04, -0.3), V(0.08, -0.12, -0.6), V(0.14, -0.2, -0.82)], [0.2, 0.13, 0.08, 0.06], S, { part: 'tail' });
+  const end = tl.curve.getPointAt(1);
+  blob(tail, end.clone().add(V(0.02, 0, -0.08)), V(0.15, 0.1, 0.13), A2, { part: 'club' });
+  for (const sx of [-1, 1]) blob(tail, end.clone().add(V(sx * 0.11 + 0.02, 0, -0.06)), V(0.1, 0.085, 0.11), A, { part: 'club' });
+  r.tail = tail;
+  // a short neck and a wide, low head with a little beak and two small horns at the back
+  blob(r.body, V(0, 0.52, 0.36), V(0.3, 0.27, 0.3), S, { part: 'head' });
+  const head = group(r.body, V(0, 0.56, 0.5));
+  r.head = head;
+  const skull = blob(head, V(0, 0.07, 0.14), V(0.35, 0.27, 0.32), S, { part: 'head' });
+  const snout = blob(head, V(0, 0.0, 0.34), V(0.21, 0.15, 0.14), skin('#79a3f4'), { part: 'face' });
+  spots(head, skull, [[V(-0.5, 1, -0.3), 0.8], [V(0.5, 1, -0.3), 0.8], [V(0, 1, -0.5), 0.6]], 0.05, A);
+  for (const sx of [-1, 1]){
+    const hb = skull.surf(V(sx * 0.9, 0.35, -0.5));
+    const h = horn(head, 0.13, 0.05, A2, { radial: 14, part: 'head' });
+    h.position.copy(hb.p).addScaledVector(hb.n, -0.02);
+    h.quaternion.setFromUnitVectors(V(0, 1, 0), V(sx * 0.8, 0.25, -0.55).normalize());
+    const s = skull.surf(V(sx * 0.58, 0.5, 0.68));
+    r.eyes.push(makeEye(head, s.p, s.n, 0.112, '#3a5aa8', S, { sink: 0.36 }));
+    const n = snout.surf(V(sx * 0.5, 0.6, 0.8));
+    blob(head, n.p, V(0.018, 0.014, 0.014), glossy('#23366a'), { seg: 12, shadow: false });
+  }
+  const ms = snout.surf(V(0, -0.32, 1));
+  r.mouth = makeMouth(head, ms.p, ms.n, 0.21, { R: 0.22, arc: 0.62 });
+  cheeks(head, skull, [V(-0.8, -0.1, 0.6), V(0.8, -0.1, 0.6)], 0.13);
+  const top = skull.surf(V(0, 1, 0.05));
+  r.hat = hatAnchor(head, top.p, top.n); r.hatScale = 0.78;
+  r.headTop = r.hat; r.mouthAnchor = r.mouth.g;
+  r.turn = -0.6; r.headYaw = 0.5;
+  return r;
+}
+
+/* ---------------- Kangaroo (standing on big back feet, leaning on its tail) ---------------- */
+function kangaroo(){
+  const r = base('kangaroo');
+  const C = { body: '#d98a52', belly: '#f8dcc0', dark: '#b86a3a', ear: '#ffb3a7', nose: '#5a3426' };
+  const S = skin(C.body, { sheen: 0.5 }), L = skin(C.belly, { sheen: 0.4 }), D = skin(C.dark, { sheen: 0.5 });
+  const t = r.torso;
+  // a pear-shaped body: wide hips, a narrower chest
+  blob(t, V(0, 0.6, -0.06), V(0.37, 0.42, 0.34), S, { part: 'belly' });
+  blob(t, V(0, 0.96, 0.0), V(0.27, 0.32, 0.25), S, { part: 'belly' });
+  blob(t, V(0, 0.74, 0.1), V(0.25, 0.4, 0.25), L, { part: 'belly' });
+  // the big back legs: a strong thigh, and a long foot flat on the ground
+  for (const sx of [-1, 1]){
+    const [Lg, o] = leg(r, V(sx * 0.24, 0.44, -0.08), sx, 1);
+    blob(Lg, o(V(sx * 0.27, 0.38, -0.02)), V(0.19, 0.27, 0.27), S, { part: 'legs' });
+    tube(Lg, [o(V(sx * 0.29, 0.3, -0.14)), o(V(sx * 0.3, 0.1, -0.16))], [0.1, 0.075], S, { part: 'legs' });
+    blob(Lg, o(V(sx * 0.29, 0.06, 0.08)), V(0.12, 0.07, 0.3), D, { part: 'feet' });
+    const n = o(V(sx * 0.29, 0.045, 0.37)); nails(Lg, n.x, n.y, n.z, 0.08, 2);
+  }
+  // little arms, held in front
+  for (const sx of [-1, 1]){
+    const arm = group(t, V(sx * 0.21, 1.0, 0.16));
+    tube(arm, [V(0, 0, 0), V(sx * 0.04, -0.12, 0.08), V(sx * 0.03, -0.22, 0.12)], [0.065, 0.052, 0.045], S, { part: 'arms' });
+    blob(arm, V(sx * 0.03, -0.26, 0.13), V(0.052, 0.05, 0.05), D, { part: 'arms' });
+    r.extra[sx < 0 ? 'armL' : 'armR'] = arm;
+  }
+  // the long, strong tail rests on the ground behind, like a fifth leg
+  const tail = group(r.body, V(0, 0.34, -0.3));
+  tube(tail, [V(0, 0, 0), V(0.06, -0.17, -0.26), V(0.2, -0.26, -0.56), V(0.42, -0.28, -0.8)], [0.19, 0.15, 0.1, 0.045], S, { part: 'tail' });
+  r.tail = tail;
+  // neck and head: a long soft snout, big tall ears
+  blob(r.body, V(0, 1.2, 0.02), V(0.15, 0.15, 0.14), S, { part: 'head' });
+  const head = group(r.body, V(0, 1.3, 0.04));
+  r.head = head;
+  const skull = blob(head, V(0, 0.13, 0.0), V(0.28, 0.255, 0.25), S, { part: 'head' });
+  const snout = blob(head, V(0, 0.03, 0.2), V(0.15, 0.125, 0.2), S, { part: 'face' });
+  const muzzle = blob(head, V(0, -0.005, 0.25), V(0.115, 0.085, 0.16), L, { part: 'face', shadow: false });
+  const nt = snout.surf(V(0, 0.45, 1));
+  const nose = blob(head, nt.p.clone().add(V(0, 0, -0.015)), V(0.055, 0.04, 0.035), glossy(C.nose, { roughness: 0.3 }), { seg: 24 });
+  void nose;
+  for (const sx of [-1, 1]){
+    const ear = group(head, V(sx * 0.13, 0.27, -0.04));
+    const e = blob(ear, V(sx * 0.03, 0.17, 0), V(0.075, 0.2, 0.045), S, { part: 'ears' });
+    e.rotation.z = -sx * 0.22;
+    const ei = blob(ear, V(sx * 0.03, 0.17, 0.03), V(0.045, 0.15, 0.02), skin(C.ear), { seg: 24, shadow: false });
+    ei.rotation.z = -sx * 0.22;
+    r.extra[sx < 0 ? 'earL' : 'earR'] = ear;
+    const s = skull.surf(V(sx * 0.55, 0.42, 0.72));
+    r.eyes.push(makeEye(head, s.p, s.n, 0.1, '#6b3d1e', S, { sink: 0.36 }));
+  }
+  const ms = muzzle.surf(V(0, -0.35, 0.95));
+  r.mouth = makeMouth(head, ms.p, ms.n, 0.13, { R: 0.16, arc: 0.7 });
+  cheeks(head, skull, [V(-0.78, -0.2, 0.6), V(0.78, -0.2, 0.6)], 0.11);
+  const top = skull.surf(V(0, 1, -0.1));
+  r.hat = hatAnchor(head, top.p, top.n); r.hatScale = 0.82;
+  r.headTop = r.hat; r.mouthAnchor = r.mouth.g;
+  r.turn = -0.6; r.headYaw = 0.42;
+  r.gait = 'hop';
+  return r;
+}
+
+export const BUILDERS = { trex, trike, stego, brachio, anky, elephant, lion, penguin, kangaroo };
+export const SPECIES_ORDER = ['trex', 'trike', 'stego', 'brachio', 'anky', 'elephant', 'lion', 'penguin', 'kangaroo'];
 
 /* Builds a friend at a growth stage: babies are smaller with a bigger head, as real babies are. */
 export function buildFriend(sp, stage = 2){

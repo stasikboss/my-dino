@@ -165,6 +165,31 @@ const B = {
     const st = slab(g, star(0.08, 0.035), 0.015, glossy('#ffd35c'), { bevel: 0.006, bevelSize: 0.006 }); st.position.set(0, -0.36, 0.08);
     return g;
   },
+  paint(){
+    const g = new THREE.Group();
+    mesh(g, new THREE.CylinderGeometry(0.16, 0.16, 0.56, 32), skin('#ff9ec4', { roughness: 0.8, sheen: 0.8 }), V(0, 0.18, 0), { z: Math.PI / 2 });
+    for (const sx of [-1, 1]) mesh(g, new THREE.CylinderGeometry(0.05, 0.05, 0.04, 20), glossy('#cfd8e2', { metalness: 0.7, roughness: 0.3 }), V(sx * 0.3, 0.18, 0), { z: Math.PI / 2 });
+    tube(g, [V(0.3, 0.18, 0), V(0.38, 0.18, 0), V(0.38, -0.02, 0), V(0, -0.08, 0), V(0, -0.2, 0)], [0.025, 0.025, 0.025, 0.025, 0.025], glossy('#cfd8e2', { metalness: 0.7, roughness: 0.3 }), { tubular: 24, radial: 10 });
+    mesh(g, new THREE.CylinderGeometry(0.055, 0.06, 0.34, 20), glossy('#4fb8ff', { roughness: 0.35 }), V(0, -0.36, 0));
+    for (const [x, c] of [[-0.12, '#7cc85a'], [0.02, '#ffd23a'], [0.15, '#4fb8ff']]) blob(g, V(x, 0.36, 0.06), V(0.05, 0.03, 0.05), glossy(c), { seg: 16 });
+    g.userData.dir = V(0.3, 0.35, 1);
+    return g;
+  },
+  gift(){
+    const g = new THREE.Group();
+    const pink = skin('#ff7aa8', { roughness: 0.45, clearcoat: 0.4 }), lid = skin('#ff9ec4', { roughness: 0.45, clearcoat: 0.4 }), gold = glossy('#ffd23a', { roughness: 0.3 });
+    mesh(g, rb(0.62, 0.46, 0.62, 0.06), pink, V(0, -0.1, 0));
+    mesh(g, rb(0.7, 0.14, 0.7, 0.05), lid, V(0, 0.18, 0));
+    mesh(g, rb(0.12, 0.6, 0.64, 0.03), gold, V(0, -0.03, 0));
+    mesh(g, rb(0.64, 0.6, 0.12, 0.03), gold, V(0, -0.03, 0));
+    for (const sx of [-1, 1]){
+      const loop = mesh(g, new THREE.TorusGeometry(0.11, 0.04, 12, 28), gold, V(sx * 0.11, 0.33, 0), { z: sx * 0.5, y: 0.2 });
+      loop.scale.set(1, 0.75, 0.6);
+    }
+    blob(g, V(0, 0.29, 0), V(0.06, 0.05, 0.06), gold, { seg: 20 });
+    g.userData.dir = V(0.35, 0.45, 1);
+    return g;
+  },
   ball(){
     const g = new THREE.Group();
     mesh(g, new THREE.SphereGeometry(0.4, 48, 32), new THREE.MeshPhysicalMaterial({ map: T.stripes('#4fb8ff', '#ffffff', 6, true), roughness: 0.3, clearcoat: 0.8 }), V(0, 0, 0), { z: 0.5, x: 0.3 });
