@@ -190,6 +190,16 @@ const B = {
     g.userData.dir = V(0.35, 0.45, 1);
     return g;
   },
+  // the breathing button: a flower to smell
+  calm(){
+    const g = new THREE.Group();
+    tube(g, [V(0, -0.52, 0), V(0.04, -0.22, 0), V(0, 0.08, 0)], [0.035, 0.03, 0.03], skin('#5fa846'));
+    blob(g, V(0.13, -0.3, 0.02), V(0.13, 0.045, 0.07), skin('#7cc85a'), { rot: { z: 0.55 } });
+    for (let i = 0; i < 6; i++){ const a = i / 6 * Math.PI * 2; blob(g, V(Math.cos(a) * 0.17, 0.2 + Math.sin(a) * 0.17, 0), V(0.115, 0.115, 0.05), skin('#ff9ec4', { roughness: 0.45 })); }
+    blob(g, V(0, 0.2, 0.035), V(0.095, 0.095, 0.06), skin('#ffd35c', { roughness: 0.4 }));
+    g.userData.dir = V(0.1, 0.25, 1);
+    return g;
+  },
   ball(){
     const g = new THREE.Group();
     mesh(g, new THREE.SphereGeometry(0.4, 48, 32), new THREE.MeshPhysicalMaterial({ map: T.stripes('#4fb8ff', '#ffffff', 6, true), roughness: 0.3, clearcoat: 0.8 }), V(0, 0, 0), { z: 0.5, x: 0.3 });

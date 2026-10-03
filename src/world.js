@@ -75,8 +75,11 @@ const World = {
     } catch (e) {}
     return true;
   },
+  liveTop: 0,
   layout(smooth){
     if (!this.on) return;
+    // a game played with the friend itself: the screen has only the card that shows what to do, and the friend stands below it
+    if (document.body.classList.contains('in-live')){ this.E.setSafe(Math.max(80, this.liveTop + 10), Math.max(24, innerHeight * 0.03), smooth); return; }
     const hud = $('hud').getBoundingClientRect(), tray = trayEl.getBoundingClientRect(), nav = navEl.getBoundingClientRect();
     const top = (hud.height ? hud.bottom : 70) + 10;
     let bottomEdge = tray.height ? tray.top : nav.height ? nav.top : innerHeight - 160;
@@ -87,7 +90,8 @@ const World = {
   // draw only while the 3D scene can be seen
   sync(){
     if (!this.on) return;
-    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen) || (!!gameOn && document.body.classList.contains('in-game3d') && !modalOpen);
+    const live = document.body.classList.contains('in-game3d') || document.body.classList.contains('in-live');
+    const seen = !introEl.hidden || (inPlay && !gameOn && chooseEl.hidden && nightEl.hidden && !modalOpen) || (!!gameOn && live && !modalOpen);
     this.E.paused = !seen;
   },
   // hatching: the egg (or the basket) in a soft studio, drawn where the tap area is

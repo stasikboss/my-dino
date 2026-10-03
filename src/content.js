@@ -366,7 +366,89 @@ const LINES = {
   bedBrush: { he: ['קודם מצחצחים שיניים, ואז מכבים את האור.'], ru: ['Сначала чистим зубы, потом выключаем свет.'], en: ['First we brush our teeth, then we turn off the light.'] },
   bedLamp: { he: { m: ['עכשיו תכבה את האור.'], f: ['עכשיו תכבי את האור.'] }, ru: ['Теперь выключи свет.'], en: ['Now turn off the light.'] },
   goodnight: { he: ['לילה טוב, {name}. נתראה מחר!'], ru: ['Спокойной ночи, {name}. Увидимся завтра!'], en: ['Good night, {name}. See you tomorrow!'] },
-  pickFriend: { he: ['{pet}!'], ru: ['{pet}!'], en: ['{petCap}!'] }
+  pickFriend: { he: ['{pet}!'], ru: ['{pet}!'], en: ['{petCap}!'] },
+
+  /* praise for trying (process praise): after a miss and then a find */
+  triedAgain: {
+    he: ['ניסית שוב ומצאת!', 'לא ויתרת, ומצאת!'],
+    ru: { m: ['Ты попробовал ещё раз и нашёл!', 'Ты не сдался и нашёл!'], f: ['Ты попробовала ещё раз и нашла!', 'Ты не сдалась и нашла!'] },
+    en: ['You tried again and found it!', "You didn't give up, and you found it!"]
+  },
+
+  /* moving and freezing */
+  moveHello: { he: { m: ['בוא נזוז ביחד! תעשה כמוני.'], f: ['בואי נזוז ביחד! תעשי כמוני.'] }, ru: ['Давай подвигаемся вместе! Делай как я.'], en: ["Let's move together! Do what I do."] },
+  move_jump: { he: { m: ['קפוץ כמו קנגורו, {times}!'], f: ['קפצי כמו קנגורו, {times}!'] }, ru: ['Прыгай как кенгуру, {times}!'], en: ['Jump like a kangaroo, {times}!'] },
+  move_stomp: { he: { m: ['רקע ברגליים כמו טירנוזאורוס, {times}!'], f: ['רקעי ברגליים כמו טירנוזאורוס, {times}!'] }, ru: ['Топай как тираннозавр, {times}!'], en: ['Stomp like a T. rex, {times}!'] },
+  move_stretch: { he: { m: ['תתמתח גבוה גבוה, כמו ברכיוזאורוס!'], f: ['תתמתחי גבוה גבוה, כמו ברכיוזאורוס!'] }, ru: ['Потянись высоко-высоко, как брахиозавр!'], en: ['Stretch up tall, like a Brachiosaurus!'] },
+  move_waddle: { he: { m: ['לך כמו פינגווין, בצעדים קטנים!'], f: ['לכי כמו פינגווין, בצעדים קטנים!'] }, ru: ['Иди как пингвин, маленькими шажками!'], en: ['Walk like a penguin, with tiny steps!'] },
+  move_swing: { he: { m: ['נפנף ביד כמו חדק של פיל!'], f: ['נפנפי ביד כמו חדק של פיל!'] }, ru: ['Помаши рукой, как слон хоботом!'], en: ["Swing your arm like an elephant's trunk!"] },
+  move_spin: { he: { m: ['הסתובב סיבוב אחד!'], f: ['הסתובבי סיבוב אחד!'] }, ru: ['Повернись вокруг себя!'], en: ['Turn all the way around!'] },
+  moveGood: {
+    he: ['זזת מעולה!', 'עשית בדיוק כמוני!', 'איזה יופי של תנועה!'],
+    ru: { m: ['Ты отлично двигался!', 'Ты сделал точно как я!'], f: ['Ты отлично двигалась!', 'Ты сделала точно как я!'] },
+    en: ['Great moving!', 'You did it just like me!', 'What great moves!']
+  },
+  freezeHello: {
+    he: { m: ['עכשיו רוקדים! כשהמוזיקה נעצרת, קופאים כמו פסל. מוכן?'], f: ['עכשיו רוקדים! כשהמוזיקה נעצרת, קופאים כמו פסל. מוכנה?'] },
+    ru: { m: ['А теперь танцуем! Когда музыка остановится, замри как статуя. Готов?'], f: ['А теперь танцуем! Когда музыка остановится, замри как статуя. Готова?'] },
+    en: ["Now we dance! When the music stops, freeze like a statue. Ready?"]
+  },
+  freeze: { he: ['קופאים!'], ru: ['Замри!'], en: ['Freeze!'] },
+  freezeGo: { he: ['ממשיכים לרקוד!'], ru: ['Танцуем дальше!'], en: ['Keep dancing!'] },
+  freezeGood: {
+    he: ['קפאת כמו פסל אמיתי!', 'איזה פסל! הגוף שלך הקשיב למוזיקה.'],
+    ru: { m: ['Ты замер как настоящая статуя!'], f: ['Ты замерла как настоящая статуя!'] },
+    en: ['You froze like a real statue!', 'What a statue! Your body listened to the music.']
+  },
+  moveDone: { he: ['זזנו וקפאנו יחד. הגוף שלנו חזק!'], ru: ['Мы двигались и замирали вместе. Наше тело сильное!'], en: ['We moved and froze together. Our bodies are strong!'] },
+
+  /* feelings */
+  feelHello: {
+    he: { m: ['בוא נדבר על רגשות! אספר לך מה קרה לי, ואתה תנחש איך אני מרגיש.'], f: ['בואי נדבר על רגשות! אספר לך מה קרה לי, ואת תנחשי איך אני מרגיש.'] },
+    ru: ['Давай поговорим о чувствах! Я расскажу, что со мной случилось, а ты угадай, что я чувствую.'],
+    en: ["Let's talk about feelings! I'll tell you what happened to me, and you guess how I feel."]
+  },
+  feelAsk: { he: ['{story} איך אני מרגיש?'], ru: ['{story} Что я чувствую?'], en: ['{story} How do I feel?'] },
+  feelNo: {
+    he: { m: ['הממ... ואם זה היה קורה לך, איך היית מרגיש?'], f: ['הממ... ואם זה היה קורה לך, איך היית מרגישה?'] },
+    ru: { m: ['Хм... А если бы это случилось с тобой, что бы ты почувствовал?'], f: ['Хм... А если бы это случилось с тобой, что бы ты почувствовала?'] },
+    en: ['Hmm... If it happened to you, how would you feel?']
+  },
+  feelDone: { he: ['כל הרגשות בסדר. טוב לדעת איך קוראים להם!'], ru: ['Все чувства — это нормально. Хорошо знать, как они называются!'], en: ["All feelings are okay. It's good to know their names!"] },
+
+  /* breathing */
+  breatheHello: { he: { m: ['בוא ננשום ביחד, לאט לאט.'], f: ['בואי ננשום ביחד, לאט לאט.'] }, ru: ['Давай подышим вместе, медленно-медленно.'], en: ["Let's breathe together, slowly."] },
+  breatheIn: { he: ['מריחים את הפרח...'], ru: ['Нюхаем цветок...'], en: ['Smell the flower...'] },
+  breatheOut: { he: ['נושפים על הנר...'], ru: ['Задуваем свечку...'], en: ['Blow out the candle...'] },
+  breatheDone: { he: ['איזה רוגע. הגוף שלי מרגיש טוב.'], ru: ['Как спокойно. Моему телу хорошо.'], en: ['So calm. My body feels good.'] },
+
+  /* patterns */
+  patternHello: {
+    he: { m: ['יש פה דפוס, משהו שחוזר שוב ושוב. מה בא אחרי? תסתכל טוב.'], f: ['יש פה דפוס, משהו שחוזר שוב ושוב. מה בא אחרי? תסתכלי טוב.'] },
+    ru: ['Тут узор: что-то повторяется снова и снова. Что будет дальше? Посмотри внимательно.'],
+    en: ["Here's a pattern, something that repeats again and again. What comes next? Look closely."]
+  },
+  patternAsk: { he: ['מה בא אחרי?'], ru: ['Что дальше?'], en: ['What comes next?'] },
+  patternYes: { he: ['נכון! מצאת את הדפוס!', 'בדיוק! ראית מה חוזר!'], ru: { m: ['Верно! Ты нашёл узор!'], f: ['Верно! Ты нашла узор!'] }, en: ['Right! You found the pattern!', 'Exactly! You saw what repeats!'] },
+  patternNo: { he: ['כמעט! מה חוזר שוב ושוב?'], ru: ['Почти! Что повторяется снова и снова?'], en: ['Almost! What repeats again and again?'] },
+
+  /* first sounds */
+  soundHello: {
+    he: { m: ['בוא נשחק בצלילים! תקשיב טוב לתחילת המילה.'], f: ['בואי נשחק בצלילים! תקשיבי טוב לתחילת המילה.'] },
+    ru: ['Давай поиграем со звуками! Слушай начало слова.'],
+    en: ["Let's play with sounds! Listen to how each word starts."]
+  },
+  soundAsk: { he: ['מה מתחיל כמו {word}? {o1}, {o2} או {o3}?'], ru: ['Что начинается так же, как {word}: {o1}, {o2} или {o3}?'], en: ['What starts like {word}: {o1}, {o2}, or {o3}?'] },
+  soundYes: { he: ['כן! {word} ו{match} מתחילים באותו צליל, באות {letter}!'], ru: ['Да! {word} и {match} начинаются одинаково, с буквы {letter}!'], en: ['Yes! {word} and {match} start the same way, with the letter {letter}!'] },
+  soundNo: { he: ['{pickedw}... זה מתחיל אחרת. נקשיב שוב: {word}.'], ru: ['{pickedw}... Это начинается по-другому. Послушай ещё раз: {word}.'], en: ['{pickedw}... That starts differently. Listen again: {word}.'] },
+
+  /* what we do next, said at goodnight */
+  next_dinner: { he: { m: ['אני הולך לישון, ואתה הולך לאכול. בתיאבון!'], f: ['אני הולך לישון, ואת הולכת לאכול. בתיאבון!'] }, ru: ['Я иду спать, а ты — кушать. Приятного аппетита!'], en: ["I'm going to sleep, and you're going to eat. Enjoy your meal!"] },
+  next_bath: { he: { m: ['אני הולך לישון, ואתה הולך להתקלח. שיהיה כיף במים!'], f: ['אני הולך לישון, ואת הולכת להתקלח. שיהיה כיף במים!'] }, ru: ['Я иду спать, а ты — купаться. Весело тебе в воде!'], en: ["I'm going to sleep, and you're going to have a bath. Have fun in the water!"] },
+  next_outside: { he: { m: ['אני הולך לישון, ואתה יוצא לשחק בחוץ. תקפוץ שם כמו קנגורו!'], f: ['אני הולך לישון, ואת יוצאת לשחק בחוץ. תקפצי שם כמו קנגורו!'] }, ru: ['Я иду спать, а ты — гулять на улицу. Попрыгай там как кенгуру!'], en: ["I'm going to sleep, and you're going out to play. Hop like a kangaroo out there!"] },
+  next_story: { he: { m: ['אני הולך לישון, ואתה הולך לקרוא סיפור ביחד. איזה כיף!'], f: ['אני הולך לישון, ואת הולכת לקרוא סיפור ביחד. איזה כיף!'] }, ru: ['Я иду спать, а ты — читать книжку вместе. Как здорово!'], en: ["I'm going to sleep, and you're going to read a story together. How fun!"] },
+  next_toys: { he: { m: ['אני הולך לישון, ואתה הולך לשחק עם הצעצועים שלך. תבנה משהו יפה!'], f: ['אני הולך לישון, ואת הולכת לשחק עם הצעצועים שלך. תבני משהו יפה!'] }, ru: ['Я иду спать, а ты — играть со своими игрушками. Построй что-нибудь красивое!'], en: ["I'm going to sleep, and you're going to play with your toys. Build something lovely!"] },
+  next_sleep: { he: { m: ['גם אני הולך לישון, וגם אתה. חלומות מתוקים!'], f: ['גם אני הולך לישון, וגם את. חלומות מתוקים!'] }, ru: ['Я иду спать, и ты тоже. Сладких снов!'], en: ["I'm going to sleep, and so are you. Sweet dreams!"] }
 };
 const TIMES = {
   he: ['פעם אחת', 'פעמיים', 'שלוש פעמים', 'ארבע פעמים', 'חמש פעמים'],
@@ -379,3 +461,106 @@ const COUNT = {
   en: ['One!', 'Two!', 'Three!', 'Four!', 'Five!', 'Six!', 'Seven!', 'Eight!', 'Nine!', 'Ten!']
 };
 const NUM_WORD = { he: ['אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש'], ru: ['Один', 'Два', 'Три', 'Четыре', 'Пять'], en: ['One', 'Two', 'Three', 'Four', 'Five'] };
+
+/* ---------- feelings: what happened to the friend, how it feels, and what helps ----------
+   Naming feelings from a situation is the emotion knowledge preschool programs build (Preschool PATHS); each answer
+   ends with something that helps (a hug, a slow breath, a hand to hold), the way the Kindness Curriculum does. */
+const FEELINGS = {
+  happy: { he: 'שמח', ru: 'весело', en: 'happy',
+    yes: { he: 'כן! אני שמח!', ru: 'Да! Мне весело!', en: "Yes! I'm happy!" },
+    help: { he: 'כשאני שמח, אני רוצה לשתף. אני מספר לכולם!', ru: 'Когда мне весело, я хочу поделиться. Я всем рассказываю!', en: "When I'm happy, I want to share it. I tell everyone!" } },
+  sad: { he: 'עצוב', ru: 'грустно', en: 'sad',
+    yes: { he: 'כן... אני עצוב.', ru: 'Да... Мне грустно.', en: "Yes... I'm sad." },
+    help: { he: 'כשאני עצוב, חיבוק עוזר לי. אפשר גם לספר למישהו שאוהבים.', ru: 'Когда мне грустно, мне помогают объятия. Можно рассказать тому, кого любишь.', en: "When I'm sad, a hug helps me. I can tell someone I love." } },
+  angry: { he: 'כועס', ru: 'сердито', en: 'angry',
+    yes: { he: 'כן! אני כועס!', ru: 'Да! Я сержусь!', en: "Yes! I'm angry!" },
+    help: { he: 'כשאני כועס, אני נושם לאט, עד שהגוף נרגע. ננשום ביחד?', ru: 'Когда я сержусь, я медленно дышу, пока тело не успокоится. Подышим вместе?', en: "When I'm angry, I breathe slowly until my body calms down. Shall we breathe together?" } },
+  scared: { he: 'מפחד', ru: 'страшно', en: 'scared',
+    yes: { he: 'כן, אני מפחד.', ru: 'Да, мне страшно.', en: "Yes, I'm scared." },
+    help: { he: 'כשאני מפחד, אני מחזיק יד של מישהו שאני אוהב, ומספר לו.', ru: 'Когда мне страшно, я держу за руку того, кого люблю, и рассказываю ему.', en: "When I'm scared, I hold the hand of someone I love, and tell them." } },
+  surprised: { he: 'מופתע', ru: 'удивительно', en: 'surprised',
+    yes: { he: 'כן! אני מופתע!', ru: 'Да! Я удивлён!', en: "Yes! I'm surprised!" },
+    help: { he: 'הפתעות פותחות לי עיניים גדולות! וואו!', ru: 'От сюрпризов у меня большие глаза! Ух ты!', en: 'Surprises make my eyes go big! Wow!' } }
+};
+const FEELING_ORDER = ['happy', 'sad', 'angry', 'scared', 'surprised'];
+const SITUATIONS = [
+  { id: 'gift', feel: 'happy', he: 'קיבלתי מתנה!', ru: 'Мне подарили подарок!', en: 'I got a present!' },
+  { id: 'friend', feel: 'happy', he: 'חבר שלי בא לשחק איתי!', ru: 'Мой друг пришёл со мной поиграть!', en: 'My friend came to play with me!' },
+  { id: 'ball', feel: 'sad', he: 'הכדור שלי התגלגל רחוק, ואני לא מוצא אותו.', ru: 'Мой мяч укатился далеко, и я не могу его найти.', en: "My ball rolled far away, and I can't find it." },
+  { id: 'icecream', feel: 'sad', he: 'הגלידה שלי נפלה על הרצפה.', ru: 'Моё мороженое упало на пол.', en: 'My ice cream fell on the floor.' },
+  { id: 'tower', feel: 'angry', he: 'מישהו הפיל את המגדל שבניתי!', ru: 'Кто-то сломал башню, которую я построил!', en: 'Someone knocked down the tower I built!' },
+  { id: 'grab', feel: 'angry', he: 'מישהו לקח לי את הצעצוע בלי לשאול!', ru: 'Кто-то взял мою игрушку без спроса!', en: 'Someone took my toy without asking!' },
+  { id: 'thunder', feel: 'scared', he: 'בחוץ יש רעם חזק: בום!', ru: 'На улице сильный гром: бум!', en: "There's loud thunder outside: boom!" },
+  { id: 'butterfly', feel: 'surprised', he: 'פרפר נחת לי על האף!', ru: 'Бабочка села мне на нос!', en: 'A butterfly landed on my nose!' },
+  { id: 'box', feel: 'surprised', he: 'פתחתי קופסה, ויצא ממנה קפיץ: בוינג!', ru: 'Я открыл коробку, а оттуда выскочила пружинка: бойнг!', en: 'I opened a box, and a spring jumped out: boing!' }
+];
+
+/* ---------- moving like the animals (each move is shown by the friend; the child does it with the whole body) ---------- */
+const MOVES = [
+  { id: 'jump', sp: 'kangaroo', n: 3 },
+  { id: 'stomp', sp: 'trex', n: 4 },
+  { id: 'stretch', sp: 'brachio', n: 3 },
+  { id: 'waddle', sp: 'penguin', n: 4 },
+  { id: 'swing', sp: 'elephant', n: 3 },
+  { id: 'spin', sp: null, n: 1 }
+];
+
+/* ---------- first sounds: which word starts like this one? Each round has one match and two that start differently
+   (and in Hebrew never two letters with the same sound, like ט and ת, or כ and ק). ---------- */
+const WORDS = {
+  he: { penguin: 'פינגווין', elephant: 'פיל', trex: 'טירנוזאורוס', trike: 'טריצרטופס', kangaroo: 'קנגורו', soap: 'סבון', fish: 'דג', towel: 'מגבת', egg: 'ביצה', meat: 'בשר',
+    sponge: 'ספוג', lamp: 'מנורה', book: 'ספר', hanger: 'קולב', brush: 'מברשת שיניים', shower: 'מקלחת' },
+  ru: { penguin: 'пингвин', gift: 'подарок', elephant: 'слон', stego: 'стегозавр', lamp: 'лампа', ball: 'мяч', soap: 'мыло', lion: 'лев', book: 'книга', kangaroo: 'кенгуру',
+    sponge: 'губка', potty: 'горшок', shower: 'душ', trex: 'тираннозавр', grass: 'трава', fish: 'рыба' },
+  en: { penguin: 'penguin', potty: 'potty', lion: 'lion', fish: 'fish', ball: 'ball', book: 'book', soap: 'soap', meat: 'meat', lamp: 'lamp', towel: 'towel', sponge: 'sponge',
+    kangaroo: 'kangaroo', fern: 'fern', grass: 'grass', gift: 'gift', egg: 'egg', brush: 'toothbrush' }
+};
+// letter: shown on the card; say: how the letter's name is read aloud
+const SOUND_ROUNDS = {
+  he: [
+    { word: 'elephant', match: 'penguin', other: ['soap', 'fish'], letter: 'פ', say: 'פֵּא' },
+    { word: 'trex', match: 'trike', other: ['towel', 'egg'], letter: 'ט', say: 'טֵית' },
+    { word: 'meat', match: 'egg', other: ['sponge', 'lamp'], letter: 'ב', say: 'בֵּית' },
+    { word: 'soap', match: 'book', other: ['elephant', 'fish'], letter: 'ס', say: 'סָמֶךְ' },
+    { word: 'towel', match: 'lamp', other: ['penguin', 'egg'], letter: 'מ', say: 'מֵם' },
+    { word: 'kangaroo', match: 'hanger', other: ['meat', 'elephant'], letter: 'ק', say: 'קוּף' },
+    { word: 'brush', match: 'shower', other: ['soap', 'egg'], letter: 'מ', say: 'מֵם' }
+  ],
+  ru: [
+    { word: 'penguin', match: 'gift', other: ['elephant', 'soap'], letter: 'П', say: 'пэ' },
+    { word: 'elephant', match: 'stego', other: ['lamp', 'ball'], letter: 'С', say: 'эс' },
+    { word: 'ball', match: 'soap', other: ['lion', 'book'], letter: 'М', say: 'эм' },
+    { word: 'lion', match: 'lamp', other: ['fish', 'sponge'], letter: 'Л', say: 'эль' },
+    { word: 'kangaroo', match: 'book', other: ['elephant', 'soap'], letter: 'К', say: 'ка' },
+    { word: 'sponge', match: 'potty', other: ['lion', 'shower'], letter: 'Г', say: 'гэ' },
+    { word: 'trex', match: 'grass', other: ['soap', 'penguin'], letter: 'Т', say: 'тэ' }
+  ],
+  en: [
+    { word: 'penguin', match: 'potty', other: ['lion', 'fish'], letter: 'P', say: 'P' },
+    { word: 'ball', match: 'book', other: ['soap', 'meat'], letter: 'B', say: 'B' },
+    { word: 'lion', match: 'lamp', other: ['fish', 'towel'], letter: 'L', say: 'L' },
+    { word: 'soap', match: 'sponge', other: ['book', 'kangaroo'], letter: 'S', say: 'S' },
+    { word: 'fish', match: 'fern', other: ['ball', 'towel'], letter: 'F', say: 'F' },
+    { word: 'towel', match: 'brush', other: ['lamp', 'egg'], letter: 'T', say: 'T' },
+    { word: 'grass', match: 'gift', other: ['lion', 'soap'], letter: 'G', say: 'G' }
+  ]
+};
+
+/* ---------- what comes after the game: the device says it, not the parent (Hiniker et al., CHI 2016) ---------- */
+const NEXT_ACT = {
+  dinner: { he: 'ארוחה' }, bath: { he: 'מקלחת' }, outside: { he: 'משחק בחוץ' }, story: { he: 'סיפור' }, toys: { he: 'צעצועים' }, sleep: { he: 'שינה' }
+};
+const NEXT_ORDER = ['dinner', 'bath', 'outside', 'story', 'toys', 'sleep'];
+
+/* ---------- what we practiced, for the parents' corner, with a way to carry each into the day ---------- */
+const SKILLS = {
+  count: { he: 'ספירה', idea: 'לספור יחד מדרגות, כפיות או מכוניות אדומות בדרך.' },
+  patterns: { he: 'דפוסים', idea: 'לסדר כפיות בדפוס, גדולה, קטנה, גדולה, קטנה, ולשאול: מה בא אחרי?' },
+  sounds: { he: 'צלילים ואותיות', idea: 'לשחק בדרך לגן ב״אני רואה משהו שמתחיל ב...״.' },
+  feelings: { he: 'רגשות', idea: 'לשאול בארוחת הערב: מה שימח אותך היום? ומה היה קשה?' },
+  calm: { he: 'נשימה והרגעה', idea: 'לנשום יחד לפני השינה: מריחים פרח, נושפים על נר.' },
+  move: { he: 'תנועה ועצירה', idea: 'לשחק ״ריקוד הפסלים״ בסלון: כשהמוזיקה נעצרת, קופאים.' },
+  facts: { he: 'עולם החי', idea: 'לבחור חיה מהאלבום ולחפש עליה ספר בספרייה.' },
+  habits: { he: 'הרגלים בריאים', idea: 'לתת לילד ״ללמד״ בובה לצחצח שיניים ולשטוף ידיים.' }
+};
+const SKILL_ORDER = ['count', 'patterns', 'sounds', 'feelings', 'calm', 'move', 'facts', 'habits'];

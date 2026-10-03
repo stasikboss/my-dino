@@ -218,7 +218,7 @@ function startBedtime(){
   pendingBed = false;
   bedtime = true;
   stopSpeech(); stopMic(); closeWardrobe();
-  if (sleeping){ say('goodnight', null, 9, null, () => setTimeout(showNight, 3000)); return; }
+  if (sleeping){ say('goodnight', null, 9, null, () => sayNext(() => setTimeout(showNight, 3000))); return; }
   setRoom('bed', true);
   sfx.yawn();
   Pet.el && Pet.el.classList.add('tilt');
@@ -254,6 +254,7 @@ function showNight(){
   }
   if (!pool.length){ const li = document.createElement('li'); li.textContent = 'מה החבר שלך אוכל? איך קוראים לו?'; ask.append(li); }
   $('offline-idea').textContent = pick(OFFLINE_IDEAS);
+  const na = $('next-act'); na.hidden = !nextAct; na.textContent = nextAct ? 'ועכשיו: ' + NEXT_ACT[nextAct].he : '';
   hudEl.hidden = true; trayEl.hidden = true; navEl.hidden = true; clockEl.hidden = true;
   hideBubble();
   nightEl.hidden = false;
@@ -284,6 +285,7 @@ const lenChips = Array.from(document.querySelectorAll('[data-len]'));
 const ageChips = Array.from(document.querySelectorAll('[data-age]'));
 const genderChips = Array.from(document.querySelectorAll('[data-g]'));
 const dailyChips = Array.from(document.querySelectorAll('[data-daily]'));
+const nextChips = Array.from(document.querySelectorAll('[data-next]'));
 const bedOn = $('bed-on'), bedTime = $('bed-time'), bedRow = $('bed-row');
 const voiceNote = $('voice-note'), vcList = $('vc-list'), vcSum = $('vc-sum'), vcChrome = $('vc-chrome');
 const noVoiceEl = $('no-voice'), noVoiceText = $('no-voice-text'), noVoiceLink = $('no-voice-link');
@@ -342,6 +344,8 @@ function renderParents(){
   ageChips.forEach(ch => ch.setAttribute('aria-pressed', String(Number(ch.dataset.age) === profile.age)));
   lenChips.forEach(ch => ch.setAttribute('aria-pressed', String(Number(ch.dataset.len) === sessionMin)));
   dailyChips.forEach(ch => ch.setAttribute('aria-pressed', String(Number(ch.dataset.daily) === limits.daily)));
+  nextChips.forEach(ch => ch.setAttribute('aria-pressed', String(ch.dataset.next === nextAct)));
+  renderSkills();
   for (const k of Object.keys(optInputs)) optInputs[k].checked = !!opts[k];
   bedOn.checked = !!limits.bedOn; bedTime.value = limits.bed; bedRow.hidden = !limits.bedOn;
   renderLangUI();
@@ -391,6 +395,7 @@ ageChips.forEach(ch => ch.addEventListener('click', () => {
 }));
 lenChips.forEach(ch => ch.addEventListener('click', () => { sessionMin = Number(ch.dataset.len); store.set('ymd-session-min', sessionMin); sessionSec = sessionMin * 60; renderParents(); }));
 dailyChips.forEach(ch => ch.addEventListener('click', () => { limits.daily = Number(ch.dataset.daily); saveLimits(); renderParents(); }));
+nextChips.forEach(ch => ch.addEventListener('click', () => { nextAct = NEXT_ORDER.includes(ch.dataset.next) ? ch.dataset.next : ''; store.set('ymd-next', nextAct); renderParents(); }));
 bedOn.addEventListener('change', () => { limits.bedOn = bedOn.checked; bedRow.hidden = !limits.bedOn; saveLimits(); });
 bedTime.addEventListener('change', () => { if (/^\d{2}:\d{2}$/.test(bedTime.value)){ limits.bed = bedTime.value; saveLimits(); } });
 for (const k of Object.keys(optInputs)) optInputs[k].addEventListener('change', () => {

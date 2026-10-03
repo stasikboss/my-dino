@@ -58,6 +58,7 @@ function unlockFact(sp, kind, speak = true){
   facts[sp][kind] = Date.now();
   saveFacts();
   todayFacts.push([sp, kind]);
+  if (!speak) practice('facts');
   showToast(kind);
   sfx.sparkle();
   const c = Pet.center(); FX.emit('sparkle', c.x, c.y - 40, 10, { speed: 220, size: 12 });
@@ -194,7 +195,9 @@ const ROOM_SETUP = {
     setTray([
       trayButton('lamp', TOOL_ART.lamp, 'מנורה', { tap: () => toggleLamp() }),
       bedtime && !teethToday ? trayButton('brush', TOOL_ART.brush, 'מברשת שיניים', { drag: rubber('brush') }) : null,
-      !bedtime ? trayButton('book', TOOL_ART.book, 'סיפור', { tap: () => story() }) : null
+      !bedtime ? trayButton('book', TOOL_ART.book, 'סיפור', { tap: () => story() }) : null,
+      // a few slow breaths together: calm before sleep
+      trayButton('calm', CALM_ART.flower, 'נושמים יחד', { tap: () => { if (!sleeping) breatheTogether(3); } })
     ]);
     if (bedtime) glowTray(teethToday ? 'lamp' : 'brush');
   },
@@ -317,7 +320,7 @@ function feed(f, from){
     FX.emit('heart', m.x, m.y - 30, 2, { angle: -Math.PI / 2, speed: 90, size: 12 });
   }
   addNeed('food', 22); addNeed('fun', 2);
-  stats.feeds++; saveStats();
+  stats.feeds++; saveStats(); practice('habits');
   if (countGame){
     countGame.got++;
     const i = countGame.got;
@@ -329,7 +332,7 @@ function feed(f, from){
       const n = countGame.n;
       countGame = null;
       clearCountBadge();
-      say('countDone', { n: { he: NUM_WORD.he[n - 1], ru: NUM_WORD.ru[n - 1], en: NUM_WORD.en[n - 1] } }, 9, lang);
+      say('countDone', { n: { he: NUM_WORD.he[n - 1], ru: NUM_WORD.ru[n - 1], en: NUM_WORD.en[n - 1] } }, 9, lang); practice('count');
       setTimeout(() => { sfx.win(); Pet.flash('hop', 600); Pet.expr('happy', 1500); FX.emit('confetti', m.x, m.y - 80, 24, { speed: 260, g: 380, size: 10 }); }, 400);
       if (!hasFact(sp, 'eats')) setTimeout(() => unlockFact(sp, 'eats'), 600);
     }
@@ -418,7 +421,7 @@ function finishBath(){
   bath.stage = 0; bath.foam = 0; bath.rinse = 0; bath.dry = 0; bath.rinseTalked = false; bath.rinseWarned = false;
   glowTray('towel', false); glowTray('sponge', false);
   needs.clean = 100; renderNeeds(); addNeed('fun', 6);
-  stats.baths++; saveStats();
+  stats.baths++; saveStats(); practice('habits');
   const c = Pet.center();
   FX.emit('sparkle', c.x, c.y, 16, { speed: 240, size: 13 });
   sfx.sparkle(); Pet.expr('happy', 1800);
@@ -438,6 +441,7 @@ function brushStep(amount, x, y){
     Pet.mouthOpen(false); Pet.expr('happy', 1600);
     const m = Pet.mouth(); FX.emit('sparkle', m.x, m.y, 10, { speed: 160, size: 11 });
     sfx.sparkle();
+    practice('habits');
     say(sp === 'penguin' ? 'beakDone' : 'brushDone', null, 8, null, () => {
       if (!hasFact(sp, 'fun')) unlockFact(sp, 'fun');
       if (bedtime){ ROOM_SETUP.bed(); say('bedLamp', null, 9); }
@@ -458,7 +462,7 @@ function startWashCount(){
       washTimer = 0;
       bath.soap = false;
       setTimeout(() => {
-        say('washDone', null, 9); sfx.sparkle(); Pet.expr('happy', 1500); Pet.flash('hop', 600);
+        say('washDone', null, 9); practice('count'); practice('habits'); sfx.sparkle(); Pet.expr('happy', 1500); Pet.flash('hop', 600);
         addNeed('clean', 10); if (room === 'bath' && !bedtime) ROOM_SETUP.bath();
       }, 500);
       bath.washCount = 0;
@@ -490,7 +494,7 @@ async function potty(){
   if (room !== 'bath' || bedtime || !inPlay) return;
   bath.soap = true; bath.washCount = 0;
   ROOM_SETUP.bath();
-  say('pottyDone', null, 9);
+  say('pottyDone', null, 9); practice('habits');
 }
 
 /* ---------- bedroom ---------- */
@@ -507,11 +511,12 @@ function goSleep(){
   Pet.setSleep(true); Pet.talk(false); Pet.lookHome();
   blanketEl.classList.remove('off');
   glowTray('lamp', false);
-  stats.sleeps++; saveStats();
+  stats.sleeps++; saveStats(); practice('habits');
   const sp = Pet.sp;
   if (bedtime){
     stopSpeech();
-    say('goodnight', null, 9, null, () => { playLullaby(); setTimeout(() => showNight(), 5200); });
+    // goodnight, and what the child does now (a parent can set it): the game says it, not the parent
+    say('goodnight', null, 9, null, () => sayNext(() => { playLullaby(); setTimeout(() => showNight(), 5200); }));
     return;
   }
   say('lightsOff', null, 9, null, () => {

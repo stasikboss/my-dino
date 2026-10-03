@@ -33,7 +33,8 @@ const E = {
   anim: { open: 0, happy: 0, sleep: 0, talk: 0, jump: 0, squash: 0, wiggle: 0, shake: 0, nod: 0, tilt: 0, excited: 0, prev: new Set(), blink: 0 },
   dpr: 1, dprMax: 2, frameAvg: 16, frameN: 0, dark: 0, darkTarget: 0, blanket: 0, blanketTarget: 0, curtain: 1, curtainTarget: 1,
   hidden: false, egg: null, onFrame: null, boundsCache: null, boundsAt: 0, paused: false, busyUntil: 0,
-  actions: [], effects: [], parts: [], walk: Life.newWalk(), lookOverride: null, cue: () => {}, game: null
+  actions: [], effects: [], parts: [], walk: Life.newWalk(), lookOverride: null, cue: () => {}, game: null,
+  frozen: false, breath: null
 };
 window.DinoEngine = E;
 
@@ -160,7 +161,7 @@ function applyStage(r, stage){
 /* ---------- life: actions, walking, eating, playing ---------- */
 const TOUCH_REACTIONS = new Set(['purr', 'giggle', 'sneeze', 'lookback', 'stomp', 'dizzy', 'shakehead']);
 // stops whatever the friend was doing (a new room, a new friend)
-E.calm = () => { E.actions = []; Life.clearEffects(E); Life.clearFoam(E); const W = E.walk; if (W.resolve){ const f = W.resolve; W.resolve = null; f(); } E.walk = Life.newWalk(); };
+E.calm = () => { E.frozen = false; E.breath = null; E.actions = []; Life.clearEffects(E); Life.clearFoam(E); const W = E.walk; if (W.resolve){ const f = W.resolve; W.resolve = null; f(); } E.walk = Life.newWalk(); };
 E.act = (name, o = {}) => {
   const r = E.friend; if (!r || !Life.ACTION_NAMES.includes(name)) return;
   if (name !== 'eat') E.actions = E.actions.filter(a => a.name !== name);
@@ -388,7 +389,8 @@ E.loop = () => {
     }
     if (E.game) E.game.update(dt);
     place(dt);
-    animate(dt);
+    // frozen like a statue (freeze dance): the pose holds until the music comes back
+    if (!E.frozen) animate(dt);
     Life.updateEffects(E, dt);
     roomFx(dt);
     if (E.egg) E.egg.update(dt);

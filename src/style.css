@@ -760,6 +760,7 @@ body.in-game3d .world{touch-action:none}
 .game-tile.three{background:linear-gradient(#fff9e8,#ffeec8)}
 .game-tile .new3d{position:absolute;top:8px;inset-inline-start:10px;font:700 12px/1 var(--font-display);color:#fff;background:linear-gradient(#ff8a72,#ff5d5d);padding:4px 8px;border-radius:999px;box-shadow:0 2px 0 #c6303d}
 .gi-catch{--gc:#ffe0e0}.gi-jump{--gc:#e2f4d0}.gi-bubbles{--gc:#dff1ff}
+.gi-move{--gc:#ffe9c2}.gi-feelings{--gc:#fff0b8}.gi-patterns{--gc:#d9f5e8}.gi-sounds{--gc:#dde6ff}
 .games{overflow-y:auto;align-content:start;padding-top:6px;padding-bottom:10px;-webkit-overflow-scrolling:touch}
 
 /* the daily surprise gift */
@@ -801,3 +802,80 @@ body.theme-4 .room[data-room="home"]{--wall:#fff5cc;--wall2:#ffe592;--wains:#ffd
 /* pictures of friends sit as blocks, so a flat drawing and the 3D picture that replaces it take exactly the same room
    (inline, the drawing left a few pixels of text line under it, and the cards jumped when the pictures arrived) */
 .friend .fb .pet,.g-pick .pet,.g-target .pet,.start-pet .pet,.night-pet .pet,.album-tab .pet,.dig-area .fossil .pet{display:block}
+
+/* ---------- new learning games ---------- */
+.choice-btn.fade{opacity:.35}
+.choice-btn.hint,.g-pick.hint{animation:hint-glow 1.2s ease-in-out infinite}
+@keyframes hint-glow{0%,100%{box-shadow:var(--lift),0 0 0 0 rgba(255,210,58,0)}50%{box-shadow:var(--lift),0 0 0 7px rgba(255,210,58,.85)}}
+.g-row.three .choice-btn{width:min(27vw,20vh,180px);padding:8px 8px 10px}
+.g-row.faces{gap:clamp(8px,2.4vw,18px)}
+.g-row.faces .choice-btn{width:min(27vw,20vh,170px);padding:8px 6px 10px}
+.g-row.faces.four{gap:clamp(6px,1.8vw,14px)}
+.g-row.faces.four .choice-btn{width:min(20.5vw,17vh,150px);padding:6px 4px 8px;font-size:clamp(14px,3.6vw,19px)}
+.choice-btn .pic img,.choice-btn .pic > svg,.choice-btn > svg{width:78%;height:auto;display:block;margin:auto}
+.choice-btn .pic img.pet{width:100%}
+/* feelings: what happened */
+.g-scene{width:min(52vw,30vh,260px);aspect-ratio:1;border-radius:34px;background:linear-gradient(#fffdf8,#fff1dc);box-shadow:var(--lift),inset 0 2px 0 #fff;display:grid;place-items:center;padding:clamp(12px,4vw,24px)}
+.g-scene svg,.g-scene img{width:100%;height:auto;max-height:100%;display:block;object-fit:contain}
+/* patterns */
+.pattern-row{display:flex;justify-content:center;align-items:center;gap:clamp(4px,1.6vw,10px);flex-wrap:nowrap;width:100%;direction:ltr}
+.p-cell{flex:none;width:min(13.4vw,9vh,84px);aspect-ratio:1;border-radius:20px;background:#fff;box-shadow:var(--lift-sm),inset 0 2px 0 #fff;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .2s}
+.p-cell img,.p-cell svg{width:80%;height:auto;max-height:80%;display:block;object-fit:contain}
+.p-cell.bop{transform:translateY(-10px) scale(1.12)}
+.p-slot{background:#fff6dc;box-shadow:inset 0 0 0 3px #ffcf6b;font:700 clamp(26px,7vw,40px)/1 var(--font-display);color:#ff9a3d;animation:slot-pulse 1.4s ease-in-out infinite}
+.p-slot.filled{animation:pop-in .5s cubic-bezier(.2,1.5,.4,1) both;background:#e9fbe0;box-shadow:inset 0 0 0 3px #8fd16a}
+@keyframes slot-pulse{0%,100%{transform:none}50%{transform:scale(1.07)}}
+/* first sounds: the word to match, with its first letter */
+.sound-target{aspect-ratio:1;width:min(48vw,28vh,250px);border-radius:34px;background:linear-gradient(#fffdf8,#fff1dc);box-shadow:var(--lift),inset 0 2px 0 #fff;display:grid;place-items:center;padding:clamp(10px,3vw,18px)}
+.sound-target img,.sound-target svg{width:100%;height:auto;max-height:100%;object-fit:contain;display:block}
+.sound-target .letter{position:absolute;top:-14px;inset-inline-end:-14px;min-width:64px;height:64px;padding:0 10px;border-radius:22px;display:grid;place-items:center;background:#4f8fe0;color:#fff;font:700 40px/1 var(--font-display);box-shadow:0 5px 0 #2f6cc0,0 10px 18px rgba(30,70,140,.3)}
+.sound-target .letter.glow{animation:pop-in .6s cubic-bezier(.2,1.6,.4,1) both;background:#5cbf55;box-shadow:0 5px 0 #3e9a38,0 0 0 6px rgba(140,220,110,.5)}
+
+/* ---------- moving and freezing: the friend is big in the meadow; the card says what to do ---------- */
+.game.g-live{background:transparent;pointer-events:none}
+.game.g-live .game-top{pointer-events:auto}
+.game.g-live .game-body{pointer-events:none;place-items:start center;padding-top:6px}
+body.in-live .hud,body.in-live .tray,body.in-live .nav,body.in-live .games,body.in-live .album,body.in-live .clock{display:none!important}
+body.in-live .bubble{pointer-events:none}
+.move-card{display:grid;justify-items:center;gap:6px;padding:10px 16px 12px;border-radius:28px;background:rgba(255,253,248,.92);box-shadow:var(--lift);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.move-pic{width:min(30vw,14vh,150px);aspect-ratio:1;display:grid;place-items:center}
+/* flat drawings: the friend stands low and big, under the card */
+body.in-live .stage{bottom:calc(var(--safe-b) + 3vh);width:min(86vw,54vh,560px)}
+@media (orientation:landscape) and (max-height:600px){
+  .game.g-live .game-body{justify-items:start;padding-inline:max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-left,0px))}
+  .move-pic{width:min(22vw,30vh,150px)}
+  body.in-live .stage{width:min(60vw,62vh,560px)}
+}
+.move-pic img,.move-pic svg{width:100%;height:auto;max-height:100%;object-fit:contain;display:block}
+.move-card .pips{display:flex;gap:8px}
+.move-card .pips:empty{display:none}
+.move-card .pips i{width:20px;height:20px;border-radius:50%;background:#efe3cf;box-shadow:inset 0 2px 3px rgba(80,40,10,.18)}
+.move-card .pips i.on{background:#ffcf3a;box-shadow:0 0 0 3px #fff,0 0 12px rgba(255,190,40,.8);animation:pop-in .35s cubic-bezier(.2,1.6,.4,1) both}
+.move-card.dancing .move-pic{animation:card-bop .45s ease-in-out infinite alternate}
+.move-card.frozen-card{background:rgba(232,244,255,.95);box-shadow:var(--lift),0 0 0 5px #9fd0ff}
+@keyframes card-bop{0%{transform:rotate(-8deg) translateY(0)}100%{transform:rotate(8deg) translateY(-6px)}}
+.pet.frozen,.pet.frozen *{animation-play-state:paused!important}
+/* a guided breath, flat: the body fills and empties with it */
+.pet.br .p-body{animation:none!important;transform:scale(calc(1 + var(--br,0) * .05),calc(1 + var(--br,0) * .08))}
+
+/* ---------- breathing together ---------- */
+/* the ring sits up high, so the friend below can be seen breathing along */
+.calm{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:calc(var(--safe-t) + 76px);background:linear-gradient(rgba(28,36,84,.6),rgba(28,36,84,.2) 60%,rgba(28,36,84,.06))}
+.calm-ring{position:relative;width:min(56vw,32vh,300px);aspect-ratio:1;display:grid;place-items:center;border-radius:50%;box-shadow:inset 0 0 0 4px rgba(255,255,255,.6)}
+.calm-ball{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ffffff,#cfe9ff 45%,#9fd0ff);box-shadow:0 0 40px rgba(160,210,255,.8);transform:scale(.55);will-change:transform}
+.calm-icon{position:relative;width:38%;aspect-ratio:1;display:grid;place-items:center}
+.calm-icon svg{width:100%;height:auto;display:block}
+.calm[data-phase="out"] .calm-icon .flame{transform-origin:50px 36px;animation:flame-out 4.6s ease-in forwards}
+@keyframes flame-out{0%{transform:scale(1)}60%{transform:scale(.7) skewX(-10deg)}100%{transform:scale(.15);opacity:.2}}
+.calm-close{position:absolute;top:calc(var(--safe-t) + 14px);inset-inline-start:14px}
+
+/* ---------- the parents' corner: what we practiced ---------- */
+.skills{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.skill{display:grid;gap:5px}
+.skill-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font:700 16px/1.2 var(--font-display)}
+.skill-n{font:500 14px/1 var(--font-body);color:var(--ink-soft)}
+.skill-bar{height:10px;border-radius:999px;background:#f1e6d4;overflow:hidden}
+.skill-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ffcf6b,#ff9a5c)}
+.skill-idea{margin:0;font:500 14px/1.45 var(--font-body);color:var(--ink-soft)}
+.skill-empty{font:500 14px/1.45 var(--font-body);color:var(--ink-soft)}
+.next-act{margin:0;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);font:700 clamp(17px,4.4vw,21px)/1.2 var(--font-display);color:#fff6d8}

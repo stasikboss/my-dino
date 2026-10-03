@@ -46,7 +46,7 @@ floors = persp_floor('wood') + persp_floor('tile')
 room = (src / 'room.html').read_text().replace('${SUN_RAYS}', rays).replace('${RUG_FRINGE}', fringe).replace('${STARS}', ''.join(stars)).replace('${FLOORS}', floors)
 body = (src / 'body.html').read_text().replace('${ROOM}', room).replace('${TUB_FOAM}', foam).replace('${TUB_SHINE}', shine).replace('${QUILT_DOTS}', quilt)
 assert '${' not in body, body[body.index('${'):body.index('${') + 40]
-js = '\n'.join((src / f).read_text() for f in ['art.js', 'content.js', 'core.js', 'stickers.js', 'pet.js', 'world.js', 'rooms.js', 'games.js', 'rewards.js', 'main.js'])
+js = '\n'.join((src / f).read_text() for f in ['art.js', 'content.js', 'core.js', 'stickers.js', 'pet.js', 'world.js', 'rooms.js', 'games.js', 'rewards.js', 'learn.js', 'main.js'])
 css = (src / 'style.css').read_text()
 html = f"""<!doctype html>
 <html lang="he" dir="rtl">

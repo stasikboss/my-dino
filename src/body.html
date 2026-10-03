@@ -72,6 +72,12 @@ ${ROOM}
 <div class="bubble" id="bubble" role="status" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <div class="reveal" id="reveal" hidden></div>
+<div class="calm" id="calm" hidden>
+  <div class="calm-ring"><div class="calm-ball" id="calm-ball"></div><span class="calm-icon" id="calm-icon"></span></div>
+  <button class="calm-close icon-btn" id="calm-close" type="button" aria-label="סיום">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
 
 <!-- start -->
 <div class="screen sky" id="start">
@@ -132,6 +138,7 @@ ${ROOM}
     <div class="night-pet" id="night-pet"></div>
     <h2 class="title" id="night-title">לילה טוב</h2>
     <p class="sub" id="night-sub"></p>
+    <p class="next-act" id="next-act" hidden></p>
     <div class="panel" id="learned-box"><span class="panel-label">מה גילינו היום</span><ul id="learned"></ul></div>
     <div class="panel"><span class="panel-label">להורים: שאלות לשאול יחד</span><ul id="ask-list"></ul></div>
     <div class="panel"><span class="panel-label">ועכשיו, בלי מסך</span><ul><li id="offline-idea"></li></ul></div>
@@ -190,6 +197,17 @@ ${ROOM}
         <button class="chip" type="button" data-len="20" aria-pressed="false">20 דקות</button>
       </div>
       <p class="small">כשהזמן נגמר, החבר מתעייף ומבקש ללכת לישון: מצחצחים שיניים, מכבים את האור, ואומרים לילה טוב. בלי ספירה לאחור ובלי עונש.</p>
+      <span class="field-label" id="next-label">מה עושים אחרי המשחק</span>
+      <div class="chips" role="group" aria-labelledby="next-label">
+        <button class="chip" type="button" data-next="" aria-pressed="true">לא לספר</button>
+        <button class="chip" type="button" data-next="dinner" aria-pressed="false">ארוחה</button>
+        <button class="chip" type="button" data-next="bath" aria-pressed="false">מקלחת</button>
+        <button class="chip" type="button" data-next="outside" aria-pressed="false">משחק בחוץ</button>
+        <button class="chip" type="button" data-next="story" aria-pressed="false">סיפור</button>
+        <button class="chip" type="button" data-next="toys" aria-pressed="false">צעצועים</button>
+        <button class="chip" type="button" data-next="sleep" aria-pressed="false">שינה</button>
+      </div>
+      <p class="small">בלילה טוב, החבר מספר לילד מה עושים עכשיו. במחקר על מעברים מהמסך (Hiniker ועמיתים, 2016), ילדים קיבלו את סוף המשחק בקלות רבה יותר כשהמכשיר הודיע עליו, ולא ההורה, וכשחיכתה פעילות הבאה.</p>
     </div>
 
     <div class="section">
@@ -241,12 +259,19 @@ ${ROOM}
       <p class="small">משרד הבריאות ממליץ לילדים בגילאי שנתיים עד חמש עד שעה ביום לכל המסכים יחד, ובלי מסכים שעתיים לפני השינה.</p>
     </div>
 
+    <div class="section">
+      <span class="field-label">מה תרגלנו השבוע</span>
+      <ul class="skills" id="skills"></ul>
+    </div>
+
     <details class="tips">
       <summary>איך לשחק נכון</summary>
       <ul>
         <li>לשבת ליד הילד מדי פעם ולשאול: ״מה הוא אוכל?״, ״איך קוראים לחלק הזה בגוף?״</li>
         <li>אחרי המשחק, לשאול את השאלות שבמסך ״לילה טוב״, ולספר את העובדות בעצמכם.</li>
         <li>לחבר לעולם האמיתי: לחפש ציפורים בחוץ, לחפור ״מאובנים״ בארגז חול, לבקר במוזיאון טבע.</li>
+        <li>לשבח את המאמץ ואת הדרך, לא את ״החוכמה״: ״ניסית שוב ומצאת!״ במקום ״איזה חכם!״. שבח כזה בגיל שנה עד שלוש ניבא אהבת אתגרים שנים אחר כך.</li>
+        <li>לשחק ביחד מדי פעם: ב״זזים וקופאים״ כולם זזים, וב״איך אני מרגיש?״ אפשר לספר מתי אתם הרגשתם ככה.</li>
         <li>לא להשתמש במשחק כפרס או כעונש. החבר לא נעלב ולא בוכה כשלא משחקים.</li>
         <li>מרחק של יותר מ-30 ס״מ מהמסך, ועדיף לשבת ליד שולחן.</li>
       </ul>

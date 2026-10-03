@@ -73,6 +73,43 @@ let facts = (() => {
 })();
 let owned = (() => { const r = store.get('ymd-owned', ['party', 'cap']); return Array.isArray(r) ? OUTFIT_ORDER.filter(o => r.includes(o)) : ['party', 'cap']; })();
 let stats = (() => { const r = store.get('ymd-stats', {}), o = isObj(r) ? r : {}, out = {}; for (const k of ['games', 'feeds', 'baths', 'sleeps', 'digs']) out[k] = Math.floor(cleanNum(o[k], 0, 1e7, 0)); return out; })();
+// what the child practiced, counted by day (for the parents' corner); kept three weeks
+let skills = (() => {
+  const r = store.get('ymd-skills', {}), out = {};
+  if (!isObj(r)) return out;
+  for (const d of Object.keys(r)){
+    if (!DAY_KEY.test(d) || !isObj(r[d])) continue;
+    const day = {};
+    for (const k of SKILL_ORDER) if (r[d][k]) day[k] = Math.floor(cleanNum(r[d][k], 0, 1e5, 0));
+    out[d] = day;
+  }
+  return out;
+})();
+let skillsTimer = 0;
+function practice(k, n = 1){
+  if (!SKILLS[k]) return;
+  const d = dayKey(), day = (skills[d] = skills[d] || {});
+  day[k] = (day[k] || 0) + n;
+  // saved a moment later, once for a burst of practice
+  if (skillsTimer) return;
+  skillsTimer = setTimeout(() => {
+    skillsTimer = 0;
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 21);
+    for (const key of Object.keys(skills)){ const p = key.split('-').map(Number); if (new Date(p[0], p[1] - 1, p[2]) < cutoff) delete skills[key]; }
+    store.set('ymd-skills', skills);
+  }, 1500);
+}
+// the last seven days, added up
+function weekSkills(){
+  const out = {};
+  for (let i = 0; i < 7; i++){
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const day = skills[keyOf(d)]; if (!day) continue;
+    for (const k of Object.keys(day)) out[k] = (out[k] || 0) + day[k];
+  }
+  return out;
+}
+let nextAct = (() => { const v = store.get('ymd-next', ''); return NEXT_ORDER.includes(v) ? v : ''; })();
 const savePets = () => store.set('ymd-pets', pets);
 const saveFacts = () => store.set('ymd-facts', facts);
 const saveStats = () => store.set('ymd-stats', stats);
@@ -305,6 +342,10 @@ const SONGS = {
   game: { bpm: 126, root: 62, prog: C_MAJ, lead: 'pluck', arp: [0, 2, 1, 2, 0, 2, 1, 2], arpVoice: 'pluck', bass: true, shaker: true, kick: true, vol: 0.9,
     mel: [[[0, 12, 1], [1, 16, 1], [2, 19, 1], [4, 24, 2], [6, 19, 2], [8, 21, 1], [9, 19, 1], [10, 16, 2], [12, 21, 2], [14, 24, 2], [16, 21, 1], [17, 24, 1], [18, 29, 2], [20, 24, 2], [22, 21, 2], [24, 23, 1], [25, 26, 1], [26, 31, 2], [28, 26, 2], [30, 23, 2]],
           [[0, 24, 2], [2, 19, 1], [3, 16, 1], [4, 19, 2], [6, 24, 2], [8, 28, 2], [10, 24, 1], [11, 21, 1], [12, 16, 2], [16, 17, 2], [18, 21, 1], [19, 24, 1], [20, 29, 2], [24, 26, 1], [25, 23, 1], [26, 19, 2], [28, 23, 4]]] },
+  // for freeze dance: bouncy, with a clear beat, so the moment it stops is easy to hear
+  dance: { bpm: 132, root: 60, prog: C_PLAIN, lead: 'pluck', arp: [0, 2, 1, 2, 0, 2, 1, 2], arpVoice: 'pluck', bass: true, shaker: true, kick: true, vol: 1.6,
+    mel: [[[0, 12, 1], [1, 16, 1], [2, 19, 2], [4, 24, 1], [5, 19, 1], [6, 16, 2], [8, 17, 1], [9, 21, 1], [10, 24, 2], [12, 21, 1], [13, 17, 1], [14, 21, 2], [16, 12, 1], [17, 16, 1], [18, 19, 2], [20, 24, 2], [24, 23, 1], [25, 26, 1], [26, 23, 1], [27, 19, 1], [28, 14, 3]],
+          [[0, 24, 1], [1, 24, 1], [2, 19, 2], [4, 21, 1], [5, 21, 1], [6, 17, 2], [8, 24, 1], [9, 24, 1], [10, 28, 2], [12, 26, 2], [14, 24, 2], [16, 21, 1], [17, 24, 1], [18, 26, 2], [20, 24, 2], [24, 19, 2], [26, 23, 2], [28, 24, 3]]] },
   hatch: { bpm: 76, root: 57, prog: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]], lead: 'musicbox', arp: [0, 1, 2, 3, 2, 1, 0, 1], arpVoice: 'kalimba', bass: false, vol: 0.75,
     mel: [[[0, 15, 4], [8, 12, 4], [16, 15, 4], [24, 17, 6]], [[0, 19, 4], [8, 15, 4], [16, 22, 4], [24, 17, 6]]] }
 };
@@ -319,14 +360,15 @@ function mVoice(kind, midi, t, vol, out, len){
 }
 const Music = {
   song: null, name: '', step: 0, loop: 0, nextT: 0, timer: 0, out: null, held: false,
-  play(name){
+  // fx: through the sound-effects bus (heard even when background music is off), because the game needs it
+  play(name, o = {}){
     if (!SONGS[name]) name = '';
     if (name === this.name && this.timer) return;
     this.stop(true);
-    this.name = name;
+    this.name = name; this.fx = !!o.fx;
     if (!name || !AC || !musicBus) return;
     this.song = SONGS[name];
-    this.out = AC.createGain(); this.out.gain.setValueAtTime(0.0001, AC.currentTime); this.out.connect(musicBus);
+    this.out = AC.createGain(); this.out.gain.setValueAtTime(0.0001, AC.currentTime); this.out.connect(this.fx ? fxBus : musicBus);
     this.out.gain.exponentialRampToValueAtTime(0.075 * (this.song.vol || 1), AC.currentTime + 1.2);
     this.step = 0; this.loop = 0; this.nextT = AC.currentTime + 0.15;
     this.timer = setInterval(() => this.tick(), 90);
@@ -340,7 +382,7 @@ const Music = {
   },
   tick(){
     if (!this.song || !AC) return;
-    if (AC.state !== 'running' || muted || !opts.music || mic.busy || sleeping || document.hidden){ this.nextT = AC.currentTime + 0.1; return; }
+    if (AC.state !== 'running' || muted || (!opts.music && !this.fx) || mic.busy || sleeping || document.hidden){ this.nextT = AC.currentTime + 0.1; return; }
     const S = this.song, stepDur = 60 / S.bpm / 2;
     if (this.nextT < AC.currentTime - 0.2) this.nextT = AC.currentTime + 0.05;
     while (this.nextT < AC.currentTime + 0.35){ this.note(this.step, this.nextT, stepDur); this.nextT += stepDur; this.step = (this.step + 1) % 32; if (this.step === 0) this.loop++; }
@@ -363,7 +405,13 @@ const Music = {
     if (S.kick && inBar % 4 === 0){ const o = AC.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.14); const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.7, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.18); o.connect(e); e.connect(out); o.start(t); o.stop(t + 0.2); }
     if (S.bubbles && Math.random() < 0.12){ const o = AC.createOscillator(); o.type = 'sine'; const f0 = 500 + Math.random() * 500; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 2.2, t + 0.07); const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.12, t + 0.005); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.08); o.connect(e); e.connect(out); o.start(t); o.stop(t + 0.1); }
   },
-  setOn(on){ if (musicBus && AC) musicBus.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.2); }
+  setOn(on){ if (musicBus && AC) musicBus.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.2); },
+  // stops at once, mid-note (freeze dance): no fade, and nothing already scheduled is heard
+  cut(){
+    clearInterval(this.timer); this.timer = 0;
+    if (this.out && AC){ const o = this.out; try { o.gain.cancelScheduledValues(AC.currentTime); o.gain.setValueAtTime(0, AC.currentTime); } catch (e) {} setTimeout(() => { try { o.disconnect(); } catch (e) {} }, 300); }
+    this.out = null; this.song = null; this.name = ''; this.fx = false;
+  }
 };
 function buzz(ms){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
 
@@ -603,6 +651,7 @@ const sayP = (kind, vars, pri = 9, lang) => new Promise(r => { say(kind, vars, p
 // A fact card: one sentence per language; said in the next language in turn.
 function sayFact(sp, kind, pri = 8, onDone){
   const f = FACTS[sp][kind];
+  practice('facts');
   return sayFrom({ he: [f.he], ru: [f.ru], en: [f.en] }, { sp }, pri, null, onDone);
 }
 const sayFactP = (sp, kind) => new Promise(r => sayFact(sp, kind, 9, r));

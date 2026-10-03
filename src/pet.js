@@ -154,12 +154,24 @@ const Pet = {
     if (World.on){ World.E.act(name, o); return; }
     const FLAT = { purr: ['squish', 'happy'], giggle: ['wiggle', 'happy'], sneeze: ['shake', 'wide'], lookback: ['wiggle', 'tilt'], stomp: ['hop', 'happy'], shakehead: ['shake'],
       dizzy: ['wiggle', 'tilt'], yawn: ['nod', 'tilt'], stretch: ['hop'], dance: ['hop', 'happy'], lookaround: ['nod', 'tilt'], surprise: ['hop', 'wide'], love: ['squish', 'happy'],
-      wave: ['hop', 'happy'], header: ['hop', 'happy'], shakedry: ['wiggle', 'happy'] };
+      wave: ['hop', 'happy'], header: ['hop', 'happy'], shakedry: ['wiggle', 'happy'], spin: ['wiggle', 'happy'] };
     const f = FLAT[name]; if (!f) return;
     this.flash(f[0], { hop: 600, squish: 360, wiggle: 700, shake: 520, nod: 700 }[f[0]] || 600);
     if (f[1] === 'tilt'){ this.el.classList.add('tilt'); setTimeout(() => this.el && this.el.classList.remove('tilt'), 1300); }
     else if (f[1]) this.expr(f[1], 1200);
     if (name === 'dance'){ setTimeout(() => this.flash('hop', 600), 700); setTimeout(() => this.flash('hop', 600), 1400); }
+  },
+  // freeze like a statue (the pose holds), and back
+  freeze(on){
+    if (World.on){ World.E.frozen = !!on; return; }
+    if (this.el) this.el.classList.toggle('frozen', !!on);
+  },
+  // a guided breath: v from 0 (all out) to 1 (all in), or null to breathe normally again
+  breathe(v){
+    if (World.on){ World.E.breath = v; return; }
+    if (!this.el) return;
+    this.el.classList.toggle('br', v != null);
+    this.el.style.setProperty('--br', v == null ? 0 : v.toFixed(3));
   },
   wear(outfit){
     petData(this.sp).outfit = outfit; savePets();

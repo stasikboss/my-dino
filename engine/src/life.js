@@ -79,6 +79,8 @@ const ACTIONS = {
   header: { dur: 0.8, run(u, P){ P.hPitch += u < 0.35 ? -0.3 * sm(u / 0.35) : 0.35 * bell(seg(u, 0.35, 0.8)) - 0.3 * (1 - seg(u, 0.35, 0.5)); P.y += bell(seg(u, 0.2, 0.7)) * 0.1; P.happy = u > 0.4 ? 1 : -1; } },
   // after the bath: a big shake to dry off, like a puppy
   shakedry: { dur: 1.3, run(u, P, a, E){ const k = bell(u); P.roll += Math.sin(u * Math.PI * 14) * 0.13 * k; P.hRoll += Math.sin(u * Math.PI * 14 + 0.6) * 0.2 * k; P.ears += Math.sin(u * Math.PI * 16) * 1.4 * k; P.open = 0.2; P.tail += 3 * k; if (!a.fired && u > 0.25){ a.fired = true; E.burstAt('drop', 'center', 18, { spread: 1 }); } } },
+  // a full turn on the spot (moving game)
+  spin: { dur: 1.3, run(u, P){ P.yaw += Math.PI * 2 * sm(u); P.y += bell(u) * 0.06; P.happy = 1; P.arms += bell(u); } },
   // eating, driven by the food effect (a.ctl holds the mouth and look it wants)
   eat: { dur: 99, run(u, P, a){ const c = a.ctl; if (!c) return; if (c.mouth >= 0) P.mouth = Math.max(P.mouth, c.mouth); if (c.happy) P.happy = 1; if (c.open >= 0) P.open = c.open; P.hYaw += c.turn || 0; P.hPitch += c.pitch || 0; P.love = Math.max(P.love, c.love || 0); if (c.done) a.end = true; } }
 };
@@ -192,7 +194,10 @@ export function animate(E, dt){
     if (k === 'shake') shake = Math.sin(u * Math.PI * 6) * 0.3 * (1 - u);
     if (k === 'nod') nod = Math.sin(u * Math.PI * 4) * 0.14;
   }
-  const breath = Math.sin(t * (sleep ? 1.4 : 2.1)) * (sleep ? 0.026 : 0.014);
+  // a guided breath (E.breath from 0, out, to 1, in) is bigger and slower than the idle breathing
+  const guided = E.breath != null;
+  const breath = guided ? (E.breath - 0.4) * 0.11 : Math.sin(t * (sleep ? 1.4 : 2.1)) * (sleep ? 0.026 : 0.014);
+  if (guided){ P.hPitch -= 0.08 * E.breath; P.happy = E.breath < 0.3 ? 1 : P.happy; }
   // asleep, the friend settles down low (into the bed, under the blanket)
   r.jump.position.y = jumpY + P.y - A.sleep * 0.13;
   const s2 = sq + P.sq;

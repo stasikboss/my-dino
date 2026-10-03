@@ -25,6 +25,16 @@ const GAME_ICON = {
   bubbles: `<svg viewBox="0 0 100 80"><g fill="rgba(160,215,255,.45)" stroke="${INK}" stroke-width="3.5"><circle cx="34" cy="44" r="20"/><circle cx="70" cy="30" r="14"/><circle cx="72" cy="62" r="10"/></g>
     <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M24 36 Q27 30 33 29"/><path d="M63 24 Q65 21 69 20"/></g>
     <text x="34" y="54" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="26" fill="#ff5d8f" stroke="${INK}" stroke-width="1.5">3</text></svg>`,
+  move: `<svg viewBox="0 0 100 80"><path d="M8 74 H92" stroke="#7cc85a" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="38" cy="18" r="9" fill="#ffd35c" stroke="${INK}" stroke-width="3.5"/><path d="M38 28 L36 50 M36 34 L20 24 M36 34 L54 26 M36 50 L24 66 M36 50 L48 66" stroke="${INK}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M66 34 l3 -10 M74 40 l9 -6 M62 30 l-3 -10" stroke="#ff5d8f" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#9fd0ff" stroke="${INK}" stroke-width="2.5"><path d="M74 54 l4 -10 4 10 -4 10 Z"/><path d="M84 60 l3 -7 3 7 -3 7 Z"/></g></svg>`,
+  feelings: `<svg viewBox="0 0 100 80"><circle cx="34" cy="40" r="24" fill="#ffd35c" stroke="${INK}" stroke-width="4"/><g fill="${INK}"><circle cx="26" cy="35" r="3.2"/><circle cx="42" cy="35" r="3.2"/></g><path d="M23 46 Q34 58 45 46" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="72" cy="44" r="20" fill="#9fd0ff" stroke="${INK}" stroke-width="4"/><g fill="${INK}"><circle cx="65" cy="41" r="3"/><circle cx="79" cy="41" r="3"/></g><path d="M64 55 Q72 48 80 55" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><path d="M84 48 Q88 54 84 57 Q80 54 84 48 Z" fill="#4fb8ff"/></svg>`,
+  patterns: `<svg viewBox="0 0 100 80"><g stroke="${INK}" stroke-width="3.5"><circle cx="16" cy="40" r="10" fill="#ff4b5c"/><rect x="30" y="30" width="20" height="20" rx="5" fill="#7cc85a"/><circle cx="62" cy="40" r="10" fill="#ff4b5c"/></g>
+    <rect x="76" y="28" width="22" height="24" rx="6" fill="#fff" stroke="${INK}" stroke-width="3.5" stroke-dasharray="5 4"/><text x="87" y="47" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="20" fill="#ff5d8f">?</text></svg>`,
+  sounds: `<svg viewBox="0 0 100 80"><rect x="8" y="14" width="44" height="52" rx="12" fill="#fff5e2" stroke="${INK}" stroke-width="4"/><text x="30" y="54" text-anchor="middle" font-family="Fredoka, Varela Round, sans-serif" font-weight="700" font-size="38" fill="#4f8fe0">א</text>
+    <path d="M62 30 Q72 40 62 50 M70 22 Q86 40 70 58 M78 14 Q100 40 78 66" fill="none" stroke="#ff5d8f" stroke-width="4.5" stroke-linecap="round"/></svg>`,
   size: `<svg viewBox="0 0 120 80"><rect x="10" y="10" width="44" height="62" rx="12" fill="#9a8cf0" stroke="${INK}" stroke-width="4"/>
     <rect x="70" y="42" width="24" height="30" rx="8" fill="#ffd35c" stroke="${INK}" stroke-width="4"/>
     <path d="M104 14 V70 M98 20 L104 12 L110 20 M98 64 L104 72 L110 64" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
@@ -33,13 +43,17 @@ const GAMES = [
   { id: 'catch', label: 'תופסים אוכל', three: true },
   { id: 'jump', label: 'קופצים וכוכבים', three: true },
   { id: 'bubbles', label: 'סופרים בועות', three: true },
+  { id: 'move', label: 'זזים וקופאים', fresh: true },
+  { id: 'feelings', label: 'איך אני מרגיש?', fresh: true },
+  { id: 'patterns', label: 'מה בא אחרי?', fresh: true },
+  { id: 'sounds', label: 'הצליל הראשון', fresh: true },
   { id: 'dig', label: 'חופרים מאובן' },
   { id: 'eats', label: 'מי אוכל מה?' },
   { id: 'shadow', label: 'של מי הצל?' },
   { id: 'egg', label: 'ביצה או נולד?' },
   { id: 'size', label: 'מי יותר גדול?', wide: true }
 ];
-let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size', 'catch', 'jump', 'bubbles']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
+let gamesPlayed = (() => { const r = store.get('ymd-games', {}), out = {}; if (isObj(r)) for (const g of ['dig', 'eats', 'shadow', 'egg', 'size', 'catch', 'jump', 'bubbles', 'move', 'feelings', 'patterns', 'sounds']) if (r[g]) out[g] = Math.floor(cleanNum(r[g], 0, 1e6, 0)); return out; })();
 function renderGames(){
   const g = $('games-grid');
   g.textContent = '';
@@ -47,7 +61,7 @@ function renderGames(){
     if (gm.three && !World.on) continue;
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'game-tile' + (gm.wide ? ' wide' : ''); b.dir = 'rtl';
-    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '') + (gm.three ? '<span class="new3d">חדש</span>' : '');
+    b.innerHTML = `<span class="gi gi-${gm.id}">${GAME_ICON[gm.id]}</span>` + `<span>${gm.label}</span>` + (gamesPlayed[gm.id] ? `<span class="stars">★ ${gamesPlayed[gm.id]}</span>` : '') + ((gm.three || gm.fresh) && !gamesPlayed[gm.id] ? '<span class="new3d">חדש</span>' : '');
     if (gm.three) b.classList.add('three');
     b.addEventListener('click', () => { initAudio(); sfx.tap(); startGame(gm.id); });
     g.append(b);
@@ -76,6 +90,7 @@ function tapOnce(btns){
 function startGame(id){
   Music.play('game');
   if (GAME3D_IDS.includes(id)){ start3d(id); return; }
+  if (id === 'move'){ startLive(id); return; }
   stopSpeech(); stopMic();
   gameOn = id; gameToken++;
   inPlay = false;
@@ -85,15 +100,17 @@ function startGame(id){
   bubbleAnchor = () => ({ x: innerWidth / 2, y: 0 });
   gameBody.textContent = '';
   closeWardrobe();
-  const run = { dig: gameDig, eats: gameEats, shadow: gameShadow, egg: gameEgg, size: gameSize }[id];
+  const run = { dig: gameDig, eats: gameEats, shadow: gameShadow, egg: gameEgg, size: gameSize, feelings: gameFeelings, patterns: gamePatterns, sounds: gameSounds }[id];
   run(gameToken).catch(() => {});
 }
 function closeGame(){
   gameOn = null; gameToken++;
   gameEl.hidden = true;
-  document.body.classList.remove('in-game', 'in-game3d');
+  document.body.classList.remove('in-game', 'in-game3d', 'in-live');
   // stop a 3D game even if 3D was switched off meanwhile, so it doesn't come back when 3D does
   if (World.E) try { World.E.stopGame(); } catch (e) {}
+  // the moving game: no statue left frozen, no dance music left playing; breathing overlay closed
+  Pet.freeze(false); if (Music.fx) Music.cut(); stopBreathing();
   gameBody.textContent = '';
   stopSpeech();
   inPlay = true;
@@ -179,7 +196,7 @@ function start3d(id){
         if (n === target){
           taking = false; round++;
           setDots(rounds, round);
-          say('countDone', { n: { he: NUM_WORD.he[target - 1], ru: NUM_WORD.ru[target - 1], en: NUM_WORD.en[target - 1] } }, 9, lang);
+          say('countDone', { n: { he: NUM_WORD.he[target - 1], ru: NUM_WORD.ru[target - 1], en: NUM_WORD.en[target - 1] } }, 9, lang); practice('count');
           sfx.yes(); Pet.act('dance', { dur: 2 });
           if (round >= rounds) setTimeout(done, 1600); else setTimeout(ask, 2600);
         }
@@ -228,6 +245,7 @@ async function gameEats(tok){
         food.style.opacity = '0';
         if (!hasFact(yes, 'eats')) unlockFact(yes, 'eats', false);
         await sayP('eatsYes', Object.assign({ sp: yes }, fv, { pet: { he: PET_NAMES[yes].he, ru: cap(PET_NAMES[yes].ru), en: PET_NAMES[yes].en } }));
+        if (cards.some(c => c.classList.contains('nope')) && alive(tok)) await sayP('triedAgain', null, 8);
         break;
       }
       stopSpeech();
@@ -270,6 +288,7 @@ async function gameShadow(tok){
         const rb = sh.getBoundingClientRect(); FX.emit('sparkle', rb.left + rb.width / 2, rb.top + rb.height / 2, 12, { speed: 220 });
         if (!hasFact(target, 'body')) unlockFact(target, 'body', false);
         await sayP('shadowYes', { sp: target });
+        if (misses && alive(tok)) await sayP('triedAgain', null, 8);
         break;
       }
       stopSpeech();
@@ -320,6 +339,7 @@ async function gameEgg(tok){
         b.classList.add('right'); sfx.yes(); if (right === 'egg') sfx.crack();
         const rb = t.getBoundingClientRect(); FX.emit('heart', rb.left + rb.width / 2, rb.top + rb.height / 2, 8, { speed: 200 });
         if (!hasFact(sp, 'baby')) unlockFact(sp, 'baby', false);
+        if (row.querySelector('.nope')) await sayP('triedAgain', null, 8);
         await sayFactP(sp, 'baby');
         break;
       }
